@@ -45,6 +45,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'channels',
+    'apps.accounts',
+    'apps.repositories',
+    'apps.parser',
+    'apps.graph',
+    'apps.analysis',
+    'apps.ai',
+    'apps.websocket',
+    'apps.common',
 ]
 
 MIDDLEWARE = [
@@ -58,7 +66,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'core.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
