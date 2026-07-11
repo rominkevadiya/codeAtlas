@@ -1,179 +1,340 @@
-# CodeAtlas - Phase 2: System Architecture & Backend Foundation
+# CodeAtlas — System Architecture
 
-This document defines the **Modular Monolith** architecture, Domain-Driven Design (DDD) principles, and coding standards for the CodeAtlas platform. It serves as the single source of truth for the backend foundation.
+> Last updated: **Phase 4 Complete** (July 2026)
+
+This document defines the **Modular Monolith** architecture, Domain-Driven Design (DDD) principles, module boundaries, and coding standards for the CodeAtlas platform. It serves as the single source of truth for system design decisions.
 
 ---
 
 ## 1. High-Level Architecture
 
-CodeAtlas follows a **Modular Monolith** pattern. All backend logic resides in a single Django application, but the codebase is strictly partitioned into independent domain modules (Django apps). 
+CodeAtlas follows a **Modular Monolith** pattern. All backend logic resides in a single Django application, partitioned into independent domain modules (Django apps) that communicate exclusively through service interfaces.
 
 **Core Principles:**
-- **High Cohesion, Loose Coupling**: Modules encapsulate their own domain logic.
-- **Service Layer Abstraction**: Modules interact *exclusively* via Service interfaces, not by importing each other's ORM models or internal utilities.
-- **Single Source of Truth**: Data mutation for a specific domain happens only within that domain's services.
+- **High Cohesion, Loose Coupling**: Each module encapsulates its own domain logic, models, and services.
+- **Service Layer Abstraction**: Modules interact *exclusively* via Service class methods — no cross-module ORM queries.
+- **Single Source of Truth**: Data mutation for a domain happens only within that domain's services.
 
 ---
 
-## 2. Project Folder Structure
-
-The repository is structured to separate Django configuration from domain logic, and web concerns from core processing engines.
+## 2. Current Project Folder Structure
 
 ```text
 codeAtlas/
-├── backend/                  # Django Application Root
-│   ├── config/               # Django project configuration (replaces standard 'core')
-│   │   ├── settings/
-│   │   │   ├── __init__.py
-│   │   │   ├── base.py       # Shared settings (Installed apps, middleware)
-│   │   │   ├── local.py      # Development settings (Debug, local DB)
-│   │   │   └── production.py # Production settings (Security, allowed hosts)
-│   │   ├── asgi.py           # Daphne / WebSocket entrypoint
-│   │   ├── wsgi.py           # Standard HTTP entrypoint
-│   │   └── urls.py           # Root URL routing
-│   │
-│   ├── apps/                 # Domain Modules (Django Apps)
-│   │   ├── accounts/         # User & Auth Domain
-│   │   ├── repositories/     # Git Repository Domain
-│   │   ├── parser/           # Tree-sitter AST Domain
-│   │   ├── graph/            # NetworkX Graph Domain
-│   │   ├── analysis/         # Code Metrics Domain
-│   │   ├── ai/               # Gemini AI Domain
-│   │   ├── websocket/        # Real-time Events Domain
-│   │   └── common/           # Shared Utilities & Base Classes
-│   │
-│   ├── manage.py
-│   └── .env
+├── .gitignore
+├── README.md
+├── ARCHITECTURE.md               ← This file
 │
-├── frontend/                 # React Application (Vite, TypeScript, Tailwind v4)
+├── frontend/                     ← React Application (Vite, TypeScript, Tailwind v4)
+│   └── src/
+│       ├── App.tsx               ← Router: / → Home, /repository/:id → Dashboard
+│       ├── main.tsx
+│       ├── index.css
+│       ├── components/
+│       │   ├── layout/           ← MainLayout (navbar wrapper, <Outlet />)
+│       │   └── ui/               ← shadcn/ui generated components
+│       ├── features/
+│       │   └── graph/            ← ✅ ACTIVE: Graph visualization module
+│       │       ├── CodeGraph.tsx ←   Fetches data → dagre layout → ReactFlow canvas
+│       │       └── nodes/
+│       │           └── EntityNode.tsx ← Custom node: icon + filename + path
+│       ├── pages/
+│       │   ├── Home.tsx          ← Repository list + ZIP upload form
+│       │   └── RepositoryDashboard.tsx ← Graph loader + CodeGraph renderer
+│       └── services/
+│           └── api.ts            ← Axios instance + RepositoryService
 │
-├── parser_engine/            # Language-specific Tree-sitter binaries and schemas (Decoupled from web layer)
-├── repositories_storage/     # Local disk storage for cloned repositories
-└── docs/                     # Architectural Decision Records (ADRs) and documentation
+└── backend/                      ← Django Application Root
+    ├── .env                      ← Secrets (git-ignored)
+    ├── manage.py
+    ├── config/                   ← Django project configuration
+    │   ├── settings.py           ←   Single settings file (dev)
+    │   ├── urls.py               ←   Root router → /api/v1/repositories/
+    │   ├── asgi.py
+    │   └── media/
+    │       └── repositories/
+    │           └── <uuid>/       ←   Extracted ZIP + knowledge_graph.json
+    └── apps/                     ← Domain Modules (bounded contexts)
+        ├── common/               ← ✅ Shared exceptions, base classes
+        ├── repositories/         ← ✅ ACTIVE: Full CRUD + upload + graph endpoint
+        ├── parser/               ← ✅ ACTIVE: Tree-sitter AST extraction
+        ├── graph/                ← ✅ ACTIVE: NetworkX graph builder
+        ├── accounts/             ← 📋 Planned (Phase 7): Auth & user management
+        ├── ai/                   ← 📋 Planned (Phase 5): Gemini AI queries
+        ├── analysis/             ← 📋 Planned: Code metrics & pattern detection
+        └── websocket/            ← 📋 Planned (Phase 6): Real-time events
 ```
 
 ---
 
 ## 3. Backend Modules & Responsibilities
 
-Each app in `backend/apps/` represents a bounded context.
+Each app in `backend/apps/` represents a bounded context with strict ownership of its data.
 
-| Module | Responsibility | Data Owned | Exposed Services | Allowed Dependencies |
+| Module | Status | Responsibility | Key Services | Allowed Dependencies |
 |:---|:---|:---|:---|:---|
-| **`accounts`** | Authentication, user profiles, session management. | `User`, `Profile`, `APIKey` | `AuthService`, `UserService` | `common` |
-| **`repositories`** | Git cloning, syncing, managing repo metadata and branch state. | `Repository`, `Branch`, `Commit` | `RepoService`, `SyncService` | `accounts`, `websocket`, `common` |
-| **`parser`** | Wraps Tree-sitter. Extracts AST, functions, classes, and imports. | `ParsedFile`, `CodeNode`, `ImportMap` | `ParsingService`, `ASTQueryService` | `repositories`, `common` |
-| **`graph`** | Builds and queries NetworkX knowledge graphs from parsed data. | `GraphEdge`, `GraphNode`, `GraphSnapshot` | `GraphBuilderService`, `TraversalService` | `parser`, `common` |
-| **`analysis`** | Runs algorithms on graphs to find complexity, metrics, and patterns. | `AnalysisReport`, `MetricScore` | `MetricsService`, `PatternService` | `graph`, `parser`, `common` |
-| **`ai`** | Orchestrates Gemini API calls, manages prompts, Context Windows. | `AIQuery`, `AIResponse`, `PromptTemplate`| `AIQueryService`, `ContextService` | `graph`, `analysis`, `common` |
-| **`websocket`** | Manages WebSocket connections and channel broadcasts. | None (Ephemeral State) | `NotificationService` | `common` |
-| **`common`** | Base models, shared exceptions, global utilities. | None | `LoggingService`, Base Classes | None |
+| **`common`** | ✅ Active | Shared base classes, `CodeAtlasException` | `CodeAtlasException` | None |
+| **`repositories`** | ✅ Active | ZIP upload, extraction, repo metadata, graph API | `RepoService` | `parser`, `graph`, `common` |
+| **`parser`** | ✅ Active | Tree-sitter AST traversal, entity & relationship extraction | `ParserService` | `common` |
+| **`graph`** | ✅ Active | NetworkX graph construction, `knowledge_graph.json` persistence | `GraphService` | `common` |
+| **`accounts`** | 📋 Phase 7 | Auth, user profiles, API key management | `AuthService`, `UserService` | `common` |
+| **`ai`** | 📋 Phase 5 | Gemini API orchestration, NL code queries | `AIQueryService` | `graph`, `analysis`, `common` |
+| **`analysis`** | 📋 Planned | Graph algorithms, complexity, metrics | `MetricsService` | `graph`, `parser`, `common` |
+| **`websocket`** | 📋 Phase 6 | WebSocket channel broadcasts | `NotificationService` | `common` |
 
 ---
 
-## 4. Module Dependency Diagram & Rules
+## 4. Data Flow — Repository Upload Pipeline
+
+This is the primary end-to-end flow currently implemented.
+
+```mermaid
+sequenceDiagram
+    participant FE as React Frontend
+    participant DRF as Django (RepositoryViewSet)
+    participant RS as RepoService
+    participant PS as ParserService
+    participant GS as GraphService
+    participant FS as Filesystem
+    participant DB as PostgreSQL
+
+    FE->>DRF: POST /api/v1/repositories/upload/ (multipart: name, file.zip)
+    DRF->>RS: upload_and_extract_repository(name, zip_file)
+    RS->>FS: Create /media/repositories/<uuid>/ directory
+    RS->>FS: Extract ZIP → /media/repositories/<uuid>/
+    RS->>PS: parse_repository(extract_path)
+    PS->>FS: Walk .py files, Tree-sitter parse each
+    PS-->>RS: {entities: [...], relationships: [...]}
+    RS->>GS: build_graph(parsed_data)
+    GS-->>RS: NetworkX node-link JSON
+    RS->>FS: Write knowledge_graph.json
+    RS->>DB: Repository.objects.create(id=uuid, name, local_path)
+    RS-->>DRF: Repository instance
+    DRF-->>FE: 201 {id, name, local_path, ...}
+```
+
+---
+
+## 5. Data Flow — Graph Visualization
+
+```mermaid
+sequenceDiagram
+    participant FE as React (RepositoryDashboard)
+    participant CG as CodeGraph Component
+    participant API as RepositoryService (api.ts)
+    participant DRF as Django (RepositoryViewSet)
+    participant FS as Filesystem
+
+    FE->>API: RepositoryService.getGraph(id)
+    API->>DRF: GET /api/v1/repositories/<id>/graph/
+    DRF->>FS: Read knowledge_graph.json
+    DRF-->>API: 200 {directed, nodes: [...], edges: [...]}
+    API-->>FE: res.data
+    FE->>CG: <CodeGraph data={graphData} />
+    CG->>CG: Map nodes to EntityNode format
+    CG->>CG: Map edges (styled by type: contains/imports)
+    CG->>CG: Dagre auto-layout (LR direction)
+    CG-->>FE: React Flow canvas rendered
+```
+
+---
+
+## 6. Module Dependency Diagram
 
 ```mermaid
 graph TD
-    UI[Frontend / API Layer] --> AI[ai]
-    UI --> Repos[repositories]
-    UI --> Accounts[accounts]
-    UI --> Analysis[analysis]
-    
-    AI --> Graph[graph]
-    AI --> Analysis
-    
+    UI[Frontend / API Layer]
+    UI --> Repos[repositories ✅]
+    UI --> Accounts[accounts 📋]
+
+    Repos --> Parser[parser ✅]
+    Repos --> Graph[graph ✅]
+    Repos --> WS[websocket 📋]
+
+    AI[ai 📋] --> Graph
+    AI --> Analysis[analysis 📋]
     Analysis --> Graph
-    Graph --> Parser[parser]
-    Parser --> Repos
-    
-    Repos --> WS[websocket]
-    Parser --> WS
-    
+    Graph --> Parser
+
     %% All depend on common
-    Accounts -.-> Common[common]
-    Repos -.-> Common
+    Repos -.-> Common[common ✅]
     Parser -.-> Common
     Graph -.-> Common
     Analysis -.-> Common
     AI -.-> Common
     WS -.-> Common
+    Accounts -.-> Common
 ```
 
-### Strict Dependency Rules:
-1. **Downward Flow**: Modules can only depend on modules below them in the architectural hierarchy. (e.g., `ai` can call `graph`, but `graph` **cannot** call `ai`).
-2. **Service Abstraction**: A module cannot query another module's database models directly. 
-   - *Violation*: `ai.views` runs `CodeNode.objects.filter(...)`
-   - *Correct*: `ai.services` calls `parser.services.ASTQueryService.get_nodes(...)`
-3. **Common is Universal**: The `common` module cannot import from any other domain module to prevent circular dependencies.
+### Strict Dependency Rules
+
+1. **Downward Flow Only**: Modules can only depend on modules below them in the hierarchy. (e.g., `repositories` can call `parser`, but `parser` **cannot** call `repositories`)
+2. **Service Abstraction**: A module cannot directly query another module's ORM models.
+   - ❌ *Violation*: `ai.views` runs `CodeNode.objects.filter(...)`
+   - ✅ *Correct*: `ai.services` calls `parser.services.ParserService.parse_repository(...)`
+3. **`common` is Universal**: The `common` module cannot import from any other domain module.
 
 ---
 
-## 5. Development Conventions & Coding Standards
+## 7. API Contract
 
-### 5.1 Naming Conventions
-- **Folders/Packages**: `snake_case` (e.g., `parser_engine`, `repositories`)
+### Currently Implemented Endpoints
+
+Base path: `/api/v1/`
+
+```
+GET    /repositories/                  → List all repos (metadata only)
+POST   /repositories/upload/           → Upload ZIP, run full pipeline
+GET    /repositories/<uuid>/           → Get single repo metadata
+DELETE /repositories/<uuid>/           → Delete repo record
+GET    /repositories/<uuid>/graph/     → Serve knowledge_graph.json
+```
+
+### `knowledge_graph.json` Schema
+
+The graph is persisted and served in NetworkX **node-link format**:
+
+```json
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "id": "src/utils.py",
+      "type": "file",
+      "name": "src/utils.py"
+    },
+    {
+      "id": "src/utils.py:MyClass",
+      "type": "class",
+      "name": "MyClass",
+      "file_path": "src/utils.py"
+    },
+    {
+      "id": "src/utils.py:helper_fn",
+      "type": "function",
+      "name": "helper_fn",
+      "file_path": "src/utils.py"
+    }
+  ],
+  "links": [
+    {
+      "source": "src/utils.py",
+      "target": "src/utils.py:MyClass",
+      "type": "contains"
+    },
+    {
+      "source": "src/utils.py",
+      "target": "os",
+      "type": "imports"
+    }
+  ]
+}
+```
+
+**Node types:**
+| Type | ID format | Description |
+|---|---|---|
+| `file` | `relative/path/to/file.py` | Python source file |
+| `class` | `relative/path.py:ClassName` | Class definition |
+| `function` | `relative/path.py:func_name` | Function or method definition |
+
+**Edge types:**
+| Type | Meaning | Visual style |
+|---|---|---|
+| `contains` | File contains a class or function | Slate gray, solid |
+| `imports` | File imports a module | Indigo, animated dashed |
+
+---
+
+## 8. Frontend Component Architecture
+
+```
+App.tsx
+└── BrowserRouter
+    └── MainLayout  (components/layout/MainLayout.tsx)
+        ├── Navbar / Sidebar
+        └── <Outlet />
+            ├── Home.tsx  (route: /)
+            │   ├── Repository list (GET /repositories/)
+            │   └── Upload form (POST /repositories/upload/)
+            └── RepositoryDashboard.tsx  (route: /repository/:id)
+                ├── useEffect → GET /repositories/:id/graph/
+                ├── Loading / Error states
+                └── CodeGraph.tsx  (features/graph/CodeGraph.tsx)
+                    ├── useNodesState / useEdgesState
+                    ├── Dagre layout engine (LR direction)
+                    └── ReactFlow
+                        ├── EntityNode (nodes/EntityNode.tsx)
+                        │   ├── Icon (file=blue, class=orange, fn=purple)
+                        │   ├── Display name (basename only for files)
+                        │   └── Path (directory or source file)
+                        ├── Background (dot grid)
+                        ├── Controls (zoom in/out/fit)
+                        └── MiniMap
+```
+
+---
+
+## 9. Development Conventions & Coding Standards
+
+### 9.1 Naming Conventions
+
+- **Python Folders/Packages**: `snake_case`
 - **Python Files**: `snake_case` (e.g., `repo_service.py`, `models.py`)
-- **Classes**: `PascalCase` (e.g., `CodeNode`, `ASTQueryService`)
-- **Functions/Variables**: `snake_case` (e.g., `sync_repository()`, `node_id`)
-- **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_RETRY_ATTEMPTS`)
+- **Python Classes**: `PascalCase` (e.g., `CodeNode`, `ParserService`)
+- **Python Functions/Variables**: `snake_case`
+- **TypeScript Components**: `PascalCase` (e.g., `EntityNode`, `CodeGraph`)
+- **TypeScript files**: `PascalCase` for components, `camelCase` for utilities
 
-### 5.2 Folder Structure per Module
-Every module in `apps/` must follow this structure:
+### 9.2 Module File Structure
+
+Every module in `apps/` follows this structure:
+
 ```text
 apps/<module_name>/
 ├── __init__.py
 ├── apps.py           # Django App Config
-├── models.py         # ORM definitions (Data Layer)
-├── services.py       # Core Business Logic (Service Layer) 
-├── selectors.py      # Complex Database Queries (Optional, keeps services thin)
-├── serializers.py    # DRF Serializers (Presentation Layer)
-├── views.py          # HTTP Endpoints (Presentation Layer)
-├── urls.py           # Route Definitions
+├── models.py         # ORM definitions
+├── services.py       # Core Business Logic ← ALL logic lives here
+├── serializers.py    # DRF Serializers
+├── views.py          # HTTP Endpoints (thin: validate → call service → return)
+├── urls.py           # Route definitions
 └── tests/            # Module-specific test suite
 ```
 
-### 5.3 Error Handling Strategy
-- **Base Exception**: Create a `CodeAtlasException` in `common/exceptions.py`.
-- **Domain Exceptions**: Each module defines its own exceptions inheriting from the base (e.g., `RepositoryNotFound(CodeAtlasException)`).
-- **Global Exception Handler**: Configure Django REST Framework to catch `CodeAtlasException` and map it to a standardized JSON response:
+### 9.3 Error Handling Strategy
+
+- **Base Exception**: `common/exceptions.py` → `CodeAtlasException`
+- **Domain Exceptions**: Each module defines typed exceptions (e.g., `RepositoryNotFound(CodeAtlasException)`)
+- **JSON Response format:**
   ```json
   {
     "error_code": "REPOSITORY_NOT_FOUND",
-    "message": "The requested repository does not exist or access is denied.",
+    "message": "The requested repository does not exist.",
     "status": 404
   }
   ```
 
----
+### 9.4 No Logic in Views
 
-## 6. Django Configuration Strategy
-
-Settings are split into three environments:
-
-1. **`base.py`**: Contains universal settings.
-   - `INSTALLED_APPS` (Core apps + custom apps)
-   - `MIDDLEWARE` (CORS, Security, Sessions)
-   - `LOGGING` (Structured JSON logging for services)
-2. **`local.py`**: Used for local development.
-   - `DEBUG = True`
-   - Local PostgreSQL & Redis URLs loaded from `.env`.
-   - `CORS_ALLOWED_ORIGINS` mapped to `http://localhost:5173`.
-3. **`production.py`**: Secure settings for deployment.
-   - `DEBUG = False`
-   - Strict `ALLOWED_HOSTS` and CORS policies.
-   - Static/Media files configured for S3 or WhiteNoise.
+Views should only:
+1. Parse & validate the HTTP request
+2. Call the appropriate Service method
+3. Return the serialized response
 
 ---
 
-## 7. Best Practices for a Three-Developer Team
+## 10. Phase Completion Summary
 
-1. **Feature Branching**: Use `feature/<module>-<brief-desc>` (e.g., `feature/parser-ast-extraction`).
-2. **Pull Requests (PRs)**:
-   - Require at least 1 approval before merging into `main`.
-   - PRs must strictly adhere to the Service Layer boundaries (Reviewers must reject direct model access across modules).
-3. **Automated Formatting & Linting**: 
-   - Enforce **Ruff** for linting/formatting and **Mypy** for type checking.
-   - Run via pre-commit hooks to avoid formatting arguments.
-4. **API Contracts First**: Before implementing a feature, backend and frontend devs agree on the JSON request/response format and document it.
-5. **No Logic in Views**: Views should only: (1) Validate input, (2) Call a Service, (3) Return the serialized Service response.
+| Phase | What Was Built |
+|---|---|
+| **Phase 1** | Vite + React + TypeScript + Tailwind v4 + Django + PostgreSQL + .env + CORS |
+| **Phase 2** | Domain module scaffold (8 apps), DRF router, REST viewsets, React Router, `Home.tsx`, `RepositoryDashboard.tsx` |
+| **Phase 3** | `ParserService` (Tree-sitter, manual AST traversal), `GraphService` (NetworkX), `RepoService.upload_and_extract_repository()`, ZIP endpoint |
+| **Phase 4** | `GET /repositories/<id>/graph/` endpoint, `RepositoryService.getGraph()`, `CodeGraph.tsx` with Dagre LR layout, `EntityNode` with filename + path display |
+
+---
+
+*Built with ❤️ using Django, React, Tree-sitter, NetworkX, and React Flow.*

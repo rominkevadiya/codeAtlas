@@ -9,6 +9,7 @@ CodeAtlas is a full-stack platform that parses source code repositories, builds 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Current Status](#current-status)
 - [Architecture](#architecture)
   - [Modular Monolith Design](#modular-monolith-design)
   - [High-Level System Diagram](#high-level-system-diagram)
@@ -26,12 +27,10 @@ CodeAtlas is a full-stack platform that parses source code repositories, builds 
   - [5. Environment Variables](#5-environment-variables)
 - [Running the Development Environment](#running-the-development-environment)
   - [Start the Django Backend](#start-the-django-backend)
-  - [Start Celery Worker](#start-celery-worker)
   - [Start the React Frontend](#start-the-react-frontend)
+- [API Reference](#api-reference)
 - [Configuration Reference](#configuration-reference)
   - [Backend Environment Variables](#backend-environment-variables)
-  - [Django Settings Overview](#django-settings-overview)
-  - [Tailwind CSS v4 Configuration](#tailwind-css-v4-configuration)
   - [TypeScript Path Aliases](#typescript-path-aliases)
 - [Development Workflow](#development-workflow)
 - [Roadmap](#roadmap)
@@ -45,10 +44,25 @@ CodeAtlas solves a fundamental challenge in modern software development: **under
 
 CodeAtlas automates this by:
 
-1. **Parsing** a repository with Tree-sitter to extract functions, classes, imports, and call graphs.
-2. **Building** a structural knowledge graph with NetworkX.
-3. **Visualizing** that graph interactively using React Flow so you can pan, zoom, and click into any node.
-4. **Augmenting** the graph with AI (Gemini API) to answer natural language questions like *"Where does authentication happen?"* or *"What calls the `send_email` function?"*
+1. **Parsing** a repository (uploaded as a ZIP) with Tree-sitter to extract functions, classes, imports, and containment relationships.
+2. **Building** a structural knowledge graph with NetworkX, persisted as `knowledge_graph.json`.
+3. **Visualizing** that graph interactively using React Flow — pan, zoom, click into any node — with auto-layout powered by Dagre.
+4. **Augmenting** the graph with AI (Gemini API) to answer natural language questions like *"Where does authentication happen?"* or *"What calls the `send_email` function?"* *(Phase 5 — Planned)*
+
+---
+
+## Current Status
+
+| Phase | Status | Description |
+|---|---|---|
+| **Phase 1** | ✅ **Complete** | Project setup — folder structure, Django, React, PostgreSQL, Tailwind, TypeScript, Git |
+| **Phase 2** | ✅ **Complete** | Django domain modules, REST API endpoints, React routing and page scaffold |
+| **Phase 3** | ✅ **Complete** | Tree-sitter parser, NetworkX graph builder, ZIP upload pipeline, `knowledge_graph.json` persistence |
+| **Phase 4** | ✅ **Complete** | `GET /graph/` API, React Flow interactive visualization, Dagre auto-layout, custom node components |
+| **Phase 5** | 🔜 **Next** | Gemini AI integration — natural language code queries |
+| **Phase 6** | 📋 Planned | Real-time WebSocket progress updates (Celery → Channels → React) |
+| **Phase 7** | 📋 Planned | Authentication, user accounts, saved repository sessions |
+| **Phase 8** | 📋 Planned | Production deployment, Docker, CI/CD |
 
 ---
 
@@ -67,7 +81,7 @@ CodeAtlas follows a **Modular Monolith** architecture. This is a deliberate choi
 
 The monolith is divided into two top-level directories that are independently deployable but share a common Git repository:
 
-- **`/backend`** — Django application (API, WebSockets, task queue, business logic)
+- **`/backend`** — Django application (API, business logic, parser, graph engine)
 - **`/frontend`** — React application (interactive UI, graph visualization)
 
 ### High-Level System Diagram
@@ -80,23 +94,23 @@ The monolith is divided into two top-level directories that are independently de
 │   │   React Frontend     │         │     Django Backend         │   │
 │   │                      │  HTTP   │                            │   │
 │   │  • React Flow Graph  │◄───────►│  • Django REST Framework   │   │
-│   │  • Zustand State     │         │  • Django Channels (WS)    │   │
-│   │  • Framer Motion     │  WS     │  • Celery Task Queue       │   │
-│   │  • Tailwind CSS v4   │◄───────►│  • Tree-sitter Parser      │   │
-│   │  • shadcn/ui         │         │  • NetworkX Graph Engine   │   │
-│   │  • TypeScript        │         │  • Gemini AI (abstracted)  │   │
+│   │  • Dagre Auto-layout │         │  • RepositoryViewSet       │   │
+│   │  • Custom EntityNode │  REST   │  • RepoService (upload)    │   │
+│   │  • Zustand State     │◄───────►│  • ParserService (AST)     │   │
+│   │  • Tailwind CSS v4   │         │  • GraphService (NetworkX) │   │
+│   │  • TypeScript        │         │  • Gemini AI (Phase 5)     │   │
 │   └──────────────────────┘         └────────────┬───────────────┘   │
 │                                                 │                   │
-│         ┌───────────────────────────────────────┼──────────┐        │
-│         │                                       │          │        │
-│   ┌─────▼──────┐    ┌──────────────────┐  ┌────▼──────┐   │        │
-│   │ PostgreSQL │    │      Redis       │  │  Daphne   │   │        │
-│   │            │    │ (Broker + Cache  │  │  (ASGI)   │   │        │
-│   │ Persistent │    │  + Channel Layer)│  │           │   │        │
-│   │    Data    │    │                  │  │           │   │        │
-│   └────────────┘    └──────────────────┘  └───────────┘   │        │
-│                                                            │        │
-└────────────────────────────────────────────────────────────┘        │
+│                          ┌──────────────────────┤                   │
+│                          │                      │                   │
+│                   ┌──────▼──────┐    ┌──────────▼──────────┐        │
+│                   │ PostgreSQL  │    │  Local Filesystem    │        │
+│                   │             │    │  (media/repositories)│        │
+│                   │  Repo meta  │    │  ├─ extracted ZIP    │        │
+│                   │  (UUID, name│    │  └─ knowledge_graph  │        │
+│                   │   path)     │    │       .json          │        │
+│                   └─────────────┘    └──────────────────────┘        │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -108,96 +122,113 @@ The monolith is divided into two top-level directories that are independently de
 | Technology | Version | Purpose |
 |---|---|---|
 | **React** | 19.x | Core UI library |
-| **TypeScript** | 6.x | Type safety |
-| **Vite** | 8.x | Build tool and dev server |
+| **TypeScript** | 5.x | Type safety |
+| **Vite** | 6.x | Build tool and dev server |
 | **Tailwind CSS** | 4.x | Utility-first CSS framework |
-| **shadcn/ui** | Latest | Accessible, composable component library |
 | **React Flow (`@xyflow/react`)** | 12.x | Interactive graph and node visualization |
-| **Framer Motion** | 12.x | Animations and transitions |
+| **Dagre** | 0.8.x | Automatic graph layout algorithm (Left-to-Right) |
 | **Zustand** | 5.x | Lightweight global state management |
 | **Axios** | 1.x | HTTP client for REST API calls |
-| **lucide-react** | 1.x | Icon library (shadcn/ui dependency) |
+| **lucide-react** | Latest | Icon library |
+| **React Router DOM** | 7.x | Client-side routing |
 
 ### Backend
 
 | Technology | Version | Purpose |
 |---|---|---|
 | **Python** | 3.13+ | Runtime |
-| **Django** | 6.x | Web framework |
-| **Django REST Framework** | 3.x | REST API layer |
-| **Django Channels** | 4.x | WebSocket support (real-time updates) |
+| **Django** | 5.x | Web framework |
+| **Django REST Framework** | 3.x | REST API layer (ViewSets, Routers, Serializers) |
+| **Django Channels** | 4.x | WebSocket support (Phase 6) |
 | **Daphne** | 4.x | ASGI server for HTTP + WebSocket |
-| **Celery** | 5.x | Distributed async task queue |
 | **psycopg** | 3.x | PostgreSQL driver (binary) |
-| **channels-redis** | 4.x | Redis-backed channel layer |
 | **python-dotenv** | 1.x | `.env` file loading |
 | **django-cors-headers** | 4.x | CORS handling for the frontend |
-| **Tree-sitter** | *(Phase 2)* | Source code parser |
-| **NetworkX** | *(Phase 2)* | Code knowledge graph construction |
+| **Tree-sitter** | 0.26+ | Source code AST parser (Python support) |
+| **tree-sitter-python** | Latest | Python language grammar for Tree-sitter |
+| **NetworkX** | 3.x | Code knowledge graph construction and serialization |
 
 ### Infrastructure
 
 | Technology | Purpose |
 |---|---|
-| **PostgreSQL** | Primary relational database for all persistent data |
-| **Redis** | Celery message broker, Celery result backend, Django Channels layer |
-| **Git** | Version control |
+| **PostgreSQL** | Primary relational database — stores repository metadata (UUID, name, local_path) |
+| **Local Filesystem** | Stores extracted ZIP content and `knowledge_graph.json` under `backend/config/media/repositories/<uuid>/` |
+| **Redis** | *(Phase 6)* Celery message broker, Django Channels layer |
 
 ---
 
 ## Project Structure
 
 ```
-codeAtlas/                          ← Monolith root / Git repository
+codeAtlas/                            ← Monolith root / Git repository
 │
-├── .gitignore                      ← Root gitignore (covers both frontend & backend)
-├── README.md                       ← This file
+├── .gitignore
+├── README.md                         ← This file
+├── ARCHITECTURE.md                   ← Domain module architecture & DDD standards
 │
-├── frontend/                       ← React application (Vite + TypeScript)
-│   ├── public/                     ← Static assets served as-is
+├── frontend/                         ← React application (Vite + TypeScript)
+│   ├── public/
 │   ├── src/
-│   │   ├── assets/                 ← Images, fonts, etc.
-│   │   ├── components/             ← (Phase 2) Reusable UI components
-│   │   │   └── ui/                 ← shadcn/ui generated components
-│   │   ├── features/               ← (Phase 2) Feature-scoped modules
-│   │   │   ├── graph/              ← React Flow graph visualization
-│   │   │   ├── analysis/           ← AI analysis panels
-│   │   │   └── repository/         ← Repository management
-│   │   ├── hooks/                  ← (Phase 2) Custom React hooks
-│   │   ├── lib/                    ← Utilities and helpers (e.g. cn() from shadcn)
-│   │   ├── services/               ← (Phase 2) Axios API service layer
-│   │   ├── store/                  ← (Phase 2) Zustand global state stores
-│   │   ├── types/                  ← (Phase 2) Shared TypeScript types/interfaces
-│   │   ├── App.tsx                 ← Root application component
-│   │   ├── main.tsx                ← Entry point
-│   │   └── index.css               ← Global styles + Tailwind CSS v4 directives
-│   ├── index.html                  ← HTML entry point
-│   ├── vite.config.ts              ← Vite + Tailwind plugin + path aliases
-│   ├── tsconfig.json               ← Base TypeScript config
-│   ├── tsconfig.app.json           ← App-specific TS config (with @/* path alias)
-│   ├── tsconfig.node.json          ← Node/Vite TS config
+│   │   ├── assets/
+│   │   ├── components/
+│   │   │   ├── layout/               ← MainLayout (navbar, sidebar, outlet)
+│   │   │   └── ui/                   ← shadcn/ui generated components
+│   │   ├── features/
+│   │   │   ├── graph/                ← React Flow graph canvas
+│   │   │   │   ├── CodeGraph.tsx     ← Main canvas: data → dagre layout → ReactFlow
+│   │   │   │   └── nodes/
+│   │   │   │       └── EntityNode.tsx ← Custom node: file/class/function with icon
+│   │   │   └── repository/           ← (Placeholder for future repo features)
+│   │   ├── pages/
+│   │   │   ├── Home.tsx              ← Repository list + ZIP upload form
+│   │   │   └── RepositoryDashboard.tsx ← Fetches graph, renders CodeGraph
+│   │   ├── services/
+│   │   │   └── api.ts                ← Axios instance + RepositoryService
+│   │   ├── store/                    ← Zustand stores (Phase 5+)
+│   │   ├── types/                    ← Shared TypeScript interfaces
+│   │   ├── App.tsx                   ← Router: / → Home, /repository/:id → Dashboard
+│   │   ├── main.tsx
+│   │   └── index.css                 ← Global styles + Tailwind v4 directives
+│   ├── index.html
+│   ├── vite.config.ts
+│   ├── tsconfig.app.json
 │   └── package.json
 │
-└── backend/                        ← Django application
-    ├── venv/                       ← Python virtual environment (git-ignored)
-    ├── .env                        ← Environment variables (git-ignored)
-    ├── manage.py                   ← Django management CLI
+└── backend/                          ← Django application
+    ├── venv/                         ← Python virtual environment (git-ignored)
+    ├── .env                          ← Secrets & config (git-ignored)
+    ├── manage.py
     │
-    └── core/                       ← Django project configuration package
-        ├── __init__.py
-        ├── settings.py             ← All Django settings (DB, Redis, Celery, etc.)
-        ├── urls.py                 ← Root URL router
-        ├── asgi.py                 ← ASGI entrypoint (Channels/Daphne)
-        └── wsgi.py                 ← WSGI entrypoint (standard HTTP)
+    └── apps/                         ← Domain modules (bounded contexts)
+        ├── accounts/                 ← (Placeholder) User & Auth Domain
+        ├── repositories/             ← ✅ Active: Upload, extract, list repos
+        │   ├── models.py             ←   Repository(id, name, url, local_path, ...)
+        │   ├── services.py           ←   RepoService: upload_and_extract_repository()
+        │   ├── serializers.py
+        │   ├── views.py              ←   RepositoryViewSet: upload, graph, CRUD
+        │   └── urls.py
+        ├── parser/                   ← ✅ Active: Tree-sitter AST extraction
+        │   └── services.py           ←   ParserService.parse_repository(path)
+        ├── graph/                    ← ✅ Active: NetworkX graph builder
+        │   └── services.py           ←   GraphService.build_graph(parsed_data)
+        ├── analysis/                 ← (Placeholder) Code metrics
+        ├── ai/                       ← (Placeholder) Gemini AI queries (Phase 5)
+        ├── websocket/                ← (Placeholder) Real-time events (Phase 6)
+        └── common/                   ← Shared base classes & exceptions
+    │
+    └── config/                       ← Django project settings
+        ├── settings.py
+        ├── urls.py                   ←   Root router → /api/v1/repositories/
+        ├── asgi.py
+        └── media/
+            └── repositories/
+                └── <uuid>/           ← Extracted repo + knowledge_graph.json
 ```
-
-> **Note:** Directories marked `(Phase 2)` will be created in the next phase. They are shown here to illustrate the intended scalable structure.
 
 ---
 
 ## Prerequisites
-
-Before setting up the project, ensure the following are installed on your system.
 
 | Software | Minimum Version | Check Command |
 |---|---|---|
@@ -205,24 +236,9 @@ Before setting up the project, ensure the following are installed on your system
 | **Node.js** | 20 LTS+ | `node -v` |
 | **npm** | 10+ | `npm -v` |
 | **PostgreSQL** | 14+ | `psql --version` |
-| **Redis** | 6+ | `redis-server --version` |
 | **Git** | 2+ | `git --version` |
 
-### Installing Redis (Linux / WSL)
-
-Redis is **not** typically pre-installed. Install it with:
-
-```bash
-sudo apt update
-sudo apt install redis-server -y
-
-# Start Redis and enable it on boot
-sudo systemctl start redis
-sudo systemctl enable redis
-
-# Verify it's running
-redis-cli ping   # Should return: PONG
-```
+> **Note:** Redis is no longer required for the current Phase 1-4 implementation. It will be needed in Phase 6 (WebSockets/Celery).
 
 ---
 
@@ -239,36 +255,27 @@ cd codeAtlas
 
 ### 2. Backend Setup
 
-All backend commands run from the **`codeAtlas/`** root directory unless noted.
-
-#### Step 2a — Create the Python Virtual Environment
-
-A virtual environment isolates the project's Python packages from your global Python installation.
+#### Step 2a — Create & Activate the Python Virtual Environment
 
 ```bash
-# Creates the venv inside the backend/ folder
+# Create the venv inside the backend/ folder
 python3 -m venv backend/venv
-```
 
-#### Step 2b — Activate the Virtual Environment
-
-```bash
-# Linux / macOS / WSL
+# Activate (Linux / macOS / WSL)
 source backend/venv/bin/activate
-
-# Windows (PowerShell)
-.\backend\venv\Scripts\Activate.ps1
 ```
 
-Your shell prompt should now show `(venv)` to confirm activation.
+Your shell prompt should now show `(venv)`.
 
-#### Step 2c — Install Python Dependencies
+#### Step 2b — Install Python Dependencies
 
 ```bash
 pip install django djangorestframework django-cors-headers \
-            channels daphne channels-redis \
-            celery psycopg[binary] redis \
-            python-dotenv
+            channels daphne \
+            psycopg[binary] \
+            python-dotenv \
+            tree-sitter tree-sitter-python \
+            networkx
 ```
 
 | Package | Why |
@@ -276,69 +283,47 @@ pip install django djangorestframework django-cors-headers \
 | `django` | Core web framework |
 | `djangorestframework` | REST API serializers, viewsets, routers |
 | `django-cors-headers` | Allows the Vite dev server (`localhost:5173`) to call the Django API |
-| `channels` | Adds WebSocket protocol support to Django |
-| `daphne` | ASGI server that serves both HTTP and WebSocket connections |
-| `channels-redis` | Connects Django Channels to Redis as its message bus |
-| `celery` | Async/background task queue (used for repo parsing jobs) |
-| `psycopg[binary]` | PostgreSQL adapter for Python (binary build = no OS-level build tools needed) |
-| `redis` | Python Redis client (used by Celery) |
-| `python-dotenv` | Loads `backend/.env` into `os.environ` automatically |
+| `channels` + `daphne` | ASGI server for HTTP (+ WebSocket in Phase 6) |
+| `psycopg[binary]` | PostgreSQL adapter for Python |
+| `python-dotenv` | Loads `backend/.env` into `os.environ` |
+| `tree-sitter` + `tree-sitter-python` | AST parsing of Python source files |
+| `networkx` | Knowledge graph construction and JSON serialization |
 
 ---
 
 ### 3. Frontend Setup
-
-#### Step 3a — Install Node Dependencies
 
 ```bash
 cd frontend
 npm install
 ```
 
-This installs all packages defined in `package.json`, including:
+Key dependencies installed:
 
-```bash
-# Runtime dependencies
-@xyflow/react      # Interactive node-graph canvas
-framer-motion      # Animation library
-zustand            # State management
-axios              # HTTP client
-clsx               # Conditional class names
-tailwind-merge     # Merges conflicting Tailwind classes
-lucide-react       # Icon library
-
-# Dev dependencies
-tailwindcss        # CSS framework (v4)
-@tailwindcss/vite  # Vite plugin for Tailwind v4 (replaces postcss config)
-typescript         # Type checking
-vite               # Build tool
+```
+@xyflow/react        # Interactive graph canvas
+dagre / @types/dagre # Auto-layout engine for the graph
+zustand              # State management
+axios                # HTTP client
+lucide-react         # Icon library
+react-router-dom     # Client-side routing
 ```
 
 ---
 
 ### 4. Database Setup
 
-#### Step 4a — Create the PostgreSQL Database
-
 ```bash
 # Connect as the postgres superuser
 sudo -u postgres psql
 
-# Inside the psql shell:
+# Inside psql:
 CREATE DATABASE codeatlas;
 CREATE USER postgres WITH PASSWORD 'postgres';
 GRANT ALL PRIVILEGES ON DATABASE codeatlas TO postgres;
 \q
-```
 
-> **Tip:** You can change the database name, user, and password — just make sure to update your `backend/.env` file accordingly.
-
-#### Step 4b — Run Migrations
-
-> **Phase 1 Note:** No custom models exist yet, but this applies Django's built-in migrations (users, sessions, admin, etc.).
-
-```bash
-# From the codeAtlas/ root, with venv active
+# Run Django migrations (with venv active, from codeAtlas/ root)
 python backend/manage.py migrate
 ```
 
@@ -346,9 +331,7 @@ python backend/manage.py migrate
 
 ### 5. Environment Variables
 
-The backend reads all secrets and configuration from `backend/.env`. This file is **git-ignored** and must be created manually on each machine.
-
-A `.env` file has been pre-created at `backend/.env` with development defaults:
+Create `backend/.env` (git-ignored). A template:
 
 ```env
 # backend/.env
@@ -358,24 +341,27 @@ SECRET_KEY=django-insecure-replace-me-in-production
 DEBUG=True
 ALLOWED_HOSTS=*
 
-# PostgreSQL — update these to match your local setup
+# PostgreSQL
 DB_NAME=codeatlas
 DB_USER=postgres
 DB_PASSWORD=postgres
 DB_HOST=localhost
 DB_PORT=5432
 
-# Redis
+# Redis (not used until Phase 6)
 REDIS_URL=redis://127.0.0.1:6379/0
+
+# Gemini AI (Phase 5)
+# GEMINI_API_KEY=your-api-key-here
 ```
 
-> ⚠️ **Never commit `.env` to Git.** It is already listed in `.gitignore`. For production deployments, inject secrets via environment variables or a secrets manager.
+> ⚠️ **Never commit `.env` to Git.** It is already listed in `.gitignore`.
 
 ---
 
 ## Running the Development Environment
 
-You need **three terminal windows** open simultaneously during development.
+You need **two terminal windows** for the current phase.
 
 ### Start the Django Backend
 
@@ -385,44 +371,72 @@ source backend/venv/bin/activate
 python backend/manage.py runserver
 ```
 
-The Django development server starts at: **http://127.0.0.1:8000**
-
-The `runserver` command uses Daphne under the hood (because `ASGI_APPLICATION` is configured), which means it handles both standard HTTP requests and WebSocket connections.
-
----
-
-### Start Celery Worker
-
-Celery handles long-running background tasks (e.g., parsing a repository). It must run separately from Django.
-
-```bash
-# Terminal 2 — from the backend/ directory with venv active
-source backend/venv/bin/activate
-cd backend
-celery -A core worker --loglevel=info
-```
-
-| Flag | Meaning |
-|---|---|
-| `-A core` | Tells Celery to find the app in the `core` Django project |
-| `worker` | Starts a worker process that consumes tasks from the Redis queue |
-| `--loglevel=info` | Shows task execution logs in the terminal |
-
----
+Django dev server: **http://127.0.0.1:8000**
 
 ### Start the React Frontend
 
 ```bash
-# Terminal 3 — from the frontend/ directory
+# Terminal 2 — from the frontend/ directory
 cd frontend
 npm run dev
 ```
 
-The Vite dev server starts at: **http://localhost:5173**
+Vite dev server: **http://localhost:5173**
 
-Vite provides:
-- **Hot Module Replacement (HMR):** UI updates instantly without a full page reload.
-- **Fast cold starts:** Sub-second server startup due to native ES modules.
+---
+
+## API Reference
+
+All endpoints are prefixed with `/api/v1/`.
+
+### Repositories
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/repositories/` | List all uploaded repositories |
+| `POST` | `/repositories/upload/` | Upload a ZIP file → extract → parse AST → build graph |
+| `GET` | `/repositories/<id>/` | Retrieve single repository metadata |
+| `DELETE` | `/repositories/<id>/` | Delete a repository record |
+| `GET` | `/repositories/<id>/graph/` | **Serve the `knowledge_graph.json`** for visualization |
+
+#### `POST /repositories/upload/`
+
+**Content-Type:** `multipart/form-data`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `name` | `string` | ✅ | Display name for the repository |
+| `file` | `File (.zip)` | ✅ | ZIP archive of the repository |
+
+**Response `201 Created`:**
+```json
+{
+  "id": "45c4652d-ed72-492f-bf06-a47c563561b4",
+  "name": "myproject",
+  "url": "local://uploaded",
+  "is_cloned": true,
+  "local_path": "/path/to/media/repositories/<uuid>",
+  "created_at": "2026-07-11T17:15:11Z"
+}
+```
+
+#### `GET /repositories/<id>/graph/`
+
+**Response `200 OK`:** NetworkX node-link JSON
+```json
+{
+  "directed": true,
+  "multigraph": false,
+  "nodes": [
+    { "id": "src/main.py", "type": "file", "name": "src/main.py" },
+    { "id": "src/main.py:main", "type": "function", "name": "main" }
+  ],
+  "edges": [
+    { "source": "src/main.py", "target": "src/main.py:main", "type": "contains" },
+    { "source": "src/main.py", "target": "os", "type": "imports" }
+  ]
+}
+```
 
 ---
 
@@ -440,136 +454,18 @@ Vite provides:
 | `DB_PASSWORD` | `postgres` | PostgreSQL password |
 | `DB_HOST` | `localhost` | PostgreSQL host |
 | `DB_PORT` | `5432` | PostgreSQL port |
-| `REDIS_URL` | `redis://127.0.0.1:6379/0` | Redis connection URL. Used for Celery broker, result backend, and Channels layer. |
-
----
-
-### Django Settings Overview
-
-`backend/core/settings.py` is the single source of truth for all Django configuration.
-
-**Key sections:**
-
-```python
-INSTALLED_APPS = [
-    'daphne',             # Must be FIRST — overrides runserver to use ASGI
-    ...
-    'rest_framework',     # Adds DRF serializers, viewsets, etc.
-    'corsheaders',        # Adds CORS middleware support
-    'channels',           # Adds WebSocket protocol layer
-]
-
-MIDDLEWARE = [
-    ...
-    'corsheaders.middleware.CorsMiddleware',  # Must be before CommonMiddleware
-    ...
-]
-
-# Tells Django to use Daphne/Channels for WebSocket routing
-ASGI_APPLICATION = 'core.asgi.application'
-
-# Allows the React frontend (on port 5173) to make API calls
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
-
-# Redis powers both the real-time WebSocket channel layer
-# and the Celery async task queue
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {"hosts": [REDIS_URL]},
-    }
-}
-CELERY_BROKER_URL = REDIS_URL
-CELERY_RESULT_BACKEND = REDIS_URL
-```
-
----
-
-### Tailwind CSS v4 Configuration
-
-This project uses **Tailwind CSS v4**, which has a fundamentally different setup from v3.
-
-**Key differences from v3:**
-
-| Aspect | v3 | v4 (this project) |
-|---|---|---|
-| Config file | `tailwind.config.js` required | No config file needed by default |
-| PostCSS | Configured via `postcss.config.js` | Handled by the `@tailwindcss/vite` plugin |
-| Import | `@tailwind base/components/utilities` | Single `@import "tailwindcss"` |
-| Theming | `theme.extend` in JS config | `@theme {}` block in CSS |
-
-**`vite.config.ts`** — The Tailwind plugin is registered here:
-```typescript
-import tailwindcss from '@tailwindcss/vite'
-
-export default defineConfig({
-  plugins: [
-    tailwindcss(),  // Processes CSS before Vite bundles it
-    react()
-  ],
-})
-```
-
-**`src/index.css`** — Tailwind is imported and CSS design tokens are defined here using `@theme` and `@layer`:
-```css
-@import "tailwindcss";
-
-@theme {
-  /* Maps Tailwind color utilities to CSS custom properties */
-  --color-primary: hsl(var(--primary));
-  /* ...etc */
-}
-
-@layer base {
-  :root {
-    /* Light mode CSS variables */
-    --primary: 222.2 47.4% 11.2%;
-  }
-  .dark {
-    /* Dark mode CSS variables */
-    --primary: 210 40% 98%;
-  }
-}
-```
-
-> **Note:** Your IDE may show an `Unknown at rule @theme` warning. This is expected — the `@theme` rule is a Tailwind v4 extension that standard CSS language servers don't recognize. It is **not** an error and will compile correctly.
-
----
+| `REDIS_URL` | `redis://127.0.0.1:6379/0` | Redis URL (required from Phase 6) |
+| `GEMINI_API_KEY` | — | Gemini AI API key (required from Phase 5) |
 
 ### TypeScript Path Aliases
 
-The `@/*` alias maps to `src/*`, enabling clean absolute imports instead of relative path chains (`../../../`).
+The `@/*` alias maps to `src/*`, enabling clean absolute imports.
 
-**`tsconfig.app.json`:**
-```json
-{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
-}
-```
-
-**`vite.config.ts`:**
 ```typescript
-resolve: {
-  alias: {
-    "@": path.resolve(__dirname, "./src"),
-  },
-},
-```
-
-**Usage in code:**
-```typescript
-// ❌ Relative (fragile, breaks on refactoring)
+// ❌ Relative (fragile)
 import { Button } from '../../../components/ui/button'
 
-// ✅ Absolute (clean, location-independent)
+// ✅ Absolute (clean)
 import { Button } from '@/components/ui/button'
 ```
 
@@ -582,8 +478,7 @@ import { Button } from '@/components/ui/button'
 2. Frontend:  Vite HMR instantly reflects changes in the browser.
 3. Backend:   Django's runserver auto-reloads Python files on save.
 4. Database:  python backend/manage.py makemigrations && migrate (after model changes).
-5. Celery:    Restart the Celery worker after changing task definitions.
-6. Commit:    git add . && git commit -m "feat: your feature description"
+5. Commit:    git add . && git commit -m "feat: your feature description"
 ```
 
 ---
@@ -592,25 +487,23 @@ import { Button } from '@/components/ui/button'
 
 | Phase | Status | Description |
 |---|---|---|
-| **Phase 1** | ✅ Complete | Project environment setup — folder structure, Django, React, PostgreSQL, Redis, Tailwind, TypeScript, Git |
-| **Phase 2** | 🔜 Next | Django application modules, REST API endpoints, React routing and page scaffold |
-| **Phase 3** | 📋 Planned | Tree-sitter code parser, NetworkX graph builder, repository upload pipeline |
-| **Phase 4** | 📋 Planned | React Flow interactive graph visualization, shadcn/ui component library |
-| **Phase 5** | 📋 Planned | Gemini AI integration (provider-abstracted), natural language code queries |
-| **Phase 6** | 📋 Planned | Real-time progress updates via WebSockets (Celery → Channels → React) |
-| **Phase 7** | 📋 Planned | Authentication, user accounts, saved repository sessions |
+| **Phase 1** | ✅ Complete | Project environment setup — folder structure, Django, React, PostgreSQL, Tailwind, TypeScript |
+| **Phase 2** | ✅ Complete | Django domain modules (`repositories`, `parser`, `graph`, `common`), REST API, React routing |
+| **Phase 3** | ✅ Complete | Tree-sitter AST parser, NetworkX graph engine, ZIP upload pipeline, `knowledge_graph.json` |
+| **Phase 4** | ✅ Complete | `GET /graph/` API endpoint, React Flow canvas, Dagre auto-layout, `EntityNode` custom node |
+| **Phase 5** | 🔜 Next | Gemini AI integration — natural language code queries ("What calls X?") |
+| **Phase 6** | 📋 Planned | Real-time WebSocket progress via Celery + Django Channels |
+| **Phase 7** | 📋 Planned | Authentication, user accounts, saved sessions |
 | **Phase 8** | 📋 Planned | Production deployment, Docker, CI/CD |
 
 ---
 
 ## Contributing
 
-This project is currently in early development. The branching strategy is:
-
 ```
 main          ← Stable, production-ready code only
 dev           ← Active development branch
-feature/*     ← Feature branches (e.g. feature/graph-renderer)
+feature/*     ← Feature branches (e.g. feature/ai-query-panel)
 fix/*         ← Bug fix branches
 ```
 
@@ -627,4 +520,4 @@ chore:    Build process or tooling changes
 
 ---
 
-*Built with ❤️ using Django, React, and an obsession with clean architecture.*
+*Built with ❤️ using Django, React, Tree-sitter, NetworkX, and React Flow.*

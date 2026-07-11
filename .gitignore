@@ -1,21 +1,86 @@
+# ============================================================
 # React / Node
+# ============================================================
 frontend/node_modules/
 frontend/dist/
 frontend/dist-ssr/
 frontend/.npm/
+frontend/.cache/
+frontend/coverage/
 *.local
 
+# ============================================================
 # Python / Django
-backend/venv/
-backend/__pycache__/
-*.pyc
-*.pyo
-*.pyd
-db.sqlite3
-.env
+# ============================================================
 
-# Editor / OS
+# Virtual environment
+backend/venv/
+backend/.venv/
+
+# Compiled bytecode
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+*.pyo
+
+# Django
+*.log
+db.sqlite3
+backend/db.sqlite3
+
+# Django collected static files
+backend/staticfiles/
+backend/static/
+
+# Django media / uploaded repositories storage
+backend/config/media/
+
+# ============================================================
+# Environment & Secrets
+# ============================================================
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# ============================================================
+# Editor & IDE
+# ============================================================
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# ============================================================
+# OS
+# ============================================================
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# ============================================================
+# Testing & Coverage
+# ============================================================
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+*.pytest_cache
+
+# ============================================================
+# Build & Distribution
+# ============================================================
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ============================================================
+# Misc
+# ============================================================
+*.bak
+*.tmp
