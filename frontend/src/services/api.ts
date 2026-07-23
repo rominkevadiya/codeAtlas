@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-// The base URL should eventually come from an environment variable
-// e.g., import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+// Read API base URL from env, fall back to localhost for local development
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -37,6 +36,6 @@ export const RepositoryService = {
 };
 
 export const AIService = {
-  query: (repository_id: string, query: string) => 
+  query: (repository_id: string, query: string) =>
     api.post('/ai/query/', { repository_id, query }),
 };

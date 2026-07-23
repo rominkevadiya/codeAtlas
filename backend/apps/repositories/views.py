@@ -38,16 +38,26 @@ class RepositoryViewSet(viewsets.ModelViewSet):
 
         if not name or not zip_file:
             return Response({"error": "Name and zip file are required."}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         if not zip_file.name.endswith('.zip'):
             return Response({"error": "Only .zip files are supported."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # ── Security: Enforce a 50MB max upload size ──
+        MAX_ZIP_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB
+        if zip_file.size > MAX_ZIP_SIZE_BYTES:
+            return Response(
+                {"error": "File size exceeds the 50MB limit. Please upload a smaller archive."},
+                status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            )
+
         owner = None if request.user.is_anonymous else request.user
-        
+
         try:
             repo = RepoService.upload_and_extract_repository(name, zip_file, owner)
             serializer = self.get_serializer(repo)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except ValueError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

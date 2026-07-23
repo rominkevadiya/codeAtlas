@@ -19,16 +19,24 @@ class RepoService:
         import os
         from django.conf import settings
         import uuid
-        
+
         # Create a unique ID for the folder
         repo_uuid = str(uuid.uuid4())
         extract_path = os.path.join(settings.MEDIA_ROOT, 'repositories', repo_uuid)
         os.makedirs(extract_path, exist_ok=True)
-        
-        # Extract zip file
-        with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-            zip_ref.extractall(extract_path)
-            
+
+        # ── Security: Validate all ZIP entries for path traversal (Zip Slip) ──
+        real_extract = os.path.realpath(extract_path)
+        try:
+            with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+                for member in zip_ref.namelist():
+                    member_path = os.path.realpath(os.path.join(real_extract, member))
+                    if not member_path.startswith(real_extract + os.sep) and member_path != real_extract:
+                        raise ValueError(f"Malicious ZIP detected: path traversal in entry '{member}'.")
+                zip_ref.extractall(extract_path)
+        except zipfile.BadZipFile:
+            raise ValueError("The uploaded file is not a valid ZIP archive.")
+
         # Parse repository and build graph
         from apps.parser.services import ParserService
         from apps.graph.services import GraphService
