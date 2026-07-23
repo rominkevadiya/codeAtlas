@@ -1,12 +1,16 @@
 import os
 import json
+import uuid
+import tempfile
+import threading
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from apps.repositories.models import Repository, Branch, Commit
+from apps.repositories.models import Repository, Branch, Commit, RepositoryStatus
 from apps.repositories.serializers import RepositorySerializer, BranchSerializer, CommitSerializer
 from apps.repositories.services import RepoService, RepositoryNotFound
+from apps.repositories.tasks import process_repository_task
 
 class RepositoryViewSet(viewsets.ModelViewSet):
     """
@@ -17,16 +21,13 @@ class RepositoryViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def create(self, request, *args, **kwargs):
-        # Delegate creation to the service layer as per DDD
         name = request.data.get('name')
         url = request.data.get('url')
         
         if not name or not url:
             return Response({"error": "Name and URL are required."}, status=status.HTTP_400_BAD_REQUEST)
         
-        # In a real app, you would pass request.user as the owner if authenticated
         owner = None if request.user.is_anonymous else request.user
-        
         repo = RepoService.create_repository(name=name, url=url, owner=owner)
         serializer = self.get_serializer(repo)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -51,15 +52,42 @@ class RepositoryViewSet(viewsets.ModelViewSet):
             )
 
         owner = None if request.user.is_anonymous else request.user
+        owner_id = str(owner.id) if owner else None
 
+        # Reserve repository record with PENDING status
+        repo_id = str(uuid.uuid4())
+        repo = Repository.objects.create(
+            id=repo_id,
+            name=name,
+            url="local://uploaded",
+            owner=owner,
+            is_cloned=False,
+            status=RepositoryStatus.PENDING,
+        )
+
+        # Write uploaded file to disk temp file
+        temp_dir = tempfile.gettempdir()
+        temp_file_path = os.path.join(temp_dir, f"repo_upload_{repo_id}.zip")
+        with open(temp_file_path, 'wb+') as destination:
+            for chunk in zip_file.chunks():
+                destination.write(chunk)
+
+        # Try async celery dispatch, fallback to daemon thread if Redis is offline
         try:
-            repo = RepoService.upload_and_extract_repository(name, zip_file, owner)
-            serializer = self.get_serializer(repo)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except ValueError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            process_repository_task.delay(name, temp_file_path, owner_id, repo_id)
+        except Exception:
+            # Fallback: process in background thread with WebSocket progress broadcasts
+            thread = threading.Thread(
+                target=process_repository_task,
+                args=(name, temp_file_path, owner_id, repo_id)
+            )
+            thread.daemon = True
+            thread.start()
+
+        serializer = self.get_serializer(repo)
+        data = serializer.data
+        data['websocket_url'] = f"ws/repositories/{repo_id}/progress/"
+        return Response(data, status=status.HTTP_202_ACCEPTED)
 
     def destroy(self, request, *args, **kwargs):
         try:

@@ -4,8 +4,8 @@ from apps.repositories.models import Repository, Branch, Commit
 class RepositorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Repository
-        fields = ['id', 'name', 'url', 'owner', 'is_cloned', 'local_path', 'default_branch', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'owner', 'is_cloned', 'local_path', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'url', 'owner', 'is_cloned', 'local_path', 'default_branch', 'status', 'error_message', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'owner', 'is_cloned', 'local_path', 'status', 'error_message', 'created_at', 'updated_at']
 
 class BranchSerializer(serializers.ModelSerializer):
     class Meta:

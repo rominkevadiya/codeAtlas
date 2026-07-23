@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { RepositoryService } from '../services/api';
-import { Loader2, GitFork } from 'lucide-react';
-
-interface Repository {
-  id: string;
-  name: string;
-  created_at: string;
-}
+import { RepositoryService, type Repository } from '../services/api';
+import { Loader2, GitFork, AlertCircle } from 'lucide-react';
 
 export const Home = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -15,6 +9,19 @@ export const Home = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const navigate = useNavigate();
+
+  // Real-time processing progress state
+  const [progressState, setProgressState] = useState<{
+    repoId: string | null;
+    status: string;
+    progress: number;
+    message: string;
+  }>({
+    repoId: null,
+    status: '',
+    progress: 0,
+    message: '',
+  });
 
   const [repos, setRepos] = useState<Repository[]>([]);
   const [reposLoading, setReposLoading] = useState(true);
@@ -42,16 +49,72 @@ export const Home = () => {
 
     setIsUploading(true);
     setUploadError('');
+    setProgressState({ repoId: null, status: 'UPLOADING', progress: 10, message: 'Uploading archive...' });
 
     try {
       const response = await RepositoryService.uploadRepository(repoName, file);
       const repoId = response.data.id;
-      navigate(`/repository/${repoId}`);
+
+      setProgressState({
+        repoId,
+        status: response.data.status || 'PENDING',
+        progress: 20,
+        message: 'Uploaded archive. Connecting to progress stream...',
+      });
+
+      // Connect WebSocket for real-time progress updates
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsHost = window.location.hostname || 'localhost';
+      const wsUrl = `${wsProtocol}//${wsHost}:8000/ws/repositories/${repoId}/progress/`;
+
+      const ws = new WebSocket(wsUrl);
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          setProgressState({
+            repoId,
+            status: data.status,
+            progress: data.progress || 0,
+            message: data.message || '',
+          });
+
+          if (data.status === 'READY') {
+            ws.close();
+            setTimeout(() => {
+              navigate(`/repository/${repoId}`);
+            }, 800);
+          } else if (data.status === 'FAILED') {
+            ws.close();
+            setUploadError(data.error || 'Processing failed.');
+            setIsUploading(false);
+          }
+        } catch (err) {
+          console.error('Error parsing WebSocket message:', err);
+        }
+      };
+
+      ws.onerror = (err) => {
+        console.error('WebSocket error:', err);
+        // Fallback: poll or navigate directly
+        setTimeout(() => navigate(`/repository/${repoId}`), 2000);
+      };
+
     } catch (err: any) {
       console.error(err);
       setUploadError(err.response?.data?.error || 'Failed to upload repository');
-    } finally {
       setIsUploading(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'READY':
+        return <span className="text-xs px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-medium">Ready</span>;
+      case 'FAILED':
+        return <span className="text-xs px-2 py-0.5 rounded bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 font-medium">Failed</span>;
+      default:
+        return <span className="text-xs px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 font-medium animate-pulse">{status || 'Processing'}</span>;
     }
   };
 
@@ -94,9 +157,12 @@ export const Home = () => {
                   >
                     <GitFork className="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors shrink-0" />
                     <div className="flex flex-col overflow-hidden">
-                      <span className="font-medium text-sm text-slate-800 dark:text-slate-200 truncate">
-                        {repo.name}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm text-slate-800 dark:text-slate-200 truncate">
+                          {repo.name}
+                        </span>
+                        {getStatusBadge(repo.status)}
+                      </div>
                       <span className="text-xs text-slate-400 truncate">
                         {new Date(repo.created_at).toLocaleDateString()}
                       </span>
@@ -118,38 +184,64 @@ export const Home = () => {
             Upload a Repository ZIP to begin extracting ASTs and building the knowledge graph.
             Max file size: <strong>50MB</strong>.
           </p>
-          <form onSubmit={handleUpload} className="space-y-3 flex flex-col">
-            <input
-              type="text"
-              placeholder="Repository Name"
-              className="px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-md bg-transparent text-sm"
-              value={repoName}
-              onChange={(e) => setRepoName(e.target.value)}
-              disabled={isUploading}
-            />
-            <input
-              type="file"
-              accept=".zip"
-              className="text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-slate-800 dark:file:text-blue-400"
-              onChange={handleFileChange}
-              disabled={isUploading}
-            />
-            {uploadError && <p className="text-red-500 text-sm">{uploadError}</p>}
-            <button
-              type="submit"
-              disabled={isUploading || !file || !repoName}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 mt-2 flex items-center justify-center gap-2"
-            >
-              {isUploading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Uploading & Parsing...
-                </>
-              ) : (
-                'Upload & Extract'
+
+          {isUploading ? (
+            <div className="py-6 flex flex-col gap-4">
+              <div className="flex items-center justify-between text-sm font-medium">
+                <span className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
+                  <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                  {progressState.message || 'Processing repository...'}
+                </span>
+                <span className="text-blue-600 font-bold">{progressState.progress}%</span>
+              </div>
+
+              {/* Progress Bar Container */}
+              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                <div
+                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${progressState.progress}%` }}
+                />
+              </div>
+
+              <div className="flex justify-between text-xs text-slate-400">
+                <span>Upload</span>
+                <span>Extract</span>
+                <span>Parse AST</span>
+                <span>Graph</span>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleUpload} className="space-y-3 flex flex-col">
+              <input
+                type="text"
+                placeholder="Repository Name"
+                className="px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-md bg-transparent text-sm"
+                value={repoName}
+                onChange={(e) => setRepoName(e.target.value)}
+                disabled={isUploading}
+              />
+              <input
+                type="file"
+                accept=".zip"
+                className="text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-slate-800 dark:file:text-blue-400"
+                onChange={handleFileChange}
+                disabled={isUploading}
+              />
+              {uploadError && (
+                <div className="flex items-center gap-2 text-red-500 text-sm bg-red-50 dark:bg-red-950/40 p-2.5 rounded-md border border-red-200 dark:border-red-900">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{uploadError}</span>
+                </div>
               )}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={isUploading || !file || !repoName}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 mt-2 flex items-center justify-center gap-2"
+              >
+                Upload & Extract
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </div>

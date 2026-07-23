@@ -1,6 +1,6 @@
 # CodeAtlas — System Architecture
 
-> Last updated: **Phase 5 Complete** (July 2026)
+> Last updated: **Phase 6 Complete** (July 2026)
 
 This document defines the **Modular Monolith** architecture, Domain-Driven Design (DDD) principles, module boundaries, and coding standards for the CodeAtlas platform. It serves as the single source of truth for system design decisions.
 
