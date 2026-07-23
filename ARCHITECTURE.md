@@ -74,11 +74,11 @@ Each app in `backend/apps/` represents a bounded context with strict ownership o
 | Module | Status | Responsibility | Key Services | Allowed Dependencies |
 |:---|:---|:---|:---|:---|
 | **`common`** | ✅ Active | Shared base classes, `CodeAtlasException` | `CodeAtlasException` | None |
-| **`repositories`** | ✅ Active | ZIP upload, extraction, repo metadata, graph API | `RepoService` | `parser`, `graph`, `common` |
+| **`repositories`** | ✅ Active | ZIP upload (50MB limit, Zip Slip protected), extraction, repo metadata, graph API | `RepoService` | `parser`, `graph`, `common` |
 | **`parser`** | ✅ Active | Tree-sitter AST traversal, entity & relationship extraction | `ParserService` | `common` |
 | **`graph`** | ✅ Active | NetworkX graph construction, `knowledge_graph.json` persistence | `GraphService` | `common` |
 | **`accounts`** | 📋 Phase 7 | Auth, user profiles, API key management | `AuthService`, `UserService` | `common` |
-| **`ai`** | ✅ Active | Gemini API orchestration, NL code queries | `AIService` | `graph`, `analysis`, `common` |
+| **`ai`** | ✅ Active | Gemini API orchestration (lazy cached model), NL code queries (rate-limited 15/hr) | `AIService` | `graph`, `analysis`, `common` |
 | **`analysis`** | 📋 Planned | Graph algorithms, complexity, metrics | `MetricsService` | `graph`, `parser`, `common` |
 | **`websocket`** | 📋 Phase 6 | WebSocket channel broadcasts | `NotificationService` | `common` |
 
@@ -340,6 +340,7 @@ Views should only:
 | **Phase 3** | `ParserService` (Tree-sitter, manual AST traversal), `GraphService` (NetworkX), `RepoService.upload_and_extract_repository()`, ZIP endpoint |
 | **Phase 4** | `GET /repositories/<id>/graph/` endpoint, `RepositoryService.getGraph()`, `CodeGraph.tsx` with Dagre LR layout, `EntityNode` with filename + path display |
 | **Phase 5** | Gemini AI integration, `AIService` query processing, `POST /ai/query/` endpoint, AI Assistant Side Panel in frontend |
+| **Phase 5 (Hardened)** | Security fixes (Zip Slip, 50MB upload limit), DRF rate limiting (`AIQueryAnonThrottle`, `AIQueryUserThrottle`), lazy Gemini model caching, PostgreSQL database env mapping, chat history panel UX, dynamic repo list on Home page |
 
 ---
 

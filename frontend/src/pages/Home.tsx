@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { RepositoryService } from '../services/api';
-import { Loader2, GitFork, Trash2 } from 'lucide-react';
+import { Loader2, GitFork } from 'lucide-react';
 
 interface Repository {
   id: string;

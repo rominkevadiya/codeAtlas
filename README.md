@@ -60,6 +60,7 @@ CodeAtlas automates this by:
 | **Phase 3** | ✅ **Complete** | Tree-sitter parser, NetworkX graph builder, ZIP upload pipeline, `knowledge_graph.json` persistence |
 | **Phase 4** | ✅ **Complete** | `GET /graph/` API, React Flow interactive visualization, Dagre auto-layout, custom node components |
 | **Phase 5** | ✅ **Complete** | Gemini AI integration — natural language code queries |
+| **Phase 5 (Hardened)** | ✅ **Complete** | Security & UX audit fixes (Zip Slip protection, 50MB upload limit, DRF rate limiting, lazy Gemini init, PostgreSQL env vars, chat history UI, live repo list) |
 | **Phase 6** | 🔜 **Next** | Real-time WebSocket progress updates (Celery → Channels → React) |
 | **Phase 7** | 📋 Planned | Authentication, user accounts, saved repository sessions |
 | **Phase 8** | 📋 Planned | Production deployment, Docker, CI/CD |
@@ -394,7 +395,7 @@ All endpoints are prefixed with `/api/v1/`.
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/repositories/` | List all uploaded repositories |
-| `POST` | `/repositories/upload/` | Upload a ZIP file → extract → parse AST → build graph |
+| `POST` | `/repositories/upload/` | Upload a ZIP file (max 50MB, Zip Slip safe) → extract → parse AST → build graph |
 | `GET` | `/repositories/<id>/` | Retrieve single repository metadata |
 | `DELETE` | `/repositories/<id>/` | Delete a repository record |
 | `GET` | `/repositories/<id>/graph/` | **Serve the `knowledge_graph.json`** for visualization |
@@ -406,7 +407,7 @@ All endpoints are prefixed with `/api/v1/`.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | `string` | ✅ | Display name for the repository |
-| `file` | `File (.zip)` | ✅ | ZIP archive of the repository |
+| `file` | `File (.zip)` | ✅ | ZIP archive of the repository (max **50MB**, protected against Zip Slip path traversal attacks) |
 
 **Response `201 Created`:**
 ```json
@@ -420,21 +421,20 @@ All endpoints are prefixed with `/api/v1/`.
 }
 ```
 
-#### `GET /repositories/<id>/graph/`
+### AI Queries
 
-**Response `200 OK`:** NetworkX node-link JSON
+| Method | Endpoint | Description | Rate Limit |
+|---|---|---|---|
+| `POST` | `/ai/query/` | Query Gemini AI with repository graph context | `15/hour` per IP |
+
+#### `POST /ai/query/`
+
+**Content-Type:** `application/json`
+
 ```json
 {
-  "directed": true,
-  "multigraph": false,
-  "nodes": [
-    { "id": "src/main.py", "type": "file", "name": "src/main.py" },
-    { "id": "src/main.py:main", "type": "function", "name": "main" }
-  ],
-  "edges": [
-    { "source": "src/main.py", "target": "src/main.py:main", "type": "contains" },
-    { "source": "src/main.py", "target": "os", "type": "imports" }
-  ]
+  "repository_id": "45c4652d-ed72-492f-bf06-a47c563561b4",
+  "query": "Which file defines the AIService class?"
 }
 ```
 
@@ -455,7 +455,13 @@ All endpoints are prefixed with `/api/v1/`.
 | `DB_HOST` | `localhost` | PostgreSQL host |
 | `DB_PORT` | `5432` | PostgreSQL port |
 | `REDIS_URL` | `redis://127.0.0.1:6379/0` | Redis URL (required from Phase 6) |
-| `GEMINI_API_KEY` | — | Gemini AI API key (required from Phase 5) |
+| `GEMINI_API_KEY` | — | Gemini AI API key (required for Phase 5 AI features) |
+
+### Frontend Environment Variables (`frontend/.env`)
+
+| Variable | Default | Description |
+|---|---|---|
+| `VITE_API_URL` | `http://localhost:8000/api/v1` | Backend API base URL for Axios client |
 
 ### TypeScript Path Aliases
 
