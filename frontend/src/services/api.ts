@@ -35,3 +35,8 @@ export const RepositoryService = {
   },
   getGraph: (id: string) => api.get(`/repositories/${id}/graph/`),
 };
+
+export const AIService = {
+  query: (repository_id: string, query: string) => 
+    api.post('/ai/query/', { repository_id, query }),
+};

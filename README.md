@@ -47,7 +47,7 @@ CodeAtlas automates this by:
 1. **Parsing** a repository (uploaded as a ZIP) with Tree-sitter to extract functions, classes, imports, and containment relationships.
 2. **Building** a structural knowledge graph with NetworkX, persisted as `knowledge_graph.json`.
 3. **Visualizing** that graph interactively using React Flow — pan, zoom, click into any node — with auto-layout powered by Dagre.
-4. **Augmenting** the graph with AI (Gemini API) to answer natural language questions like *"Where does authentication happen?"* or *"What calls the `send_email` function?"* *(Phase 5 — Planned)*
+4. **Augmenting** the graph with AI (Gemini API) to answer natural language questions like *"Where does authentication happen?"* or *"What calls the `send_email` function?"*
 
 ---
 
@@ -59,8 +59,8 @@ CodeAtlas automates this by:
 | **Phase 2** | ✅ **Complete** | Django domain modules, REST API endpoints, React routing and page scaffold |
 | **Phase 3** | ✅ **Complete** | Tree-sitter parser, NetworkX graph builder, ZIP upload pipeline, `knowledge_graph.json` persistence |
 | **Phase 4** | ✅ **Complete** | `GET /graph/` API, React Flow interactive visualization, Dagre auto-layout, custom node components |
-| **Phase 5** | 🔜 **Next** | Gemini AI integration — natural language code queries |
-| **Phase 6** | 📋 Planned | Real-time WebSocket progress updates (Celery → Channels → React) |
+| **Phase 5** | ✅ **Complete** | Gemini AI integration — natural language code queries |
+| **Phase 6** | 🔜 **Next** | Real-time WebSocket progress updates (Celery → Channels → React) |
 | **Phase 7** | 📋 Planned | Authentication, user accounts, saved repository sessions |
 | **Phase 8** | 📋 Planned | Production deployment, Docker, CI/CD |
 
@@ -179,7 +179,7 @@ codeAtlas/                            ← Monolith root / Git repository
 │   │   │   │   ├── CodeGraph.tsx     ← Main canvas: data → dagre layout → ReactFlow
 │   │   │   │   └── nodes/
 │   │   │   │       └── EntityNode.tsx ← Custom node: file/class/function with icon
-│   │   │   └── repository/           ← (Placeholder for future repo features)
+│start    │   │   └── repository/           ← (Placeholder for future repo features)
 │   │   ├── pages/
 │   │   │   ├── Home.tsx              ← Repository list + ZIP upload form
 │   │   │   └── RepositoryDashboard.tsx ← Fetches graph, renders CodeGraph
@@ -213,7 +213,7 @@ codeAtlas/                            ← Monolith root / Git repository
         ├── graph/                    ← ✅ Active: NetworkX graph builder
         │   └── services.py           ←   GraphService.build_graph(parsed_data)
         ├── analysis/                 ← (Placeholder) Code metrics
-        ├── ai/                       ← (Placeholder) Gemini AI queries (Phase 5)
+        ├── ai/                       ← ✅ Active: Gemini AI queries (Phase 5)
         ├── websocket/                ← (Placeholder) Real-time events (Phase 6)
         └── common/                   ← Shared base classes & exceptions
     │
@@ -491,8 +491,8 @@ import { Button } from '@/components/ui/button'
 | **Phase 2** | ✅ Complete | Django domain modules (`repositories`, `parser`, `graph`, `common`), REST API, React routing |
 | **Phase 3** | ✅ Complete | Tree-sitter AST parser, NetworkX graph engine, ZIP upload pipeline, `knowledge_graph.json` |
 | **Phase 4** | ✅ Complete | `GET /graph/` API endpoint, React Flow canvas, Dagre auto-layout, `EntityNode` custom node |
-| **Phase 5** | 🔜 Next | Gemini AI integration — natural language code queries ("What calls X?") |
-| **Phase 6** | 📋 Planned | Real-time WebSocket progress via Celery + Django Channels |
+| **Phase 5** | ✅ Complete | Gemini AI integration — natural language code queries ("What calls X?") |
+| **Phase 6** | 🔜 Next | Real-time WebSocket progress via Celery + Django Channels |
 | **Phase 7** | 📋 Planned | Authentication, user accounts, saved sessions |
 | **Phase 8** | 📋 Planned | Production deployment, Docker, CI/CD |
 

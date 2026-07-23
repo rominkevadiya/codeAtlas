@@ -1,6 +1,6 @@
 # CodeAtlas — System Architecture
 
-> Last updated: **Phase 4 Complete** (July 2026)
+> Last updated: **Phase 5 Complete** (July 2026)
 
 This document defines the **Modular Monolith** architecture, Domain-Driven Design (DDD) principles, module boundaries, and coding standards for the CodeAtlas platform. It serves as the single source of truth for system design decisions.
 
@@ -60,7 +60,7 @@ codeAtlas/
         ├── parser/               ← ✅ ACTIVE: Tree-sitter AST extraction
         ├── graph/                ← ✅ ACTIVE: NetworkX graph builder
         ├── accounts/             ← 📋 Planned (Phase 7): Auth & user management
-        ├── ai/                   ← 📋 Planned (Phase 5): Gemini AI queries
+        ├── ai/                   ← ✅ ACTIVE: Gemini AI queries
         ├── analysis/             ← 📋 Planned: Code metrics & pattern detection
         └── websocket/            ← 📋 Planned (Phase 6): Real-time events
 ```
@@ -78,7 +78,7 @@ Each app in `backend/apps/` represents a bounded context with strict ownership o
 | **`parser`** | ✅ Active | Tree-sitter AST traversal, entity & relationship extraction | `ParserService` | `common` |
 | **`graph`** | ✅ Active | NetworkX graph construction, `knowledge_graph.json` persistence | `GraphService` | `common` |
 | **`accounts`** | 📋 Phase 7 | Auth, user profiles, API key management | `AuthService`, `UserService` | `common` |
-| **`ai`** | 📋 Phase 5 | Gemini API orchestration, NL code queries | `AIQueryService` | `graph`, `analysis`, `common` |
+| **`ai`** | ✅ Active | Gemini API orchestration, NL code queries | `AIService` | `graph`, `analysis`, `common` |
 | **`analysis`** | 📋 Planned | Graph algorithms, complexity, metrics | `MetricsService` | `graph`, `parser`, `common` |
 | **`websocket`** | 📋 Phase 6 | WebSocket channel broadcasts | `NotificationService` | `common` |
 
@@ -188,6 +188,11 @@ POST   /repositories/upload/           → Upload ZIP, run full pipeline
 GET    /repositories/<uuid>/           → Get single repo metadata
 DELETE /repositories/<uuid>/           → Delete repo record
 GET    /repositories/<uuid>/graph/     → Serve knowledge_graph.json
+
+### AI Queries
+
+```
+POST   /ai/query/                      → Query Gemini AI with graph context
 ```
 
 ### `knowledge_graph.json` Schema
@@ -334,6 +339,7 @@ Views should only:
 | **Phase 2** | Domain module scaffold (8 apps), DRF router, REST viewsets, React Router, `Home.tsx`, `RepositoryDashboard.tsx` |
 | **Phase 3** | `ParserService` (Tree-sitter, manual AST traversal), `GraphService` (NetworkX), `RepoService.upload_and_extract_repository()`, ZIP endpoint |
 | **Phase 4** | `GET /repositories/<id>/graph/` endpoint, `RepositoryService.getGraph()`, `CodeGraph.tsx` with Dagre LR layout, `EntityNode` with filename + path display |
+| **Phase 5** | Gemini AI integration, `AIService` query processing, `POST /ai/query/` endpoint, AI Assistant Side Panel in frontend |
 
 ---
 
