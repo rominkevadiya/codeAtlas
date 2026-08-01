@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { RepositoryService, AIService } from '@/services/api';
 import { CodeGraph } from '@/features/graph/CodeGraph';
-import { Loader2, MessageSquare, X, Send, User, Bot, Sparkles } from 'lucide-react';
+import { AnalysisPanel } from '@/features/analysis/AnalysisPanel';
+import { Loader2, MessageSquare, X, Send, User, Bot, Sparkles, Activity } from 'lucide-react';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface ChatMessage {
@@ -19,6 +20,7 @@ export const RepositoryDashboard = () => {
 
   // AI Panel State
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
+  const [isAnalysisPanelOpen, setIsAnalysisPanelOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [aiLoading, setAiLoading] = useState(false);
@@ -116,7 +118,20 @@ export const RepositoryDashboard = () => {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}
+            onClick={() => {
+              setIsAnalysisPanelOpen(!isAnalysisPanelOpen);
+              if (isAiPanelOpen) setIsAiPanelOpen(false);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 rounded-lg text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors shadow-sm cursor-pointer"
+          >
+            <Activity className="w-4 h-4" />
+            Metrics
+          </button>
+          <button
+            onClick={() => {
+              setIsAiPanelOpen(!isAiPanelOpen);
+              if (isAnalysisPanelOpen) setIsAnalysisPanelOpen(false);
+            }}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
           >
             <MessageSquare className="w-4 h-4" />
@@ -301,6 +316,11 @@ export const RepositoryDashboard = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Analysis Panel */}
+      {isAnalysisPanelOpen && id && (
+        <AnalysisPanel repositoryId={id} onClose={() => setIsAnalysisPanelOpen(false)} />
       )}
     </div>
   );

@@ -1,0 +1,102 @@
+import os
+import json
+import networkx as nx
+from networkx.readwrite import json_graph
+from django.conf import settings
+from apps.common.exceptions import CodeAtlasException
+from apps.repositories.models import Repository
+
+class MetricsService:
+    @staticmethod
+    def calculate_metrics(repository_id):
+        try:
+            repo = Repository.objects.get(id=repository_id)
+        except Repository.DoesNotExist:
+            raise CodeAtlasException("Repository not found", code="REPO_NOT_FOUND", status_code=404)
+
+        graph_path = os.path.join(repo.local_path, "knowledge_graph.json")
+        if not os.path.exists(graph_path):
+            raise CodeAtlasException("Knowledge graph not found", code="GRAPH_NOT_FOUND", status_code=404)
+
+        try:
+            with open(graph_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            G = json_graph.node_link_graph(data)
+        except Exception as e:
+            raise CodeAtlasException(f"Failed to load graph: {str(e)}", code="GRAPH_LOAD_ERROR", status_code=500)
+
+        # Separate nodes by type
+        file_nodes = [n for n, attr in G.nodes(data=True) if attr.get("type") == "file"]
+        
+        # 1. God Classes / Giant Files
+        # We can calculate LOC (Lines of Code) from start_line and end_line
+        file_metrics = []
+        for fn in file_nodes:
+            attr = G.nodes[fn]
+            start_line = attr.get("start_line", 0)
+            end_line = attr.get("end_line", 0)
+            loc = end_line - start_line + 1 if end_line >= start_line else 0
+            
+            # Count functions/classes contained in this file
+            contains_count = 0
+            for u, v, e_data in G.out_edges(fn, data=True):
+                if e_data.get("type") == "contains":
+                    contains_count += 1
+                    
+            file_metrics.append({
+                "id": fn,
+                "name": attr.get("name", fn),
+                "loc": loc,
+                "contains_count": contains_count
+            })
+
+        # Sort by LOC (descending) and take top 10
+        top_giant_files = sorted(file_metrics, key=lambda x: x["loc"], reverse=True)[:10]
+        
+        # 2. Coupling Analysis (Inbound/Outbound imports)
+        # We will build an imports subgraph
+        import_edges = [(u, v) for u, v, attr in G.edges(data=True) if attr.get("type") == "imports"]
+        imports_graph = nx.DiGraph()
+        imports_graph.add_edges_from(import_edges)
+        
+        coupling_metrics = []
+        for fn in file_nodes:
+            if fn in imports_graph:
+                in_degree = imports_graph.in_degree(fn)
+                out_degree = imports_graph.out_degree(fn)
+            else:
+                in_degree = 0
+                out_degree = 0
+                
+            coupling_metrics.append({
+                "id": fn,
+                "name": G.nodes[fn].get("name", fn),
+                "inbound_imports": in_degree,
+                "outbound_imports": out_degree,
+                "total_coupling": in_degree + out_degree
+            })
+            
+        top_coupled_files = sorted(coupling_metrics, key=lambda x: x["total_coupling"], reverse=True)[:10]
+        
+        # 3. Circular Dependency Detection
+        # Find cycles in the imports_graph
+        cycles = []
+        try:
+            # simple_cycles can be expensive on very large graphs, limit to finding a few
+            # or use recursive_simple_cycles for NetworkX >= 2.8, but simple_cycles is standard
+            # To avoid hanging on huge graphs, we might want to restrict or timeout, but we'll try it directly.
+            # Convert simple_cycles generator to a list, limit to 20 cycles
+            cycle_gen = nx.simple_cycles(imports_graph)
+            for i, cycle in enumerate(cycle_gen):
+                if i >= 20:
+                    break
+                if len(cycle) > 1: # Ignore self-imports if any
+                    cycles.append(cycle)
+        except Exception:
+            pass
+
+        return {
+            "top_giant_files": top_giant_files,
+            "top_coupled_files": top_coupled_files,
+            "circular_dependencies": cycles
+        }

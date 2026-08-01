@@ -9,7 +9,8 @@ import {
   MiniMap,
   MarkerType,
   BackgroundVariant,
-  Panel
+  Panel,
+  Position
 } from '@xyflow/react';
 import { Search, Filter, Layers } from 'lucide-react';
 import type { Connection, Edge, Node } from '@xyflow/react';
@@ -56,8 +57,8 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => 
     const nodeWithPosition = dagreGraph.node(node.id);
     return {
       ...node,
-      targetPosition: isHorizontal ? 'left' : 'top',
-      sourcePosition: isHorizontal ? 'right' : 'bottom',
+      targetPosition: isHorizontal ? Position.Left : Position.Top,
+      sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
       position: {
         x: nodeWithPosition.x - 260 / 2,
         y: nodeWithPosition.y - 80 / 2,
@@ -69,8 +70,8 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => 
 };
 
 export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   
   // Filtering and Search State
   const [searchQuery, setSearchQuery] = useState('');
@@ -108,41 +109,93 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps)
         filteredNodeIds.has(e.source) && filteredNodeIds.has(e.target)
       );
 
-      // 3. Blast Radius styling prep
+      // 3. Blast Radius styling prep (BFS Traversal)
       const connectedNodeIds = new Set<string>();
+      const forwardEdges = new Set<string>();
+      const backwardEdges = new Set<string>();
+      const impactedNodes = new Set<string>();
+      const dependencyNodes = new Set<string>();
+      
       if (selectedNodeId && filteredNodeIds.has(selectedNodeId)) {
         connectedNodeIds.add(selectedNodeId);
+        
+        // Build adjacency lists for fast traversal
+        const graphForward = new Map<string, string[]>(); // source -> target
+        const graphBackward = new Map<string, string[]>(); // target -> source
+        
         filteredEdgesData.forEach((e: any) => {
-          if (e.source === selectedNodeId) connectedNodeIds.add(e.target);
-          if (e.target === selectedNodeId) connectedNodeIds.add(e.source);
+          if (!graphForward.has(e.source)) graphForward.set(e.source, []);
+          graphForward.get(e.source)!.push(e.target);
+          
+          if (!graphBackward.has(e.target)) graphBackward.set(e.target, []);
+          graphBackward.get(e.target)!.push(e.source);
         });
+
+        // Traverse backwards (What depends on me? Impacted)
+        const qBack = [selectedNodeId];
+        while (qBack.length > 0) {
+          const curr = qBack.shift()!;
+          const parents = graphBackward.get(curr) || [];
+          for (const parent of parents) {
+            if (!connectedNodeIds.has(parent)) {
+              connectedNodeIds.add(parent);
+              qBack.push(parent);
+            }
+            impactedNodes.add(parent);
+            backwardEdges.add(`${parent}->${curr}`);
+          }
+        }
+
+        // Traverse forwards (What do I depend on? Dependencies)
+        const qForw = [selectedNodeId];
+        const visitedForw = new Set<string>([selectedNodeId]);
+        while (qForw.length > 0) {
+          const curr = qForw.shift()!;
+          const children = graphForward.get(curr) || [];
+          for (const child of children) {
+            if (!visitedForw.has(child)) {
+              visitedForw.add(child);
+              connectedNodeIds.add(child);
+              qForw.push(child);
+            }
+            dependencyNodes.add(child);
+            forwardEdges.add(`${curr}->${child}`);
+          }
+        }
       }
 
       const initialNodes: Node[] = filteredNodesData.map((n) => {
         const isSelected = selectedNodeId === n.id;
         const isConnected = selectedNodeId ? connectedNodeIds.has(n.id) : true;
+        const isImpacted = impactedNodes.has(n.id);
+        const isDependency = dependencyNodes.has(n.id);
         
         return {
           id: n.id,
           type: 'entity',
-          data: { ...n, isSelected, isFaded: !isConnected },
+          data: { ...n, isSelected, isFaded: !isConnected, isImpacted, isDependency },
           position: { x: 0, y: 0 },
         };
       });
       
       const initialEdges: Edge[] = filteredEdgesData.map((e: any, idx: number) => {
         const isContains = e.type === 'contains';
-        const isConnectedToSelected = selectedNodeId 
-          ? (e.source === selectedNodeId || e.target === selectedNodeId) 
-          : false;
-          
+        const edgeKey = `${e.source}->${e.target}`;
+        
+        let isConnectedToSelected = false;
         let strokeColor = isContains ? '#475569' : '#8b5cf6';
         let strokeWidth = isContains ? 1.5 : 2.5;
         let opacity = isContains ? 0.4 : 0.9;
         
         if (selectedNodeId) {
-          if (isConnectedToSelected) {
-            strokeColor = e.source === selectedNodeId ? '#f43f5e' : '#10b981';
+          if (backwardEdges.has(edgeKey)) {
+            isConnectedToSelected = true;
+            strokeColor = '#f43f5e'; // Rose (Impacted)
+            strokeWidth = 3;
+            opacity = 1;
+          } else if (forwardEdges.has(edgeKey)) {
+            isConnectedToSelected = true;
+            strokeColor = '#10b981'; // Emerald (Dependency)
             strokeWidth = 3;
             opacity = 1;
           } else {

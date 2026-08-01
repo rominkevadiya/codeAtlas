@@ -1,4 +1,3 @@
-import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { FileCode2, Box, FunctionSquare, Database, PackageOpen } from 'lucide-react';
 
@@ -7,6 +6,10 @@ interface EntityNodeProps {
     id: string;
     name: string;
     type: string;
+    isImpacted?: boolean;
+    isDependency?: boolean;
+    isSelected?: boolean;
+    isFaded?: boolean;
   };
 }
 
@@ -81,11 +84,37 @@ export const EntityNode = ({ data }: EntityNodeProps) => {
   const config = getStyleConfig();
   const displayName = getDisplayName();
   const displayPath = getDisplayPath();
+  const getBlastRadiusStyle = () => {
+    if (data.isImpacted) {
+      return {
+        wrapper: 'ring-2 ring-rose-500 shadow-rose-500/20 shadow-xl scale-[1.05]',
+        glow: 'bg-rose-500/30 opacity-100 blur-xl',
+      };
+    }
+    if (data.isDependency) {
+      return {
+        wrapper: 'ring-2 ring-emerald-500 shadow-emerald-500/20 shadow-xl scale-[1.02]',
+        glow: 'bg-emerald-500/30 opacity-100 blur-xl',
+      };
+    }
+    if (data.isSelected) {
+      return {
+        wrapper: 'ring-2 ring-blue-500 shadow-blue-500/20 shadow-xl scale-[1.05]',
+        glow: 'bg-blue-500/30 opacity-100 blur-xl',
+      };
+    }
+    return {
+      wrapper: data.isFaded ? 'opacity-30 grayscale-[50%] scale-95' : 'hover:-translate-y-1 hover:shadow-2xl hover:scale-[1.02]',
+      glow: `opacity-0 group-hover:opacity-100 blur-xl ${config.glow}`,
+    };
+  };
+
+  const blastStyle = getBlastRadiusStyle();
 
   return (
-    <div className={`group relative flex flex-col min-w-[220px] max-w-[320px] rounded-2xl border bg-white/70 dark:bg-[#0B1120]/80 backdrop-blur-xl shadow-lg transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:scale-[1.02] cursor-pointer ${config.border}`}>
-      {/* Background ambient glow on hover */}
-      <div className={`absolute -inset-0.5 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300 -z-10 ${config.glow}`} />
+    <div className={`group relative flex flex-col min-w-[220px] max-w-[320px] rounded-2xl border bg-white/70 dark:bg-[#0B1120]/80 backdrop-blur-xl shadow-lg transition-all duration-300 ease-out cursor-pointer ${config.border} ${blastStyle.wrapper}`}>
+      {/* Background ambient glow on hover or active */}
+      <div className={`absolute -inset-0.5 rounded-2xl transition-opacity duration-300 -z-10 ${blastStyle.glow}`} />
       
       {/* Left Handle */}
       <Handle 

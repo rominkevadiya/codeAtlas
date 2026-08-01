@@ -59,3 +59,8 @@ export const AIService = {
   query: (repository_id: string, query: string) =>
     api.post('/ai/query/', { repository_id, query }),
 };
+
+export const AnalysisService = {
+  getMetrics: (repository_id: string) =>
+    api.get(`/analysis/${repository_id}/`),
+};
