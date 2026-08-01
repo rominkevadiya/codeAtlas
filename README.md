@@ -63,9 +63,10 @@ CodeAtlas automates this by:
 | **Phase 5** | ✅ **Complete** | Gemini AI integration — natural language code queries |
 | **Phase 5 (Hardened)** | ✅ **Complete** | Security & UX audit fixes (Zip Slip protection, 50MB upload limit, DRF rate limiting, lazy Gemini init, PostgreSQL env vars, chat history UI, live repo list) |
 | **Phase 5.5** | ✅ **Complete** | Interactive blast radius analysis, node dependency highlighting, and integrated source code viewer panel (`node_snippet` API) |
-| **Phase 6** | ✅ **Complete** | Real-time WebSocket progress updates (Celery → Channels → React) |
-| **Phase 7** | 🔜 **Next** | Authentication, user accounts, saved repository sessions |
-| **Phase 8** | 📋 Planned | Production deployment, Docker, CI/CD |
+| **Phase 6** | ✅ **Complete** | Frontend Intelligence (Graph filtering, search panel, AI source code explanation) |
+| **Phase 7** | 📋 **Planned** | Real-time WebSocket progress updates (Celery → Channels → React) |
+| **Phase 8** | 📋 **Planned** | Authentication, user accounts, saved repository sessions |
+| **Phase 9** | 📋 Planned | Production deployment, Docker, CI/CD |
 
 ---
 
@@ -502,9 +503,10 @@ import { Button } from '@/components/ui/button'
 | **Phase 4** | ✅ Complete | `GET /graph/` API endpoint, React Flow canvas, Dagre auto-layout, `EntityNode` custom node |
 | **Phase 5** | ✅ Complete | Gemini AI integration — natural language code queries ("What calls X?") |
 | **Phase 5.5** | ✅ Complete | Interactive blast radius analysis, dependency highlighting, and integrated source code viewer |
-| **Phase 6** | 🔜 Next | Real-time WebSocket progress via Celery + Django Channels |
-| **Phase 7** | 📋 Planned | Authentication, user accounts, saved sessions |
-| **Phase 8** | 📋 Planned | Production deployment, Docker, CI/CD |
+| **Phase 6** | ✅ Complete | Frontend Intelligence (Graph filtering, search panel, AI source code explanation) |
+| **Phase 7** | 📋 Planned | Real-time WebSocket progress via Celery + Django Channels |
+| **Phase 8** | 📋 Planned | Authentication, user accounts, saved sessions |
+| **Phase 9** | 📋 Planned | Production deployment, Docker, CI/CD |
 
 ---
 

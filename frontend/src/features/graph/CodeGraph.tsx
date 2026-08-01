@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import {
   ReactFlow,
   useNodesState,
@@ -9,7 +9,9 @@ import {
   MiniMap,
   MarkerType,
   BackgroundVariant,
+  Panel
 } from '@xyflow/react';
+import { Search, Filter, Layers } from 'lucide-react';
 import type { Connection, Edge, Node } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import dagre from 'dagre';
@@ -35,13 +37,12 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => 
   const isHorizontal = direction === 'LR';
   dagreGraph.setGraph({ 
     rankdir: direction,
-    ranksep: 200, // Increased space between layers for a wider, cleaner look
-    nodesep: 40,  // Increased space between nodes in the same rank
+    ranksep: 200,
+    nodesep: 40,
     edgesep: 20
   });
 
   nodes.forEach((node) => {
-    // Tighter default size for calculation based on the updated node UI
     dagreGraph.setNode(node.id, { width: 260, height: 80 });
   });
 
@@ -53,7 +54,7 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => 
 
   const layoutedNodes = nodes.map((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
-    const newNode = {
+    return {
       ...node,
       targetPosition: isHorizontal ? 'left' : 'top',
       sourcePosition: isHorizontal ? 'right' : 'bottom',
@@ -62,7 +63,6 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => 
         y: nodeWithPosition.y - 80 / 2,
       },
     };
-    return newNode;
   });
 
   return { nodes: layoutedNodes, edges };
@@ -71,21 +71,54 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => 
 export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  
+  // Filtering and Search State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [visibleTypes, setVisibleTypes] = useState(new Set(['file', 'class', 'function', 'module']));
+
+  const toggleType = (type: string) => {
+    const newTypes = new Set(visibleTypes);
+    if (newTypes.has(type)) {
+      newTypes.delete(type);
+    } else {
+      newTypes.add(type);
+    }
+    setVisibleTypes(newTypes);
+  };
 
   useEffect(() => {
-    const edgesData = data?.edges || (data as any)?.links;
-    if (data && data.nodes && edgesData) {
-      // Find connected nodes if there is a selected node
+    if (data && data.nodes && (data.edges || (data as any).links)) {
+      const edgesData = data.edges || (data as any).links;
+      
+      // 1. Filter Nodes
+      let filteredNodesData = data.nodes.filter(n => visibleTypes.has(n.type || 'file'));
+      
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        filteredNodesData = filteredNodesData.filter(n => 
+          n.name?.toLowerCase().includes(query) || 
+          n.file_path?.toLowerCase().includes(query)
+        );
+      }
+      
+      const filteredNodeIds = new Set(filteredNodesData.map(n => n.id));
+      
+      // 2. Filter Edges
+      const filteredEdgesData = edgesData.filter((e: any) => 
+        filteredNodeIds.has(e.source) && filteredNodeIds.has(e.target)
+      );
+
+      // 3. Blast Radius styling prep
       const connectedNodeIds = new Set<string>();
-      if (selectedNodeId) {
+      if (selectedNodeId && filteredNodeIds.has(selectedNodeId)) {
         connectedNodeIds.add(selectedNodeId);
-        edgesData.forEach((e: any) => {
+        filteredEdgesData.forEach((e: any) => {
           if (e.source === selectedNodeId) connectedNodeIds.add(e.target);
           if (e.target === selectedNodeId) connectedNodeIds.add(e.source);
         });
       }
 
-      const initialNodes: Node[] = data.nodes.map((n) => {
+      const initialNodes: Node[] = filteredNodesData.map((n) => {
         const isSelected = selectedNodeId === n.id;
         const isConnected = selectedNodeId ? connectedNodeIds.has(n.id) : true;
         
@@ -93,28 +126,27 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps)
           id: n.id,
           type: 'entity',
           data: { ...n, isSelected, isFaded: !isConnected },
-          position: { x: 0, y: 0 }, // will be layouted
+          position: { x: 0, y: 0 },
         };
       });
       
-      const initialEdges: Edge[] = edgesData.map((e: any, idx: number) => {
+      const initialEdges: Edge[] = filteredEdgesData.map((e: any, idx: number) => {
         const isContains = e.type === 'contains';
         const isConnectedToSelected = selectedNodeId 
           ? (e.source === selectedNodeId || e.target === selectedNodeId) 
           : false;
           
-        let strokeColor = isContains ? '#475569' : '#8b5cf6'; // Slate 600 vs Violet 500
+        let strokeColor = isContains ? '#475569' : '#8b5cf6';
         let strokeWidth = isContains ? 1.5 : 2.5;
         let opacity = isContains ? 0.4 : 0.9;
         
-        // Blast radius styling
         if (selectedNodeId) {
           if (isConnectedToSelected) {
-            strokeColor = e.source === selectedNodeId ? '#f43f5e' : '#10b981'; // Outbound=Rose, Inbound=Emerald
+            strokeColor = e.source === selectedNodeId ? '#f43f5e' : '#10b981';
             strokeWidth = 3;
             opacity = 1;
           } else {
-            opacity = 0.05; // Fade out unrelated edges heavily
+            opacity = 0.05;
           }
         }
 
@@ -149,7 +181,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps)
       setNodes(layoutedNodes);
       setEdges(layoutedEdges);
     }
-  }, [data, selectedNodeId, setNodes, setEdges]);
+  }, [data, selectedNodeId, searchQuery, visibleTypes, setNodes, setEdges]);
 
   const onConnect = useCallback(
     (params: Connection | Edge) => setEdges((eds) => addEdge(params, eds)),
@@ -168,14 +200,10 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps)
     return (
       <div className="flex-1 w-full h-full min-h-[500px] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#030712] text-slate-500">
         <div className="p-8 rounded-3xl border border-slate-200 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col items-center max-w-md text-center">
-          <div className="w-16 h-16 mb-4 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
-            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-            </svg>
-          </div>
+          <Layers className="w-16 h-16 mb-4 text-slate-400" />
           <p className="text-xl font-bold text-slate-800 dark:text-slate-200">No supported files found</p>
           <p className="text-sm mt-3 text-slate-500 dark:text-slate-400 leading-relaxed">
-            The parser currently supports Python (<code>.py</code>), JavaScript/TypeScript (<code>.js</code>, <code>.jsx</code>, <code>.ts</code>, <code>.tsx</code>), JSON, and EJS files. The uploaded repository appears to have no supported source code or all parsing failed, so the knowledge graph is empty.
+            The parser currently supports Python, JavaScript/TypeScript, JSON, and EJS files. The repository has no supported source code.
           </p>
         </div>
       </div>
@@ -194,6 +222,37 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps)
       fitView
       className="bg-slate-50 dark:bg-[#030712]"
     >
+      <Panel position="top-left" className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col gap-3 min-w-[240px] m-4">
+        <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-semibold text-sm">
+          <Filter className="w-4 h-4" />
+          Filter & Search
+        </div>
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-2.5 top-2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search nodes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2 mt-1">
+          {['file', 'class', 'function', 'module'].map(type => (
+            <button
+              key={type}
+              onClick={() => toggleType(type)}
+              className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                visibleTypes.has(type)
+                  ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900'
+                  : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700'
+              }`}
+            >
+              {type.charAt(0).toUpperCase() + type.slice(1)}
+            </button>
+          ))}
+        </div>
+      </Panel>
       <Background 
         color="#64748b" 
         gap={24} 

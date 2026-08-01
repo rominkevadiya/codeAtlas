@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { RepositoryService, AIService } from '@/services/api';
 import { CodeGraph } from '@/features/graph/CodeGraph';
-import { Loader2, MessageSquare, X, Send, User, Bot } from 'lucide-react';
+import { Loader2, MessageSquare, X, Send, User, Bot, Sparkles } from 'lucide-react';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface ChatMessage {
@@ -75,18 +75,15 @@ export const RepositoryDashboard = () => {
     }
   };
 
-  const handleAskAI = async () => {
-    const trimmedQuery = query.trim();
-    if (!trimmedQuery || !id) return;
-
-    // Add user message to history immediately
-    setMessages((prev) => [...prev, { role: 'user', content: trimmedQuery }]);
-    setQuery('');  // ── Fix: clear input right after sending ──
+  const executeAiQuery = async (prompt: string, displayMessage: string) => {
+    if (!id) return;
+    setIsAiPanelOpen(true);
+    setMessages((prev) => [...prev, { role: 'user', content: displayMessage }]);
     setAiLoading(true);
     setAiError(null);
 
     try {
-      const res = await AIService.query(id, trimmedQuery);
+      const res = await AIService.query(id, prompt);
       setMessages((prev) => [...prev, { role: 'assistant', content: res.data.answer }]);
     } catch (err: any) {
       const errMsg = err.response?.data?.error || 'Failed to get a response from AI.';
@@ -94,6 +91,19 @@ export const RepositoryDashboard = () => {
     } finally {
       setAiLoading(false);
     }
+  };
+
+  const handleAskAI = () => {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery || !id) return;
+    setQuery('');
+    executeAiQuery(trimmedQuery, trimmedQuery);
+  };
+
+  const handleExplainCode = () => {
+    if (!selectedNode || !nodeSnippet) return;
+    const prompt = `Please explain the following code snippet from ${selectedNode.name}:\n\n\`\`\`\n${nodeSnippet}\n\`\`\`\n\nProvide a clear, concise explanation of what this code does.`;
+    executeAiQuery(prompt, `Explain the code for ${selectedNode.name}`);
   };
 
   return (
@@ -148,12 +158,24 @@ export const RepositoryDashboard = () => {
                 {selectedNode.file_path}
               </span>
             </div>
-            <button
-              onClick={() => setSelectedNode(null)}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0 ml-4"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2 shrink-0 ml-4">
+              {nodeSnippet && !snippetLoading && (
+                <button
+                  onClick={handleExplainCode}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-lg text-xs font-medium hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+                  title="Explain this code with AI"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Explain
+                </button>
+              )}
+              <button
+                onClick={() => setSelectedNode(null)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
           
           <div className="flex-1 overflow-auto p-4 bg-slate-50/50 dark:bg-[#0d1117]">
