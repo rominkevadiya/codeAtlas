@@ -188,6 +188,7 @@ POST   /repositories/upload/           → Upload ZIP, run full pipeline
 GET    /repositories/<uuid>/           → Get single repo metadata
 DELETE /repositories/<uuid>/           → Delete repo record
 GET    /repositories/<uuid>/graph/     → Serve knowledge_graph.json
+GET    /repositories/<uuid>/node_snippet/ → Fetch source code slices safely
 
 ### AI Queries
 
@@ -270,6 +271,7 @@ App.tsx
                 └── CodeGraph.tsx  (features/graph/CodeGraph.tsx)
                     ├── useNodesState / useEdgesState
                     ├── Dagre layout engine (LR direction)
+                    ├── Blast Radius Highlight (Rose/Emerald coloring based on selectedNodeId)
                     └── ReactFlow
                         ├── EntityNode (nodes/EntityNode.tsx)
                         │   ├── Icon (file=blue, class=orange, fn=purple)
@@ -278,6 +280,7 @@ App.tsx
                         ├── Background (dot grid)
                         ├── Controls (zoom in/out/fit)
                         └── MiniMap
+                └── Source Code Panel (Absolute sliding panel rendering nodeSnippet)
 ```
 
 ---
@@ -341,6 +344,7 @@ Views should only:
 | **Phase 4** | `GET /repositories/<id>/graph/` endpoint, `RepositoryService.getGraph()`, `CodeGraph.tsx` with Dagre LR layout, `EntityNode` with filename + path display |
 | **Phase 5** | Gemini AI integration, `AIService` query processing, `POST /ai/query/` endpoint, AI Assistant Side Panel in frontend |
 | **Phase 5 (Hardened)** | Security fixes (Zip Slip, 50MB upload limit), DRF rate limiting (`AIQueryAnonThrottle`, `AIQueryUserThrottle`), lazy Gemini model caching, PostgreSQL database env mapping, chat history panel UX, dynamic repo list on Home page |
+| **Phase 5.5** | AST parser enrichment (line numbers), `node_snippet` endpoint, Blast Radius graph highlighting (Rose/Emerald), interactive source code viewer sliding panel. |
 
 ---
 

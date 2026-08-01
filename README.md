@@ -44,10 +44,11 @@ CodeAtlas solves a fundamental challenge in modern software development: **under
 
 CodeAtlas automates this by:
 
-1. **Parsing** a repository (uploaded as a ZIP) with Tree-sitter to extract functions, classes, imports, and containment relationships.
+1. **Parsing** a repository (uploaded as a ZIP) with Tree-sitter to extract functions, classes, imports, and containment relationships, including exact line number coordinates.
 2. **Building** a structural knowledge graph with NetworkX, persisted as `knowledge_graph.json`.
-3. **Visualizing** that graph interactively using React Flow — pan, zoom, click into any node — with auto-layout powered by Dagre.
-4. **Augmenting** the graph with AI (Gemini API) to answer natural language questions like *"Where does authentication happen?"* or *"What calls the `send_email` function?"*
+3. **Visualizing** that graph interactively using React Flow — pan, zoom, click into any node to trigger a **Blast Radius** view that highlights inbound and outbound dependencies while fading the rest.
+4. **Exploring** code dynamically via the integrated **Source Code Viewer** panel that fetches precise snippets directly from the parsed coordinates.
+5. **Augmenting** the graph with AI (Gemini API) to answer natural language questions like *"Where does authentication happen?"* or *"What calls the `send_email` function?"*
 
 ---
 
@@ -61,6 +62,7 @@ CodeAtlas automates this by:
 | **Phase 4** | ✅ **Complete** | `GET /graph/` API, React Flow interactive visualization, Dagre auto-layout, custom node components |
 | **Phase 5** | ✅ **Complete** | Gemini AI integration — natural language code queries |
 | **Phase 5 (Hardened)** | ✅ **Complete** | Security & UX audit fixes (Zip Slip protection, 50MB upload limit, DRF rate limiting, lazy Gemini init, PostgreSQL env vars, chat history UI, live repo list) |
+| **Phase 5.5** | ✅ **Complete** | Interactive blast radius analysis, node dependency highlighting, and integrated source code viewer panel (`node_snippet` API) |
 | **Phase 6** | ✅ **Complete** | Real-time WebSocket progress updates (Celery → Channels → React) |
 | **Phase 7** | 🔜 **Next** | Authentication, user accounts, saved repository sessions |
 | **Phase 8** | 📋 Planned | Production deployment, Docker, CI/CD |
@@ -399,6 +401,7 @@ All endpoints are prefixed with `/api/v1/`.
 | `GET` | `/repositories/<id>/` | Retrieve single repository metadata |
 | `DELETE` | `/repositories/<id>/` | Delete a repository record |
 | `GET` | `/repositories/<id>/graph/` | **Serve the `knowledge_graph.json`** for visualization |
+| `GET` | `/repositories/<id>/node_snippet/` | Retrieve a specific source code snippet by file path and line coordinates |
 
 #### `POST /repositories/upload/`
 
@@ -498,6 +501,7 @@ import { Button } from '@/components/ui/button'
 | **Phase 3** | ✅ Complete | Tree-sitter AST parser, NetworkX graph engine, ZIP upload pipeline, `knowledge_graph.json` |
 | **Phase 4** | ✅ Complete | `GET /graph/` API endpoint, React Flow canvas, Dagre auto-layout, `EntityNode` custom node |
 | **Phase 5** | ✅ Complete | Gemini AI integration — natural language code queries ("What calls X?") |
+| **Phase 5.5** | ✅ Complete | Interactive blast radius analysis, dependency highlighting, and integrated source code viewer |
 | **Phase 6** | 🔜 Next | Real-time WebSocket progress via Celery + Django Channels |
 | **Phase 7** | 📋 Planned | Authentication, user accounts, saved sessions |
 | **Phase 8** | 📋 Planned | Production deployment, Docker, CI/CD |
