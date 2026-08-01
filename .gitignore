@@ -84,3 +84,7 @@ build/
 # ============================================================
 *.bak
 *.tmp
+
+# Local dependencies and test data
+local_redis/
+backend/test_repo/
