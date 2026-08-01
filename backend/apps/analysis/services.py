@@ -100,3 +100,60 @@ class MetricsService:
             "top_coupled_files": top_coupled_files,
             "circular_dependencies": cycles
         }
+
+    @staticmethod
+    def calculate_blast_radius(repository_id, node_id):
+        try:
+            repo = Repository.objects.get(id=repository_id)
+        except Repository.DoesNotExist:
+            raise CodeAtlasException("Repository not found", code="REPO_NOT_FOUND", status_code=404)
+
+        graph_path = os.path.join(repo.local_path, "knowledge_graph.json")
+        if not os.path.exists(graph_path):
+            raise CodeAtlasException("Knowledge graph not found", code="GRAPH_NOT_FOUND", status_code=404)
+
+        try:
+            with open(graph_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            G = json_graph.node_link_graph(data, directed=True)
+        except Exception as e:
+            raise CodeAtlasException(f"Failed to load graph: {str(e)}", code="GRAPH_LOAD_ERROR", status_code=500)
+
+        if node_id not in G:
+            raise CodeAtlasException("Node not found in graph", code="NODE_NOT_FOUND", status_code=404)
+
+        # Forward dependencies (things this node depends on)
+        forward_edges = list(nx.bfs_edges(G, source=node_id))
+        forward_nodes = set([v for u, v in forward_edges])
+        
+        # Backward dependencies (impacted nodes - things that depend on this node)
+        # Reverse graph to find ancestors
+        R = G.reverse(copy=False)
+        backward_edges = list(nx.bfs_edges(R, source=node_id))
+        backward_nodes = set([v for u, v in backward_edges])
+
+        # Formatting results
+        impacted = []
+        for n in backward_nodes:
+            impacted.append({
+                "id": n,
+                "name": G.nodes[n].get("name", n),
+                "type": G.nodes[n].get("type", "unknown"),
+                "file_path": G.nodes[n].get("file_path", "")
+            })
+
+        dependencies = []
+        for n in forward_nodes:
+            dependencies.append({
+                "id": n,
+                "name": G.nodes[n].get("name", n),
+                "type": G.nodes[n].get("type", "unknown"),
+                "file_path": G.nodes[n].get("file_path", "")
+            })
+
+        return {
+            "node_id": node_id,
+            "impacted_nodes": impacted,
+            "dependency_nodes": dependencies,
+            "impact_score": len(impacted)
+        }

@@ -12,6 +12,7 @@ This is the React frontend for the CodeAtlas platform — an AI-powered reposito
 | **Tailwind CSS v4** | Utility-first styling |
 | **React Flow (`@xyflow/react`)** | Interactive graph canvas |
 | **Dagre** | Automatic Left-to-Right graph layout |
+| **Framer Motion** | Fluid animations (Cmd+K Command Palette) |
 | **Axios** | HTTP client for the Django REST API |
 | **React Router DOM** | Client-side routing |
 | **Zustand** | Global state management |

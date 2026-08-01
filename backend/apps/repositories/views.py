@@ -89,6 +89,46 @@ class RepositoryViewSet(viewsets.ModelViewSet):
         data['websocket_url'] = f"ws/repositories/{repo_id}/progress/"
         return Response(data, status=status.HTTP_202_ACCEPTED)
 
+    @action(detail=False, methods=['post'])
+    def import_github(self, request):
+        github_url = request.data.get('github_url')
+
+        if not github_url:
+            return Response({"error": "github_url is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Basic validation
+        if not github_url.startswith("https://github.com/") and not github_url.startswith("https://gitlab.com/"):
+            return Response({"error": "Only GitHub or GitLab HTTPS URLs are supported."}, status=status.HTTP_400_BAD_REQUEST)
+
+        name = github_url.rstrip('/').split('/')[-1]
+        if name.endswith('.git'):
+            name = name[:-4]
+
+        owner = None if request.user.is_anonymous else request.user
+        owner_id = str(owner.id) if owner else None
+
+        # Generate ID early to return to user immediately
+        repo_id = str(uuid.uuid4())
+
+        # Try async celery dispatch, fallback to daemon thread if Redis is offline
+        try:
+            process_repository_task.delay(name=name, github_url=github_url, owner_id=owner_id, repo_id=repo_id)
+        except Exception:
+            thread = threading.Thread(
+                target=process_repository_task,
+                kwargs={"name": name, "github_url": github_url, "owner_id": owner_id, "repo_id": repo_id}
+            )
+            thread.daemon = True
+            thread.start()
+
+        return Response({
+            "id": repo_id,
+            "name": name,
+            "url": github_url,
+            "status": RepositoryStatus.PENDING,
+            "websocket_url": f"ws/repositories/{repo_id}/progress/"
+        }, status=status.HTTP_202_ACCEPTED)
+
     def destroy(self, request, *args, **kwargs):
         try:
             RepoService.delete_repository(kwargs.get('pk'))

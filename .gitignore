@@ -88,3 +88,7 @@ build/
 # Local dependencies and test data
 local_redis/
 backend/test_repo/
+
+# Redis / Celery Dumps
+*.rdb
+celerybeat-schedule.db

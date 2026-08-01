@@ -3,6 +3,7 @@ import os
 import zipfile
 import uuid
 import json
+import subprocess
 from django.conf import settings
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -72,6 +73,78 @@ class RepoService:
                     if not member_path.startswith(real_extract + os.sep) and member_path != real_extract:
                         raise ValueError(f"Malicious ZIP detected: path traversal in entry '{member}'.")
                 zip_ref.extractall(extract_path)
+
+            # ── 2. PARSING AST (50%) ──
+            repo.status = RepositoryStatus.PARSING
+            repo.save(update_fields=['status'])
+            broadcast_progress(repo_uuid, RepositoryStatus.PARSING, 50, "Parsing AST entities & relationships...")
+
+            from apps.parser.services import ParserService
+            from apps.graph.services import GraphService
+
+            parsed_data = ParserService.parse_repository(extract_path)
+
+            # ── 3. BUILDING KNOWLEDGE GRAPH (75%) ──
+            repo.status = RepositoryStatus.BUILDING_GRAPH
+            repo.save(update_fields=['status'])
+            broadcast_progress(repo_uuid, RepositoryStatus.BUILDING_GRAPH, 75, "Building NetworkX knowledge graph...")
+
+            graph_data = GraphService.build_graph(parsed_data)
+
+            graph_path = os.path.join(extract_path, 'knowledge_graph.json')
+            with open(graph_path, 'w') as f:
+                json.dump(graph_data, f, indent=2)
+
+            # ── 4. READY (100%) ──
+            repo.is_cloned = True
+            repo.status = RepositoryStatus.READY
+            repo.error_message = None
+            repo.save(update_fields=['is_cloned', 'status', 'error_message'])
+            broadcast_progress(repo_uuid, RepositoryStatus.READY, 100, "Repository processing complete.")
+
+            return repo
+
+        except Exception as e:
+            repo.status = RepositoryStatus.FAILED
+            repo.error_message = str(e)
+            repo.save(update_fields=['status', 'error_message'])
+            broadcast_progress(repo_uuid, RepositoryStatus.FAILED, 0, f"Error: {str(e)}", error=str(e))
+            raise e
+
+    @staticmethod
+    def clone_github_repository(name: str, github_url: str, owner=None, repo_id: Optional[str] = None) -> Repository:
+        repo_uuid = repo_id or str(uuid.uuid4())
+        extract_path = os.path.join(settings.MEDIA_ROOT, 'repositories', repo_uuid)
+        os.makedirs(extract_path, exist_ok=True)
+
+        repo, created = Repository.objects.get_or_create(
+            id=repo_uuid,
+            defaults={
+                'name': name,
+                'url': github_url,
+                'owner': owner,
+                'is_cloned': False,
+                'status': RepositoryStatus.PENDING,
+            }
+        )
+        
+        repo.local_path = extract_path
+        repo.save(update_fields=['local_path'])
+
+        try:
+            # ── 1. CLONING GITHUB REPO (25%) ──
+            repo.status = RepositoryStatus.EXTRACTING
+            repo.save(update_fields=['status'])
+            broadcast_progress(repo_uuid, RepositoryStatus.EXTRACTING, 25, "Cloning repository from GitHub...")
+
+            # Run git clone
+            result = subprocess.run(
+                ["git", "clone", "--depth", "1", github_url, extract_path],
+                capture_output=True,
+                text=True
+            )
+            if result.returncode != 0:
+                raise ValueError(f"Failed to clone repository: {result.stderr}")
 
             # ── 2. PARSING AST (50%) ──
             repo.status = RepositoryStatus.PARSING

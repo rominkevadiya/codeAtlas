@@ -46,6 +46,11 @@ export const RepositoryService = {
       },
     });
   },
+  importGithub: (githubUrl: string) => 
+    api.post('/repositories/import_github/', { github_url: githubUrl }),
+    
+  getImpactAnalysis: (id: string, nodeId: string) =>
+    api.get(`/analysis/${id}/impact/?node_id=${encodeURIComponent(nodeId)}`),
   getGraph: (id: string) => api.get(`/repositories/${id}/graph/`),
   getNodeSnippet: (id: string, file_path: string, start_line?: number, end_line?: number) => {
     let url = `/repositories/${id}/node_snippet/?file_path=${encodeURIComponent(file_path)}`;
@@ -58,6 +63,8 @@ export const RepositoryService = {
 export const AIService = {
   query: (repository_id: string, query: string) =>
     api.post('/ai/query/', { repository_id, query }),
+  explainNode: (repository_id: string, node_name: string, node_type: string, snippet: string) =>
+    api.post('/ai/explain/', { repository_id, node_name, node_type, snippet }),
 };
 
 export const AnalysisService = {

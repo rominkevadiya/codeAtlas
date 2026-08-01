@@ -66,9 +66,11 @@ export const RepositoryDashboard = () => {
     setNodeSnippet(null);
     setSnippetError(null);
     
-    if (nodeData.file_path && id) {
+    const filePath = nodeData.type === 'file' ? nodeData.id : nodeData.file_path;
+    
+    if (filePath && id) {
       setSnippetLoading(true);
-      RepositoryService.getNodeSnippet(id, nodeData.file_path, nodeData.start_line, nodeData.end_line)
+      RepositoryService.getNodeSnippet(id, filePath, nodeData.start_line, nodeData.end_line)
         .then(res => setNodeSnippet(res.data.snippet))
         .catch(err => setSnippetError(err.response?.data?.error || 'Failed to load source code'))
         .finally(() => setSnippetLoading(false));
@@ -170,7 +172,7 @@ export const RepositoryDashboard = () => {
                 {selectedNode.name}
               </span>
               <span className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate">
-                {selectedNode.file_path}
+                {selectedNode.type === 'file' ? selectedNode.id : selectedNode.file_path}
               </span>
             </div>
             <div className="flex items-center gap-2 shrink-0 ml-4">

@@ -4,31 +4,38 @@ import {
   useNodesState,
   useEdgesState,
   addEdge,
-  Background,
   Controls,
   MiniMap,
   MarkerType,
-  BackgroundVariant,
   Panel,
   Position
 } from '@xyflow/react';
-import { Search, Filter, Layers } from 'lucide-react';
+import { Search, Filter, Layers, Download } from 'lucide-react';
+import { toPng } from 'html-to-image';
 import type { Connection, Edge, Node } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import dagre from 'dagre';
 import { EntityNode } from './nodes/EntityNode';
+import { CommandPalette } from './CommandPalette';
 
 const nodeTypes = {
   entity: EntityNode,
 };
 
+interface GraphData {
+  nodes: any[];
+  edges: any[];
+}
+
 interface CodeGraphProps {
-  data: {
-    nodes: any[];
-    edges: any[];
-  } | null;
+  data: GraphData | null;
   selectedNodeId?: string | null;
   onNodeClick?: (nodeId: string, nodeData: any) => void;
+  impactData?: {
+    impacted_nodes: { id: string, name: string, type: string }[];
+    dependency_nodes: { id: string, name: string, type: string }[];
+    impact_score: number;
+  } | null;
 }
 
 const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => {
@@ -39,12 +46,12 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => 
   dagreGraph.setGraph({ 
     rankdir: direction,
     ranksep: 200,
-    nodesep: 40,
+    nodesep: 60,
     edgesep: 20
   });
 
   nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: 260, height: 80 });
+    dagreGraph.setNode(node.id, { width: 180, height: 40 });
   });
 
   edges.forEach((edge) => {
@@ -60,8 +67,8 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => 
       targetPosition: isHorizontal ? Position.Left : Position.Top,
       sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
       position: {
-        x: nodeWithPosition.x - 260 / 2,
-        y: nodeWithPosition.y - 80 / 2,
+        x: nodeWithPosition.x - 180 / 2,
+        y: nodeWithPosition.y - 40 / 2,
       },
     };
   });
@@ -69,13 +76,41 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => 
   return { nodes: layoutedNodes, edges };
 };
 
-export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps) => {
+export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: CodeGraphProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const [rfInstance, setRfInstance] = useState<any>(null);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   
   // Filtering and Search State
   const [searchQuery, setSearchQuery] = useState('');
-  const [visibleTypes, setVisibleTypes] = useState(new Set(['file', 'class', 'function', 'module']));
+  const [visibleTypes, setVisibleTypes] = useState(new Set(['file', 'class', 'function'])); // Excluded 'module' by default to hide external dependencies
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleCommandPaletteSelect = useCallback((nodeId: string) => {
+    if (onNodeClick && data && data.nodes) {
+      const nodeData = data.nodes.find((n: any) => n.id === nodeId);
+      if (nodeData) onNodeClick(nodeId, nodeData);
+    }
+    
+    // Pan to node
+    if (rfInstance) {
+      const node = rfInstance.getNode(nodeId);
+      if (node) {
+        rfInstance.setCenter(node.position.x + 100, node.position.y + 20, { zoom: 1.2, duration: 800 });
+      }
+    }
+  }, [onNodeClick, data, rfInstance]);
 
   const toggleType = (type: string) => {
     const newTypes = new Set(visibleTypes);
@@ -91,8 +126,15 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps)
     if (data && data.nodes && (data.edges || (data as any).links)) {
       const edgesData = data.edges || (data as any).links;
       
+      // Normalize legacy data: if a node has no type (was created implicitly by an import), treat it as an external module
+      const normalizedNodes = data.nodes.map(n => ({
+        ...n,
+        type: n.type || 'module',
+        name: n.name || n.id
+      }));
+
       // 1. Filter Nodes
-      let filteredNodesData = data.nodes.filter(n => visibleTypes.has(n.type || 'file'));
+      let filteredNodesData = normalizedNodes.filter(n => visibleTypes.has(n.type));
       
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
@@ -109,97 +151,54 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps)
         filteredNodeIds.has(e.source) && filteredNodeIds.has(e.target)
       );
 
-      // 3. Blast Radius styling prep (BFS Traversal)
-      const connectedNodeIds = new Set<string>();
-      const forwardEdges = new Set<string>();
-      const backwardEdges = new Set<string>();
-      const impactedNodes = new Set<string>();
-      const dependencyNodes = new Set<string>();
-      
-      if (selectedNodeId && filteredNodeIds.has(selectedNodeId)) {
-        connectedNodeIds.add(selectedNodeId);
-        
-        // Build adjacency lists for fast traversal
-        const graphForward = new Map<string, string[]>(); // source -> target
-        const graphBackward = new Map<string, string[]>(); // target -> source
-        
-        filteredEdgesData.forEach((e: any) => {
-          if (!graphForward.has(e.source)) graphForward.set(e.source, []);
-          graphForward.get(e.source)!.push(e.target);
-          
-          if (!graphBackward.has(e.target)) graphBackward.set(e.target, []);
-          graphBackward.get(e.target)!.push(e.source);
-        });
-
-        // Traverse backwards (What depends on me? Impacted)
-        const qBack = [selectedNodeId];
-        while (qBack.length > 0) {
-          const curr = qBack.shift()!;
-          const parents = graphBackward.get(curr) || [];
-          for (const parent of parents) {
-            if (!connectedNodeIds.has(parent)) {
-              connectedNodeIds.add(parent);
-              qBack.push(parent);
-            }
-            impactedNodes.add(parent);
-            backwardEdges.add(`${parent}->${curr}`);
-          }
-        }
-
-        // Traverse forwards (What do I depend on? Dependencies)
-        const qForw = [selectedNodeId];
-        const visitedForw = new Set<string>([selectedNodeId]);
-        while (qForw.length > 0) {
-          const curr = qForw.shift()!;
-          const children = graphForward.get(curr) || [];
-          for (const child of children) {
-            if (!visitedForw.has(child)) {
-              visitedForw.add(child);
-              connectedNodeIds.add(child);
-              qForw.push(child);
-            }
-            dependencyNodes.add(child);
-            forwardEdges.add(`${curr}->${child}`);
-          }
-        }
-      }
-
       const initialNodes: Node[] = filteredNodesData.map((n) => {
-        const isSelected = selectedNodeId === n.id;
-        const isConnected = selectedNodeId ? connectedNodeIds.has(n.id) : true;
-        const isImpacted = impactedNodes.has(n.id);
-        const isDependency = dependencyNodes.has(n.id);
+        const isImpacted = impactData?.impacted_nodes.some(node => node.id === n.id);
+        const isDependency = impactData?.dependency_nodes.some(node => node.id === n.id);
+        const isImpactRoot = impactData && selectedNodeId === n.id;
+        const isFaded = selectedNodeId && !isImpacted && !isDependency && !isImpactRoot;
         
         return {
           id: n.id,
           type: 'entity',
-          data: { ...n, isSelected, isFaded: !isConnected, isImpacted, isDependency },
+          data: { ...n, isSelected: selectedNodeId === n.id, isFaded, isImpacted, isDependency, isImpactRoot },
           position: { x: 0, y: 0 },
         };
       });
       
       const initialEdges: Edge[] = filteredEdgesData.map((e: any, idx: number) => {
         const isContains = e.type === 'contains';
-        const edgeKey = `${e.source}->${e.target}`;
         
-        let isConnectedToSelected = false;
-        let strokeColor = isContains ? '#475569' : '#8b5cf6';
-        let strokeWidth = isContains ? 1.5 : 2.5;
-        let opacity = isContains ? 0.4 : 0.9;
-        
-        if (selectedNodeId) {
-          if (backwardEdges.has(edgeKey)) {
-            isConnectedToSelected = true;
-            strokeColor = '#f43f5e'; // Rose (Impacted)
+        let isAnimated = false;
+        let strokeColor = isContains ? '#64748b' : '#a855f7'; // Lighter purple for better dark mode visibility
+        let strokeWidth = isContains ? 2 : 3;
+        let opacity = isContains ? 0.5 : 0.95;
+
+        if (impactData) {
+          const isImpactPath = impactData.impacted_nodes.some(n => n.id === e.target) && 
+                              (impactData.impacted_nodes.some(n => n.id === e.source) || e.source === selectedNodeId);
+                              
+          const isDepPath = impactData.dependency_nodes.some(n => n.id === e.source) && 
+                            (impactData.dependency_nodes.some(n => n.id === e.target) || e.target === selectedNodeId);
+
+          if (isImpactPath) {
+            strokeColor = '#f43f5e';
             strokeWidth = 3;
+            isAnimated = true;
             opacity = 1;
-          } else if (forwardEdges.has(edgeKey)) {
-            isConnectedToSelected = true;
-            strokeColor = '#10b981'; // Emerald (Dependency)
+          } else if (isDepPath) {
+            strokeColor = '#10b981';
             strokeWidth = 3;
+            isAnimated = true;
             opacity = 1;
           } else {
             opacity = 0.05;
+          }
+        } else if (selectedNodeId) {
+          if (e.source === selectedNodeId || e.target === selectedNodeId) {
+             strokeWidth = 3;
+             opacity = 1;
+          } else {
+             opacity = 0.05;
           }
         }
 
@@ -207,20 +206,22 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps)
           id: `e${idx}-${e.source}-${e.target}`,
           source: e.source,
           target: e.target,
-          type: 'smoothstep',
-          animated: !isContains && (selectedNodeId ? isConnectedToSelected : true),
-          label: !isContains ? e.type : '',
-          labelStyle: { fill: '#94a3b8', fontWeight: 500, fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', opacity: selectedNodeId && !isConnectedToSelected ? 0 : 1 },
+          type: 'default', // standard bezier curve which looks best in Dagre
+          animated: isAnimated,
+          label: (!isContains && opacity > 0.5) ? e.type : '',
+          labelStyle: { fill: '#94a3b8', fontWeight: 500, fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase' },
           labelBgStyle: { fill: 'transparent' },
           style: { 
             stroke: strokeColor, 
             strokeWidth: strokeWidth, 
             opacity: opacity,
-            transition: 'all 0.3s ease'
+            transition: 'all 0.3s ease',
           },
           markerEnd: {
             type: MarkerType.ArrowClosed,
             color: strokeColor,
+            width: 20,
+            height: 20,
           },
         };
       });
@@ -264,21 +265,47 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps)
   }
 
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      onNodeClick={handleNodeClick}
-      nodeTypes={nodeTypes}
-      fitView
-      className="bg-slate-50 dark:bg-[#030712]"
+    <>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onNodeClick={handleNodeClick}
+        onInit={setRfInstance}
+        nodeTypes={nodeTypes}
+        fitView
+      fitViewOptions={{ padding: 0.3 }}
+      className="!bg-transparent"
+      colorMode="dark"
+      minZoom={0.05}
+      maxZoom={2}
     >
-      <Panel position="top-left" className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col gap-3 min-w-[240px] m-4">
-        <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-semibold text-sm">
-          <Filter className="w-4 h-4" />
-          Filter & Search
+      <Panel position="top-left" className="glass-card p-3 rounded-xl flex flex-col gap-3 min-w-[280px] m-6 border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-white font-semibold text-sm">
+            <Filter className="w-4 h-4 text-indigo-400" />
+            Filter & Search
+          </div>
+          <button
+            onClick={() => {
+              const flowViewport = document.querySelector('.react-flow__viewport') as HTMLElement;
+              if (flowViewport) {
+                toPng(flowViewport, { backgroundColor: '#050505' })
+                  .then((dataUrl) => {
+                    const a = document.createElement('a');
+                    a.setAttribute('download', 'code-atlas-graph.png');
+                    a.setAttribute('href', dataUrl);
+                    a.click();
+                  });
+              }
+            }}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            title="Download PNG"
+          >
+            <Download className="w-4 h-4" />
+          </button>
         </div>
         <div className="relative">
           <Search className="w-4 h-4 absolute left-2.5 top-2 text-slate-400" />
@@ -287,7 +314,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps)
             placeholder="Search nodes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            className="w-full bg-[#111115] border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500/50 transition-colors placeholder:text-slate-500"
           />
         </div>
         <div className="flex flex-wrap gap-2 mt-1">
@@ -295,10 +322,10 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps)
             <button
               key={type}
               onClick={() => toggleType(type)}
-              className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
                 visibleTypes.has(type)
-                  ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900'
-                  : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700'
+                  ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                  : 'bg-white/5 text-slate-400 border border-white/5 hover:bg-white/10'
               }`}
             >
               {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -306,30 +333,31 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick }: CodeGraphProps)
           ))}
         </div>
       </Panel>
-      <Background 
-        color="#64748b" 
-        gap={24} 
-        size={2} 
-        variant={BackgroundVariant.Dots} 
-        style={{ opacity: 0.15 }} 
-      />
       <Controls 
-        className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-lg" 
+        className="glass-panel border-white/10 rounded-xl overflow-hidden shadow-2xl !bg-[#111115]" 
         showInteractive={false}
       />
       <MiniMap 
-        className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xl" 
-        maskColor="rgba(15, 23, 42, 0.4)"
+        className="glass-card border-white/10 rounded-xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.5)] !bg-[#050505]" 
+        maskColor="rgba(5, 5, 5, 0.7)"
         nodeColor={(node) => {
           switch (node.data?.type) {
-            case 'file': return '#10b981'; // emerald-500
-            case 'class': return '#f59e0b'; // amber-500
-            case 'function': return '#8b5cf6'; // violet-500
+            case 'file': return '#34d399'; // emerald-400
+            case 'class': return '#fbbf24'; // amber-400
+            case 'function': return '#a78bfa'; // violet-400
             case 'module': return '#38bdf8'; // sky-400
-            default: return '#64748b'; // slate-500
+            default: return '#94a3b8'; // slate-400
           }
         }}
       />
-    </ReactFlow>
+      </ReactFlow>
+      
+      <CommandPalette 
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        nodes={data.nodes || []}
+        onSelectNode={handleCommandPaletteSelect}
+      />
+    </>
   );
 };

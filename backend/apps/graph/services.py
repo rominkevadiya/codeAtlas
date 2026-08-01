@@ -17,6 +17,8 @@ class GraphService:
             G.add_node(entity["id"], **entity)
             
         for rel in relationships:
+            if rel["target"] not in G:
+                G.add_node(rel["target"], id=rel["target"], name=rel["target"], type="module", is_external=True)
             G.add_edge(rel["source"], rel["target"], type=rel["type"])
             
         return json_graph.node_link_data(G)

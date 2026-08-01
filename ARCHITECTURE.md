@@ -345,7 +345,7 @@ Views should only:
 | **Phase 5** | Gemini AI integration, `AIService` query processing, `POST /ai/query/` endpoint, AI Assistant Side Panel in frontend |
 | **Phase 5 (Hardened)** | Security fixes (Zip Slip, 50MB upload limit), DRF rate limiting (`AIQueryAnonThrottle`, `AIQueryUserThrottle`), lazy Gemini model caching, PostgreSQL database env mapping, chat history panel UX, dynamic repo list on Home page |
 | **Phase 5.5** | AST parser enrichment (line numbers), `node_snippet` endpoint, Blast Radius graph highlighting (Rose/Emerald), interactive source code viewer sliding panel. |
-| **Phase 6** | Frontend Intelligence: Real-time graph filtering, search panel, AI source code explanation (Auto-Doc), and updated DRF serializers. |
+| **Phase 6** | Frontend Intelligence: Real-time graph filtering, Cmd+K search panel (framer-motion), AI source code explanation (Auto-Doc), and updated DRF serializers. |
 
 ---
 

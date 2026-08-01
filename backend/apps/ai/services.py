@@ -54,18 +54,20 @@ class AIService:
             graph_str = graph_str[:50000] + "\n... (graph truncated due to size)"
 
         prompt = f"""
-You are an expert software developer and code architecture analyzer.
-I will provide you with a JSON representation of a code knowledge graph for a repository named '{repo.name}'.
-The graph contains nodes (files, classes, functions) and edges (contains, imports, calls, etc.).
+You are a senior principal engineer and architectural assistant helping a developer understand their codebase.
+Below is the structural data (files, classes, functions, and their connections) extracted from their repository named '{repo.name}'.
 
-Knowledge Graph:
+Codebase Architecture Data:
 {graph_str}
 
 User Question:
 {query}
 
-Please answer the user's question clearly and concisely based ONLY on the provided knowledge graph.
-If the information is not present in the graph, state that you cannot answer it based on the available parsed data.
+Instructions:
+1. Answer the user's question conversationally, directly, and naturally.
+2. Act as if you are intimately familiar with this codebase. 
+3. DO NOT use phrases like "Based on the provided knowledge graph..." or "The graph indicates...". Just give the answer directly based on the data you see.
+4. If you don't have the specific answer in the architecture, feel free to say so clearly.
 """
 
         try:
@@ -80,3 +82,32 @@ If the information is not present in the graph, state that you cannot answer it 
         except Exception as e:
             logger.error(f"Gemini API error: {e}")
             raise ValueError(f"Failed to generate response from AI: {str(e)}")
+
+    @staticmethod
+    def explain_node(repository_id: str, node_name: str, node_type: str, snippet: str) -> str:
+        """
+        Explain a specific code node (file, class, function) using its source snippet.
+        """
+        prompt = f"""
+You are an expert software developer.
+Please explain the following {node_type} named '{node_name}'.
+
+Source Code:
+{snippet}
+
+Provide a clear, concise explanation of what this code does, its main logic, and its purpose.
+Act as if you are intimately familiar with this codebase.
+Do not use phrases like "Based on the provided snippet..." just answer directly.
+"""
+        try:
+            client = _get_gemini_client()
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt
+            )
+            return response.text
+        except ValueError:
+            raise
+        except Exception as e:
+            logger.error(f"Gemini API error (explain): {e}")
+            raise ValueError(f"Failed to generate explanation from AI: {str(e)}")
