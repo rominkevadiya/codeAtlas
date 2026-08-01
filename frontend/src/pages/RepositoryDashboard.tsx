@@ -25,6 +25,12 @@ export const RepositoryDashboard = () => {
   const [aiError, setAiError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Source Code Panel State
+  const [selectedNode, setSelectedNode] = useState<any>(null);
+  const [nodeSnippet, setNodeSnippet] = useState<string | null>(null);
+  const [snippetLoading, setSnippetLoading] = useState(false);
+  const [snippetError, setSnippetError] = useState<string | null>(null);
+
   // Scroll to bottom whenever messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -47,6 +53,27 @@ export const RepositoryDashboard = () => {
         setLoading(false);
       });
   }, [id]);
+  
+  const handleNodeClick = (nodeId: string, nodeData: any) => {
+    if (selectedNode?.id === nodeId) {
+      setSelectedNode(null);
+      return;
+    }
+    
+    setSelectedNode(nodeData);
+    setNodeSnippet(null);
+    setSnippetError(null);
+    
+    if (nodeData.file_path && id) {
+      setSnippetLoading(true);
+      RepositoryService.getNodeSnippet(id, nodeData.file_path, nodeData.start_line, nodeData.end_line)
+        .then(res => setNodeSnippet(res.data.snippet))
+        .catch(err => setSnippetError(err.response?.data?.error || 'Failed to load source code'))
+        .finally(() => setSnippetLoading(false));
+    } else {
+      setSnippetError("Source code not available for this node.");
+    }
+  };
 
   const handleAskAI = async () => {
     const trimmedQuery = query.trim();
@@ -101,9 +128,56 @@ export const RepositoryDashboard = () => {
             <p className="text-sm opacity-90">{error}</p>
           </div>
         ) : (
-          <CodeGraph data={graphData} />
+          <CodeGraph 
+            data={graphData} 
+            selectedNodeId={selectedNode?.id} 
+            onNodeClick={handleNodeClick} 
+          />
         )}
       </div>
+
+      {/* Source Code Panel */}
+      {selectedNode && (
+        <div className="absolute top-24 left-8 bottom-8 w-[28rem] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl flex flex-col z-40 overflow-hidden animate-in slide-in-from-left-8 duration-200">
+          <div className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 shrink-0">
+            <div className="flex flex-col overflow-hidden">
+              <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">
+                {selectedNode.name}
+              </span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate">
+                {selectedNode.file_path}
+              </span>
+            </div>
+            <button
+              onClick={() => setSelectedNode(null)}
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0 ml-4"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <div className="flex-1 overflow-auto p-4 bg-slate-50/50 dark:bg-[#0d1117]">
+            {snippetLoading ? (
+              <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-2">
+                <Loader2 className="w-6 h-6 animate-spin" />
+                <p className="text-sm">Loading source code...</p>
+              </div>
+            ) : snippetError ? (
+              <div className="text-red-500 text-sm p-4 bg-red-50 dark:bg-red-950/30 rounded-lg border border-red-200 dark:border-red-900/50">
+                {snippetError}
+              </div>
+            ) : nodeSnippet ? (
+              <pre className="text-[13px] font-mono leading-relaxed text-slate-800 dark:text-slate-300">
+                <code>{nodeSnippet}</code>
+              </pre>
+            ) : (
+              <div className="text-slate-500 text-sm text-center mt-10">
+                No source code available.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* AI Assistant Panel */}
       {isAiPanelOpen && (

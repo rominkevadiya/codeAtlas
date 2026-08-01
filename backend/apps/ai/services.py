@@ -1,26 +1,25 @@
 import os
 import json
 import logging
-import google.generativeai as genai
+from google import genai
 from django.conf import settings
 from apps.repositories.models import Repository
 
 logger = logging.getLogger(__name__)
 
 # ── Lazy Gemini client — initialized once on first use, not on every request ──
-_gemini_model = None
+_gemini_client = None
 
-def _get_gemini_model():
-    """Return a cached Gemini model instance, configuring the API key on first call."""
-    global _gemini_model
-    if _gemini_model is None:
+def _get_gemini_client():
+    """Return a cached Gemini client instance, configuring the API key on first call."""
+    global _gemini_client
+    if _gemini_client is None:
         api_key = settings.GEMINI_API_KEY
         if not api_key:
             raise ValueError("GEMINI_API_KEY is not configured in settings.")
-        genai.configure(api_key=api_key)
-        _gemini_model = genai.GenerativeModel('gemini-2.5-flash')
-        logger.info("Gemini model initialized successfully.")
-    return _gemini_model
+        _gemini_client = genai.Client(api_key=api_key)
+        logger.info("Gemini client initialized successfully.")
+    return _gemini_client
 
 
 class AIService:
@@ -70,8 +69,11 @@ If the information is not present in the graph, state that you cannot answer it 
 """
 
         try:
-            model = _get_gemini_model()
-            response = model.generate_content(prompt)
+            client = _get_gemini_client()
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt
+            )
             return response.text
         except ValueError:
             raise  # re-raise config errors as-is

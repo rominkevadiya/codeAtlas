@@ -61,8 +61,8 @@ CodeAtlas automates this by:
 | **Phase 4** | ✅ **Complete** | `GET /graph/` API, React Flow interactive visualization, Dagre auto-layout, custom node components |
 | **Phase 5** | ✅ **Complete** | Gemini AI integration — natural language code queries |
 | **Phase 5 (Hardened)** | ✅ **Complete** | Security & UX audit fixes (Zip Slip protection, 50MB upload limit, DRF rate limiting, lazy Gemini init, PostgreSQL env vars, chat history UI, live repo list) |
-| **Phase 6** | 🔜 **Next** | Real-time WebSocket progress updates (Celery → Channels → React) |
-| **Phase 7** | 📋 Planned | Authentication, user accounts, saved repository sessions |
+| **Phase 6** | ✅ **Complete** | Real-time WebSocket progress updates (Celery → Channels → React) |
+| **Phase 7** | 🔜 **Next** | Authentication, user accounts, saved repository sessions |
 | **Phase 8** | 📋 Planned | Production deployment, Docker, CI/CD |
 
 ---

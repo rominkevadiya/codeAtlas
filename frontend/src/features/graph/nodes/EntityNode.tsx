@@ -1,6 +1,6 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { FileCode2, Box, FunctionSquare, Database } from 'lucide-react';
+import { FileCode2, Box, FunctionSquare, Database, PackageOpen } from 'lucide-react';
 
 interface EntityNodeProps {
   data: {
@@ -11,30 +11,53 @@ interface EntityNodeProps {
 }
 
 export const EntityNode = ({ data }: EntityNodeProps) => {
-  const getIcon = () => {
+  const getStyleConfig = () => {
     switch (data.type) {
-      case 'file': return <FileCode2 className="w-3.5 h-3.5 text-blue-500" />;
-      case 'class': return <Box className="w-3.5 h-3.5 text-orange-500" />;
-      case 'function': return <FunctionSquare className="w-3.5 h-3.5 text-purple-500" />;
-      default: return <Database className="w-3.5 h-3.5 text-slate-500" />;
-    }
-  };
-
-  const getBorderColor = () => {
-    switch (data.type) {
-      case 'file': return 'border-blue-200/60 dark:border-blue-800/40';
-      case 'class': return 'border-orange-200/60 dark:border-orange-800/40';
-      case 'function': return 'border-purple-200/60 dark:border-purple-800/40';
-      default: return 'border-slate-200 dark:border-slate-700/50';
-    }
-  };
-
-  const getBgColor = () => {
-    switch (data.type) {
-      case 'file': return 'bg-blue-50/50 dark:bg-blue-950/20';
-      case 'class': return 'bg-orange-50/50 dark:bg-orange-950/20';
-      case 'function': return 'bg-purple-50/50 dark:bg-purple-950/20';
-      default: return 'bg-slate-50/50 dark:bg-slate-900/30';
+      case 'file': 
+        return {
+          icon: <FileCode2 className="w-4 h-4 text-emerald-400" />,
+          border: 'border-emerald-500/30 group-hover:border-emerald-400/60',
+          bg: 'bg-emerald-500/10 dark:bg-emerald-950/30',
+          glow: 'bg-emerald-500/20',
+          text: 'text-emerald-700 dark:text-emerald-300',
+          badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+        };
+      case 'class': 
+        return {
+          icon: <Box className="w-4 h-4 text-amber-400" />,
+          border: 'border-amber-500/30 group-hover:border-amber-400/60',
+          bg: 'bg-amber-500/10 dark:bg-amber-950/30',
+          glow: 'bg-amber-500/20',
+          text: 'text-amber-700 dark:text-amber-300',
+          badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+        };
+      case 'function': 
+        return {
+          icon: <FunctionSquare className="w-4 h-4 text-violet-400" />,
+          border: 'border-violet-500/30 group-hover:border-violet-400/60',
+          bg: 'bg-violet-500/10 dark:bg-violet-950/30',
+          glow: 'bg-violet-500/20',
+          text: 'text-violet-700 dark:text-violet-300',
+          badge: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 border-violet-200 dark:border-violet-800',
+        };
+      case 'module':
+        return {
+          icon: <PackageOpen className="w-4 h-4 text-sky-400" />,
+          border: 'border-sky-500/30 group-hover:border-sky-400/60',
+          bg: 'bg-sky-500/10 dark:bg-sky-950/30',
+          glow: 'bg-sky-500/20',
+          text: 'text-sky-700 dark:text-sky-300',
+          badge: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 border-sky-200 dark:border-sky-800',
+        };
+      default: 
+        return {
+          icon: <Database className="w-4 h-4 text-slate-400" />,
+          border: 'border-slate-500/30 group-hover:border-slate-400/60',
+          bg: 'bg-slate-500/10 dark:bg-slate-900/30',
+          glow: 'bg-slate-500/20',
+          text: 'text-slate-700 dark:text-slate-300',
+          badge: 'bg-slate-100 text-slate-700 dark:bg-slate-800/60 dark:text-slate-300 border-slate-200 dark:border-slate-700',
+        };
     }
   };
 
@@ -51,32 +74,57 @@ export const EntityNode = ({ data }: EntityNodeProps) => {
       parts.pop();
       return parts.join('/') || '/';
     }
-    // For class/function, id is typically "path/to/file.py:functionName"
     const pathPart = data.id?.split(':')[0];
     return pathPart || '';
   };
 
+  const config = getStyleConfig();
   const displayName = getDisplayName();
   const displayPath = getDisplayPath();
 
-  // Node is horizontal now, so handles should be on left and right
   return (
-    <div className={`px-3 py-2 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] rounded-lg border bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm flex flex-col min-w-[180px] max-w-[280px] transition-all hover:shadow-md ${getBorderColor()}`}>
-      <Handle type="target" position={Position.Left} className="w-2 h-2 -ml-1 border-2 border-white dark:border-slate-800" />
-      <div className="flex items-center gap-2.5">
-        <div className={`p-1.5 rounded-md ${getBgColor()}`}>
-          {getIcon()}
+    <div className={`group relative flex flex-col min-w-[220px] max-w-[320px] rounded-2xl border bg-white/70 dark:bg-[#0B1120]/80 backdrop-blur-xl shadow-lg transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:scale-[1.02] cursor-pointer ${config.border}`}>
+      {/* Background ambient glow on hover */}
+      <div className={`absolute -inset-0.5 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300 -z-10 ${config.glow}`} />
+      
+      {/* Left Handle */}
+      <Handle 
+        type="target" 
+        position={Position.Left} 
+        className={`w-3 h-3 -ml-1.5 rounded-full border-2 border-white dark:border-slate-900 transition-colors ${config.bg} ${config.border}`} 
+      />
+      
+      {/* Node Content */}
+      <div className="p-4 flex flex-col gap-3">
+        {/* Header: Icon & Type Badge */}
+        <div className="flex items-center justify-between gap-3">
+          <div className={`p-2 rounded-xl flex items-center justify-center shrink-0 shadow-sm border border-white/10 ${config.bg}`}>
+            {config.icon}
+          </div>
+          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${config.badge}`}>
+            {data.type}
+          </span>
         </div>
-        <div className="flex flex-col overflow-hidden w-full">
-          <span className="font-semibold text-[13px] text-slate-800 dark:text-slate-200 truncate" title={displayName}>
+        
+        {/* Body: Name & Path */}
+        <div className="flex flex-col gap-1 overflow-hidden">
+          <span className="font-semibold text-[15px] tracking-tight text-slate-900 dark:text-white truncate" title={displayName}>
             {displayName}
           </span>
-          <span className="text-[10px] text-slate-400 font-medium truncate" title={displayPath}>
-            {displayPath}
-          </span>
+          {displayPath && (
+            <span className={`text-xs font-medium truncate ${config.text}`} title={displayPath}>
+              {displayPath}
+            </span>
+          )}
         </div>
       </div>
-      <Handle type="source" position={Position.Right} className="w-2 h-2 -mr-1 border-2 border-white dark:border-slate-800" />
+
+      {/* Right Handle */}
+      <Handle 
+        type="source" 
+        position={Position.Right} 
+        className={`w-3 h-3 -mr-1.5 rounded-full border-2 border-white dark:border-slate-900 transition-colors ${config.bg} ${config.border}`} 
+      />
     </div>
   );
 };

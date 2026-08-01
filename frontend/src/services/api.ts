@@ -47,6 +47,12 @@ export const RepositoryService = {
     });
   },
   getGraph: (id: string) => api.get(`/repositories/${id}/graph/`),
+  getNodeSnippet: (id: string, file_path: string, start_line?: number, end_line?: number) => {
+    let url = `/repositories/${id}/node_snippet/?file_path=${encodeURIComponent(file_path)}`;
+    if (start_line !== undefined) url += `&start_line=${start_line}`;
+    if (end_line !== undefined) url += `&end_line=${end_line}`;
+    return api.get(url);
+  },
 };
 
 export const AIService = {

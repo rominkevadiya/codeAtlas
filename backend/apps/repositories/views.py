@@ -127,6 +127,46 @@ class RepositoryViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+    @action(detail=True, methods=['get'])
+    def node_snippet(self, request, pk=None):
+        """
+        Returns the source code snippet for a given file_path, start_line, and end_line.
+        """
+        repo = self.get_object()
+        file_path = request.query_params.get('file_path')
+        start_line = request.query_params.get('start_line')
+        end_line = request.query_params.get('end_line')
+        
+        if not file_path:
+            return Response({"error": "file_path is required."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        if not repo.local_path:
+            return Response({"error": "Repository has no local path."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Prevent path traversal by ensuring it stays within local_path
+        full_path = os.path.realpath(os.path.join(repo.local_path, file_path))
+        real_local_path = os.path.realpath(repo.local_path)
+        if not full_path.startswith(real_local_path + os.sep) and full_path != real_local_path:
+            return Response({"error": "Invalid file path."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        if not os.path.exists(full_path):
+            return Response({"error": "File not found."}, status=status.HTTP_404_NOT_FOUND)
+            
+        try:
+            with open(full_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+                
+            if start_line is not None and end_line is not None:
+                start = int(start_line)
+                end = int(end_line)
+                snippet = "".join(lines[start:end+1])
+            else:
+                snippet = "".join(lines)
+                
+            return Response({"snippet": snippet}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": f"Failed to read file: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class BranchViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Branch.objects.all()
     serializer_class = BranchSerializer

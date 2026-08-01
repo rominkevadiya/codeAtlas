@@ -52,10 +52,12 @@ class RepoService:
                 'url': "local://uploaded",
                 'owner': owner,
                 'is_cloned': False,
-                'local_path': extract_path,
                 'status': RepositoryStatus.PENDING,
             }
         )
+        
+        repo.local_path = extract_path
+        repo.save(update_fields=['local_path'])
 
         try:
             # ── 1. EXTRACTING ZIP (25%) ──
