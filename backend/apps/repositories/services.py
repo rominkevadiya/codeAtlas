@@ -210,11 +210,7 @@ class RepoService:
         except Repository.DoesNotExist:
             raise RepositoryNotFound()
 
-    @staticmethod
-    def list_repositories(owner=None) -> List[Repository]:
-        if owner:
-            return list(Repository.objects.filter(owner=owner))
-        return list(Repository.objects.all())
+
 
     @staticmethod
     def delete_repository(repo_id: str):
