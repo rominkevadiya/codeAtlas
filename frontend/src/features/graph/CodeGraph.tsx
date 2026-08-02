@@ -315,7 +315,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
     onInit={setRfInstance}
     nodeTypes={nodeTypes}
     fitView
-    fitViewOptions={{ padding: 0.3 }}
+    fitViewOptions={{ padding: 0.3, duration: 800 }}
     className="!bg-transparent"
     colorMode="dark"
     minZoom={0.05}

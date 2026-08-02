@@ -415,35 +415,37 @@ export default function App() {
     {activeRightPanel && (
      <motion.aside 
       key={activeRightPanel}
-      initial={{ x: 400, opacity: 0 }}
+      initial={{ x: 384, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      exit={{ x: 400, opacity: 0 }}
+      exit={{ x: 384, opacity: 0 }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="w-96 shrink-0 bg-zinc-950 border-l border-zinc-800 shadow-[-4px_0_24px_rgba(0,0,0,0.02)] flex flex-col z-30 relative"
+      className="absolute right-0 top-0 bottom-0 w-96 shrink-0 bg-zinc-950 border-l border-zinc-800 shadow-[-24px_0_48px_rgba(0,0,0,0.2)] flex flex-col z-30"
      >
-      {activeRightPanel === 'analysis' && (
-       <div className="h-full relative [&>div]:h-full [&>div]:shadow-none [&>div]:border-0 [&>div]:rounded-none">
-         <AnalysisPanel onClose={() => setShowAnalysis(false)} repositoryId={repoId} />
-       </div>
-      )}
-      
-      {activeRightPanel === 'autodoc' && repoId && (
-       <div className="h-full relative [&>div]:h-full [&>div]:shadow-none [&>div]:border-0 [&>div]:rounded-none">
-         <AutoDocPanel onClose={() => setShowAutoDoc(false)} repositoryId={repoId} />
-       </div>
-      )}
-      
-      {activeRightPanel === 'chat' && (
-       <div className="h-full relative [&>div]:h-full [&>div]:shadow-none [&>div]:border-0 [&>div]:rounded-none">
-         <ChatPanel onClose={() => setShowChat(false)} repositoryId={repoId} />
-       </div>
-      )}
-      
-      {activeRightPanel === 'inspector' && !isInspectorExpanded && (
-       <div className="h-full relative [&>div]:h-full [&>div]:shadow-none [&>div]:border-0 [&>div]:rounded-none">
-        {renderInspector(false)}
-       </div>
-      )}
+      <div className="w-full h-full flex flex-col relative">
+       {activeRightPanel === 'analysis' && (
+        <div className="h-full relative [&>div]:h-full [&>div]:shadow-none [&>div]:border-0 [&>div]:rounded-none">
+          <AnalysisPanel onClose={() => setShowAnalysis(false)} repositoryId={repoId} />
+        </div>
+       )}
+       
+       {activeRightPanel === 'autodoc' && repoId && (
+        <div className="h-full relative [&>div]:h-full [&>div]:shadow-none [&>div]:border-0 [&>div]:rounded-none">
+          <AutoDocPanel onClose={() => setShowAutoDoc(false)} repositoryId={repoId} />
+        </div>
+       )}
+       
+       {activeRightPanel === 'chat' && (
+        <div className="h-full relative [&>div]:h-full [&>div]:shadow-none [&>div]:border-0 [&>div]:rounded-none">
+          <ChatPanel onClose={() => setShowChat(false)} repositoryId={repoId} />
+        </div>
+       )}
+       
+       {activeRightPanel === 'inspector' && !isInspectorExpanded && (
+        <div className="h-full relative [&>div]:h-full [&>div]:shadow-none [&>div]:border-0 [&>div]:rounded-none">
+         {renderInspector(false)}
+        </div>
+       )}
+      </div>
      </motion.aside>
     )}
     </AnimatePresence>
@@ -452,13 +454,16 @@ export default function App() {
    {/* Repo Panel Overlay */}
    <AnimatePresence>
    {showRepoPanel && (
-    <>
      <motion.div 
+      key="repo-panel-backdrop"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm z-40" 
       onClick={() => setShowRepoPanel(false)} 
      />
+   )}
+   {showRepoPanel && (
      <motion.div 
+      key="repo-panel-content"
       initial={{ opacity: 0, y: -20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -470,13 +475,13 @@ export default function App() {
        onAddNew={() => { setShowRepoPanel(false); setShowUpload(true); }}
       />
      </motion.div>
-    </>
    )}
    </AnimatePresence>
 
    <AnimatePresence>
    {showUpload && (
     <UploadModal 
+     key="upload-modal"
      onClose={() => setShowUpload(false)} 
      onUploadComplete={(newRepoId) => {
       setShowUpload(false);
@@ -494,6 +499,7 @@ export default function App() {
    <AnimatePresence>
     {activeRightPanel === 'inspector' && isInspectorExpanded && (
      <motion.div 
+      key="expanded-inspector-overlay"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

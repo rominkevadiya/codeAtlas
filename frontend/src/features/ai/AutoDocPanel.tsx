@@ -199,6 +199,7 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
     <AnimatePresence>
      {isExpanded && (
       <motion.div 
+       key="autodoc-panel-expanded"
        initial={{ opacity: 0, scale: 0.95 }}
        animate={{ opacity: 1, scale: 1 }}
        exit={{ opacity: 0, scale: 0.95 }}

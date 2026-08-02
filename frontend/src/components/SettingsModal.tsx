@@ -35,6 +35,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, any>((props, ref) 
   <AnimatePresence>
    {showSettingsModal && (
     <motion.div
+     key="settings-backdrop"
      ref={ref}
      {...props}
      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}

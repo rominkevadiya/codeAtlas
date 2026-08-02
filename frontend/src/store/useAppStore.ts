@@ -244,12 +244,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   });
 
   try {
-   const snippetRes = await RepositoryService.getNodeSnippet(
-    repoId,
-    filePath,
-    selectedNodeData.start_line,
-    selectedNodeData.end_line
-   );
+    const snippetRes = await RepositoryService.getNodeSnippet(
+     repoId,
+     filePath,
+     selectedNodeData?.start_line,
+     selectedNodeData?.end_line
+    );
    set({ nodeSnippet: snippetRes.data.snippet, isLoadingSnippet: false });
   } catch (err) {
    console.error("Failed to fetch snippet:", err);

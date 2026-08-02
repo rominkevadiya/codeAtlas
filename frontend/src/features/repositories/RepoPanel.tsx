@@ -134,7 +134,7 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
         <div className="min-w-0 flex-1">
          <div className="mb-1 flex items-center gap-2">
           <p className="truncate text-sm font-semibold text-zinc-200">{repo.name}</p>
-          {isActive && <span className="rounded-full bg-zinc-200 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-zinc-300">Active</span>}
+          {isActive && <span className="rounded-full bg-zinc-200 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-zinc-900">Active</span>}
          </div>
          <div className="flex items-center gap-2">
           <StatusBadge status={repo.status} />

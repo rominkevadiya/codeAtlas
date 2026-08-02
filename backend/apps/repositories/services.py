@@ -137,15 +137,27 @@ class RepoService:
             repo.save(update_fields=['status'])
             broadcast_progress(repo_uuid, RepositoryStatus.EXTRACTING, 25, "Cloning repository from GitHub...")
 
-            # Run git clone
-            result = subprocess.run(
-                ["git", "clone", "--depth", "1", github_url, extract_path],
-                capture_output=True,
-                text=True,
-                timeout=120
-            )
-            if result.returncode != 0:
-                raise ValueError(f"Failed to clone repository: {result.stderr}")
+            # Run git clone with retries for transient network errors
+            import time
+            import shutil
+            max_retries = 3
+            for attempt in range(max_retries):
+                result = subprocess.run(
+                    ["git", "clone", "--depth", "1", github_url, extract_path],
+                    capture_output=True,
+                    text=True,
+                    timeout=120
+                )
+                if result.returncode == 0:
+                    break
+                else:
+                    if attempt < max_retries - 1:
+                        if os.path.exists(extract_path):
+                            shutil.rmtree(extract_path, ignore_errors=True)
+                            os.makedirs(extract_path, exist_ok=True)
+                        time.sleep(2 ** attempt)
+                    else:
+                        raise ValueError(f"Failed to clone repository after {max_retries} attempts: {result.stderr}")
 
             # ── 2. PARSING AST (50%) ──
             repo.status = RepositoryStatus.PARSING
