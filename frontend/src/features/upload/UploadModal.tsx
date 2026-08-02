@@ -122,18 +122,18 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-white/5 bg-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-              <UploadCloud className="w-4 h-4 text-indigo-400" />
+            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+              <UploadCloud className="w-4 h-4 text-white" />
             </div>
             <div>
               <h2 className="text-base font-semibold text-white tracking-tight">Add Repository</h2>
-              <p className="text-[11px] text-slate-400 font-medium">Import or upload codebase</p>
+              <p className="text-[11px] text-zinc-400 font-medium">Import or upload codebase</p>
             </div>
           </div>
           {!isUploading && (
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -144,15 +144,15 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
         <div className="p-6">
           {isUploading ? (
             <div className="py-8 flex flex-col items-center justify-center gap-6">
-              <div className="relative flex items-center justify-center w-16 h-16 rounded-full bg-indigo-500/10">
-                <Loader2 className="w-8 h-8 text-indigo-500 animate-spin absolute" />
-                <FileArchive className="w-4 h-4 text-indigo-400" />
+              <div className="relative flex items-center justify-center w-16 h-16 rounded-full bg-white/5">
+                <Loader2 className="w-8 h-8 text-white animate-spin absolute" />
+                <FileArchive className="w-4 h-4 text-white" />
               </div>
               
               <div className="w-full space-y-2 text-center">
                 <div className="flex justify-between items-center text-xs font-semibold px-1">
-                  <span className="text-slate-300">{progressState.message || 'Processing...'}</span>
-                  <span className="text-indigo-400">{progressState.progress}%</span>
+                  <span className="text-zinc-300">{progressState.message || 'Processing...'}</span>
+                  <span className="text-white">{progressState.progress}%</span>
                 </div>
                 <div className="w-full bg-zinc-900 rounded-full h-1.5 mb-2 overflow-hidden">
                   <div 
@@ -170,7 +170,7 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
                 <button
                   type="button"
                   onClick={() => setUploadMode('github')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-colors ${uploadMode === 'github' ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-400 hover:text-slate-300'}`}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-colors ${uploadMode === 'github' ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-zinc-300'}`}
                 >
                   <GitBranch className="w-4 h-4" />
                   GitHub URL
@@ -178,7 +178,7 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
                 <button
                   type="button"
                   onClick={() => setUploadMode('zip')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-colors ${uploadMode === 'zip' ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-400 hover:text-slate-300'}`}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-colors ${uploadMode === 'zip' ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-zinc-300'}`}
                 >
                   <FileArchive className="w-4 h-4" />
                   ZIP Archive
@@ -187,33 +187,33 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
 
               {uploadMode === 'github' ? (
                 <div className="space-y-1.5 animate-in slide-in-from-right-4 duration-300">
-                  <label className="text-xs font-medium text-slate-400 uppercase tracking-wide px-1">GitHub / GitLab URL</label>
+                  <label className="text-xs font-medium text-zinc-400 uppercase tracking-wide px-1">GitHub / GitLab URL</label>
                   <input
                     type="url"
                     placeholder="https://github.com/user/repo"
                     value={githubUrl}
                     onChange={(e) => setGithubUrl(e.target.value)}
-                    className="w-full bg-[#111115] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-slate-600"
+                    className="w-full bg-[#111115] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-white/20 transition-all placeholder:text-zinc-600"
                   />
-                  <p className="text-[10px] text-slate-500 px-1 mt-1">
+                  <p className="text-[10px] text-zinc-500 px-1 mt-1">
                     Public repositories only. Example: https://github.com/facebook/react
                   </p>
                 </div>
               ) : (
                 <div className="space-y-5 animate-in slide-in-from-left-4 duration-300">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-slate-400 uppercase tracking-wide px-1">Repository Name</label>
+                    <label className="text-xs font-medium text-zinc-400 uppercase tracking-wide px-1">Repository Name</label>
                     <input
                       type="text"
                       placeholder="e.g., CodeAtlas Core"
                       value={repoName}
                       onChange={(e) => setRepoName(e.target.value)}
-                      className="w-full bg-[#111115] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-slate-600"
+                      className="w-full bg-[#111115] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-white/20 transition-all placeholder:text-zinc-600"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-slate-400 uppercase tracking-wide px-1">Archive (.zip)</label>
+                    <label className="text-xs font-medium text-zinc-400 uppercase tracking-wide px-1">Archive (.zip)</label>
                     <div className="relative group cursor-pointer">
                       <input
                         type="file"
@@ -221,15 +221,15 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
                         onChange={handleFileChange}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
-                      <div className={`w-full border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-3 transition-colors ${file ? 'border-white/10 bg-indigo-500/5' : 'border-white/10 bg-[#111115] group-hover:border-white/20 group-hover:bg-white/5'}`}>
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${file ? 'bg-indigo-500/20' : 'bg-white/5'}`}>
-                          <FileArchive className={`w-5 h-5 ${file ? 'text-indigo-400' : 'text-slate-400'}`} />
+                      <div className={`w-full border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-3 transition-colors ${file ? 'border-white/10 bg-white/5' : 'border-white/10 bg-[#111115] group-hover:border-white/20 group-hover:bg-white/5'}`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${file ? 'bg-white/10' : 'bg-white/5'}`}>
+                          <FileArchive className={`w-5 h-5 ${file ? 'text-white' : 'text-zinc-400'}`} />
                         </div>
                         <div className="text-center">
-                          <p className="text-sm font-medium text-slate-200">
+                          <p className="text-sm font-medium text-zinc-200">
                             {file ? file.name : 'Click or drag ZIP file here'}
                           </p>
-                          <p className="text-xs text-slate-500 mt-1">
+                          <p className="text-xs text-zinc-500 mt-1">
                             {file ? `${(file.size / (1024 * 1024)).toFixed(2)} MB` : 'Maximum file size: 50MB'}
                           </p>
                         </div>

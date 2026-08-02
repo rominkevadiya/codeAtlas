@@ -163,7 +163,7 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
           {repositoryId && (
             <button
               onClick={createNewSession}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
               title="New chat"
             >
               <Plus className="w-4 h-4" />
@@ -171,13 +171,13 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
           )}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
             title={isExpanded ? "Minimize" : "Expand Full Screen"}
           >
             {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
           {isExpanded ? null : (
-            <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
+            <button onClick={onClose} className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors">
               <X className="w-4 h-4" />
             </button>
           )}
@@ -188,8 +188,8 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
       {!repositoryId && (
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="text-center">
-            <MessageSquare className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-            <p className="text-sm text-slate-400">Upload a repository first to start chatting.</p>
+            <MessageSquare className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
+            <p className="text-sm text-zinc-400">Upload a repository first to start chatting.</p>
           </div>
         </div>
       )}
@@ -201,14 +201,14 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
             <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
               {isLoadingSessions ? (
                 <div className="flex items-center justify-center h-32">
-                  <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
+                  <Loader2 className="w-5 h-5 text-white animate-spin" />
                 </div>
               ) : sessions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4 py-8 text-center">
-                  <MessageSquare className="w-10 h-10 text-slate-600" />
+                  <MessageSquare className="w-10 h-10 text-zinc-600" />
                   <div>
-                    <p className="text-sm font-medium text-slate-300">No conversations yet</p>
-                    <p className="text-xs text-slate-500 mt-1">Start a new chat below</p>
+                    <p className="text-sm font-medium text-zinc-300">No conversations yet</p>
+                    <p className="text-xs text-zinc-500 mt-1">Start a new chat below</p>
                   </div>
                   {/* Starter Prompts */}
                   <div className="space-y-2 w-full mt-2">
@@ -225,7 +225,7 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
                 </div>
               ) : (
                 <>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold px-1 mb-2">Recent Conversations</p>
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold px-1 mb-2">Recent Conversations</p>
                   {sessions.map(session => (
                     <div
                       key={session.id}
@@ -238,21 +238,21 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold text-white truncate">{session.title}</p>
                         {session.last_message && (
-                          <p className="text-[10px] text-slate-500 truncate mt-0.5">{session.last_message.content}</p>
+                          <p className="text-[10px] text-zinc-500 truncate mt-0.5">{session.last_message.content}</p>
                         )}
-                        <p className="text-[9px] text-slate-600 mt-1">{session.message_count} messages</p>
+                        <p className="text-[9px] text-zinc-600 mt-1">{session.message_count} messages</p>
                       </div>
                       <button
                         onClick={(e) => deleteSession(session.id, e)}
                         disabled={isDeletingSession === session.id}
-                        className="p-1 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                        className="p-1 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-all shrink-0"
                       >
                         {isDeletingSession === session.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
                       </button>
                     </div>
                   ))}
                   {/* Starter Prompts for new session */}
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold px-1 pt-4 mb-2">Quick Start</p>
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold px-1 pt-4 mb-2">Quick Start</p>
                   {STARTER_PROMPTS.map((prompt) => (
                     <button
                       key={prompt}
@@ -273,7 +273,7 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
               {/* Back to sessions */}
               <button
                 onClick={() => { setActiveSession(null); setMessages([]); }}
-                className="mx-3 mt-2 text-[10px] text-slate-500 hover:text-slate-300 transition-colors text-left px-2"
+                className="mx-3 mt-2 text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors text-left px-2"
               >
                 ← All conversations
               </button>
@@ -361,7 +361,7 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
       <>
         <div className="h-full flex flex-col items-center justify-center p-6 text-center border border-white/10 rounded-md bg-transparent shadow-sm">
           <MessageSquare className="w-8 h-8 text-zinc-500 mb-3" />
-          <p className="text-sm text-slate-400">Chat is opened in full screen</p>
+          <p className="text-sm text-zinc-400">Chat is opened in full screen</p>
           <button onClick={() => setIsExpanded(false)} className="mt-4 px-4 py-2 bg-white/5 hover:bg-white/10 text-xs text-white rounded-lg transition-colors">
             Close Full Screen
           </button>

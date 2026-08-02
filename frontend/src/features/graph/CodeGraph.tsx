@@ -288,11 +288,11 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
 
   if (data.nodes && data.nodes.length === 0) {
     return (
-      <div className="flex-1 w-full h-full min-h-[500px] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#030712] text-slate-500">
-        <div className="p-8 rounded-3xl border border-slate-200 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col items-center max-w-md text-center">
-          <Layers className="w-16 h-16 mb-4 text-slate-400" />
-          <p className="text-xl font-bold text-slate-800 dark:text-slate-200">No supported files found</p>
-          <p className="text-sm mt-3 text-slate-500 dark:text-slate-400 leading-relaxed">
+      <div className="flex-1 w-full h-full min-h-[500px] flex flex-col items-center justify-center bg-zinc-50 dark:bg-[#030712] text-zinc-500">
+        <div className="p-8 rounded-3xl border border-zinc-200 dark:border-zinc-800/60 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl shadow-xl flex flex-col items-center max-w-md text-center">
+          <Layers className="w-16 h-16 mb-4 text-zinc-400" />
+          <p className="text-xl font-bold text-zinc-800 dark:text-zinc-200">No supported files found</p>
+          <p className="text-sm mt-3 text-zinc-500 dark:text-zinc-400 leading-relaxed">
             The parser currently supports Python, JavaScript/TypeScript, JSON, and EJS files. The repository has no supported source code.
           </p>
         </div>
@@ -321,7 +321,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
       <Panel position="top-left" className="glass-card p-3 rounded-xl flex flex-col gap-3 min-w-[280px] m-6 border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-white font-semibold text-sm">
-            <Filter className="w-4 h-4 text-indigo-400" />
+            <Filter className="w-4 h-4 text-white" />
             Filter & Search
           </div>
           <button
@@ -337,20 +337,20 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
                   });
               }
             }}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
             title="Download PNG"
           >
             <Download className="w-4 h-4" />
           </button>
         </div>
         <div className="relative">
-          <Search className="w-4 h-4 absolute left-2.5 top-2 text-slate-400" />
+          <Search className="w-4 h-4 absolute left-2.5 top-2 text-zinc-400" />
           <input
             type="text"
             placeholder="Search nodes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#111115] border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-white/10 transition-colors placeholder:text-slate-500"
+            className="w-full bg-[#111115] border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-sm text-zinc-200 focus:outline-none focus:border-white/10 transition-colors placeholder:text-zinc-500"
           />
         </div>
         <div className="flex flex-wrap gap-2 mt-1">
@@ -360,8 +360,8 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
               onClick={() => toggleType(type)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
                 visibleTypes.has(type)
-                  ? 'bg-indigo-500/20 text-indigo-300 border border-white/10'
-                  : 'bg-white/5 text-slate-400 border border-white/5 hover:bg-white/10'
+                  ? 'bg-white/10 text-zinc-300 border border-white/10'
+                  : 'bg-white/5 text-zinc-400 border border-white/5 hover:bg-white/10'
               }`}
             >
               {type.charAt(0).toUpperCase() + type.slice(1)}

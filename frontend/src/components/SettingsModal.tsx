@@ -33,17 +33,17 @@ export const SettingsModal: React.FC = () => {
   const userInitial = currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : 'U';
 
   return createPortal(
-    <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/50">
-          <div className="flex items-center gap-2.5 text-slate-100 font-semibold text-base">
-            <Settings className="w-5 h-5 text-indigo-400" />
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-950/50">
+          <div className="flex items-center gap-2.5 text-zinc-100 font-semibold text-base">
+            <Settings className="w-5 h-5 text-white" />
             Account & Settings
           </div>
           <button
             onClick={() => setShowSettingsModal(false)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -52,13 +52,13 @@ export const SettingsModal: React.FC = () => {
         {/* Content Layout */}
         <div className="flex flex-1 min-h-[360px] overflow-hidden">
           {/* Sidebar Tabs */}
-          <div className="w-48 border-r border-slate-800 p-3 flex flex-col gap-1 bg-slate-950/30 shrink-0">
+          <div className="w-48 border-r border-zinc-800 p-3 flex flex-col gap-1 bg-zinc-950/30 shrink-0">
             <button
               onClick={() => setActiveTab('profile')}
               className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                 activeTab === 'profile'
-                  ? 'bg-indigo-600/20 text-indigo-400 border border-white/10'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  ? 'bg-white/10 text-white border border-white/10'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
               }`}
             >
               <User className="w-4 h-4" />
@@ -68,8 +68,8 @@ export const SettingsModal: React.FC = () => {
               onClick={() => setActiveTab('preferences')}
               className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                 activeTab === 'preferences'
-                  ? 'bg-indigo-600/20 text-indigo-400 border border-white/10'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  ? 'bg-white/10 text-white border border-white/10'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
               }`}
             >
               <Sliders className="w-4 h-4" />
@@ -80,7 +80,7 @@ export const SettingsModal: React.FC = () => {
               className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                 activeTab === 'danger'
                   ? 'bg-rose-600/20 text-rose-400 border border-rose-500/30'
-                  : 'text-slate-400 hover:text-rose-300 hover:bg-slate-800/50'
+                  : 'text-zinc-400 hover:text-rose-300 hover:bg-zinc-800/50'
               }`}
             >
               <Shield className="w-4 h-4" />
@@ -92,13 +92,13 @@ export const SettingsModal: React.FC = () => {
           <div className="flex-1 p-6 overflow-y-auto">
             {activeTab === 'profile' && (
               <div className="space-y-6">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-zinc-950/60 border border-zinc-800">
                   <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center text-xl font-bold text-black shadow-sm">
                     {userInitial}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-100 text-base">{currentUser?.username || 'Authenticated User'}</h3>
-                    <p className="text-xs text-slate-400 mt-0.5">{currentUser?.email || 'No email registered'}</p>
+                    <h3 className="font-semibold text-zinc-100 text-base">{currentUser?.username || 'Authenticated User'}</h3>
+                    <p className="text-xs text-zinc-400 mt-0.5">{currentUser?.email || 'No email registered'}</p>
                     <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                       Active Developer
                     </span>
@@ -106,15 +106,15 @@ export const SettingsModal: React.FC = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Account Details</label>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Account Details</label>
                   <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="p-3 rounded-xl bg-slate-950/40 border border-slate-800/80">
-                      <span className="text-slate-400">User ID</span>
-                      <p className="font-mono text-slate-200 mt-1 truncate">{currentUser?.id || 'N/A'}</p>
+                    <div className="p-3 rounded-xl bg-zinc-950/40 border border-zinc-800/80">
+                      <span className="text-zinc-400">User ID</span>
+                      <p className="font-mono text-zinc-200 mt-1 truncate">{currentUser?.id || 'N/A'}</p>
                     </div>
-                    <div className="p-3 rounded-xl bg-slate-950/40 border border-slate-800/80">
-                      <span className="text-slate-400">Role</span>
-                      <p className="font-medium text-slate-200 mt-1">Repository Architect</p>
+                    <div className="p-3 rounded-xl bg-zinc-950/40 border border-zinc-800/80">
+                      <span className="text-zinc-400">Role</span>
+                      <p className="font-medium text-zinc-200 mt-1">Repository Architect</p>
                     </div>
                   </div>
                 </div>
@@ -124,17 +124,17 @@ export const SettingsModal: React.FC = () => {
             {activeTab === 'preferences' && (
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Graph Engine Settings</h4>
+                  <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Graph Engine Settings</h4>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-950/40 border border-slate-800">
+                    <div className="flex items-center justify-between p-3.5 rounded-xl bg-zinc-950/40 border border-zinc-800">
                       <div>
-                        <p className="text-xs font-medium text-slate-200">Auto-Center Graph</p>
-                        <p className="text-[11px] text-slate-400">Focus selected node automatically on search</p>
+                        <p className="text-xs font-medium text-zinc-200">Auto-Center Graph</p>
+                        <p className="text-[11px] text-zinc-400">Focus selected node automatically on search</p>
                       </div>
                       <button
                         onClick={() => setAutoZoom(!autoZoom)}
                         className={`w-10 h-5 rounded-full transition-colors relative flex items-center ${
-                          autoZoom ? 'bg-indigo-600' : 'bg-slate-700'
+                          autoZoom ? 'bg-white text-black' : 'bg-zinc-700'
                         }`}
                       >
                         <div
@@ -145,15 +145,15 @@ export const SettingsModal: React.FC = () => {
                       </button>
                     </div>
 
-                    <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-950/40 border border-slate-800">
+                    <div className="flex items-center justify-between p-3.5 rounded-xl bg-zinc-950/40 border border-zinc-800">
                       <div>
-                        <p className="text-xs font-medium text-slate-200">Enhanced Particle Physics</p>
-                        <p className="text-[11px] text-slate-400">Smooth 60FPS force simulation</p>
+                        <p className="text-xs font-medium text-zinc-200">Enhanced Particle Physics</p>
+                        <p className="text-[11px] text-zinc-400">Smooth 60FPS force simulation</p>
                       </div>
                       <button
                         onClick={() => setHighQualityGraph(!highQualityGraph)}
                         className={`w-10 h-5 rounded-full transition-colors relative flex items-center ${
-                          highQualityGraph ? 'bg-indigo-600' : 'bg-slate-700'
+                          highQualityGraph ? 'bg-white text-black' : 'bg-zinc-700'
                         }`}
                       >
                         <div
@@ -174,14 +174,14 @@ export const SettingsModal: React.FC = () => {
                   <h4 className="text-xs font-semibold text-rose-400 uppercase tracking-wider">System Maintenance</h4>
                   <div className="p-4 rounded-xl bg-rose-950/20 border border-rose-900/30 flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-medium text-slate-200">Clear Local Application Cache</p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">Resets UI state without deleting repository data</p>
+                      <p className="text-xs font-medium text-zinc-200">Clear Local Application Cache</p>
+                      <p className="text-[11px] text-zinc-400 mt-0.5">Resets UI state without deleting repository data</p>
                     </div>
                     <button
                       onClick={handleClearCache}
-                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-colors flex items-center gap-1.5"
+                      className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium transition-colors flex items-center gap-1.5"
                     >
-                      <Trash2 className="w-3.5 h-3.5 text-slate-400" />
+                      <Trash2 className="w-3.5 h-3.5 text-zinc-400" />
                       Clear Cache
                     </button>
                   </div>
@@ -189,7 +189,7 @@ export const SettingsModal: React.FC = () => {
                   <div className="p-4 rounded-xl bg-rose-950/20 border border-rose-900/30 flex items-center justify-between mt-4">
                     <div>
                       <p className="text-xs font-medium text-rose-300">Sign Out of CodeAtlas</p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">Terminates active session token</p>
+                      <p className="text-[11px] text-zinc-400 mt-0.5">Terminates active session token</p>
                     </div>
                     <button
                       onClick={handleLogout}

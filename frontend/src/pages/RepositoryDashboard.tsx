@@ -115,10 +115,10 @@ export const RepositoryDashboard = () => {
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col space-y-4 pt-4 pb-4 px-4 overflow-hidden relative">
       {/* Header */}
-      <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-4 shrink-0">
+      <div className="flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-4 shrink-0">
         <div>
           <h1 className="text-2xl font-bold">Repository Explorer</h1>
-          <p className="text-sm text-slate-500">ID: {id}</p>
+          <p className="text-sm text-zinc-500">ID: {id}</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -127,7 +127,7 @@ export const RepositoryDashboard = () => {
               if (isAiPanelOpen) setIsAiPanelOpen(false);
               if (isAnalysisPanelOpen) setIsAnalysisPanelOpen(false);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shadow-sm cursor-pointer"
           >
             <FileText className="w-4 h-4" />
             Auto-Doc
@@ -138,7 +138,7 @@ export const RepositoryDashboard = () => {
               if (isAiPanelOpen) setIsAiPanelOpen(false);
               if (isAutoDocPanelOpen) setIsAutoDocPanelOpen(false);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 rounded-lg text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors shadow-sm cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-900 dark:bg-indigo-900/30 text-white dark:text-white border border-white/10 dark:border-white/10 rounded-lg text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors shadow-sm cursor-pointer"
           >
             <Activity className="w-4 h-4" />
             Metrics
@@ -158,9 +158,9 @@ export const RepositoryDashboard = () => {
       </div>
 
       {/* Graph Canvas */}
-      <div className="flex-1 min-h-[500px] border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50 flex items-center justify-center relative overflow-hidden">
+      <div className="flex-1 min-h-[500px] border border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 flex items-center justify-center relative overflow-hidden">
         {loading ? (
-          <div className="flex flex-col items-center gap-2 text-slate-500">
+          <div className="flex flex-col items-center gap-2 text-zinc-500">
             <Loader2 className="w-8 h-8 animate-spin" />
             <p>Loading graph data...</p>
           </div>
@@ -180,13 +180,13 @@ export const RepositoryDashboard = () => {
 
       {/* Source Code Panel */}
       {selectedNode && (
-        <div className="absolute top-24 left-8 bottom-8 w-[28rem] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl flex flex-col z-40 overflow-hidden animate-in slide-in-from-left-8 duration-200">
-          <div className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 shrink-0">
+        <div className="absolute top-24 left-8 bottom-8 w-[28rem] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl flex flex-col z-40 overflow-hidden animate-in slide-in-from-left-8 duration-200">
+          <div className="flex justify-between items-center p-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 shrink-0">
             <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">
+              <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate">
                 {selectedNode.name}
               </span>
-              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate">
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono truncate">
                 {selectedNode.type === 'file' ? selectedNode.id : selectedNode.file_path}
               </span>
             </div>
@@ -203,16 +203,16 @@ export const RepositoryDashboard = () => {
               )}
               <button
                 onClick={() => setSelectedNode(null)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-1"
+                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors p-1"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
           </div>
           
-          <div className="flex-1 overflow-auto p-4 bg-slate-50/50 dark:bg-[#0d1117]">
+          <div className="flex-1 overflow-auto p-4 bg-zinc-50/50 dark:bg-[#0d1117]">
             {snippetLoading ? (
-              <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-2">
+              <div className="flex flex-col items-center justify-center h-full text-zinc-500 gap-2">
                 <Loader2 className="w-6 h-6 animate-spin" />
                 <p className="text-sm">Loading source code...</p>
               </div>
@@ -221,11 +221,11 @@ export const RepositoryDashboard = () => {
                 {snippetError}
               </div>
             ) : nodeSnippet ? (
-              <pre className="text-[13px] font-mono leading-relaxed text-slate-800 dark:text-slate-300">
+              <pre className="text-[13px] font-mono leading-relaxed text-zinc-800 dark:text-zinc-300">
                 <code>{nodeSnippet}</code>
               </pre>
             ) : (
-              <div className="text-slate-500 text-sm text-center mt-10">
+              <div className="text-zinc-500 text-sm text-center mt-10">
                 No source code available.
               </div>
             )}
@@ -235,16 +235,16 @@ export const RepositoryDashboard = () => {
 
       {/* AI Assistant Panel */}
       {isAiPanelOpen && (
-        <div className="absolute top-20 right-8 bottom-8 w-[22rem] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl flex flex-col z-50 overflow-hidden animate-in slide-in-from-right-8 duration-200">
+        <div className="absolute top-20 right-8 bottom-8 w-[22rem] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl flex flex-col z-50 overflow-hidden animate-in slide-in-from-right-8 duration-200">
           {/* Panel Header */}
-          <div className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 shrink-0">
+          <div className="flex justify-between items-center p-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 shrink-0">
             <div className="flex items-center gap-2 text-blue-600 dark:text-blue-500 font-semibold">
               <MessageSquare className="w-5 h-5" />
               CodeAtlas AI
             </div>
             <button
               onClick={() => setIsAiPanelOpen(false)}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+              className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -253,7 +253,7 @@ export const RepositoryDashboard = () => {
           {/* Chat History */}
           <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
             {messages.length === 0 ? (
-              <div className="flex-1 flex items-center justify-center text-slate-400 text-sm text-center px-8 py-12">
+              <div className="flex-1 flex items-center justify-center text-zinc-400 text-sm text-center px-8 py-12">
                 Ask a natural language question about this codebase.
                 <br /><br />
                 <span className="text-xs italic">e.g. "What classes are defined?" or "Which file imports os?"</span>
@@ -273,14 +273,14 @@ export const RepositoryDashboard = () => {
                     className={`max-w-[80%] px-3 py-2 rounded-xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
                       msg.role === 'user'
                         ? 'bg-blue-600 text-white rounded-tr-none'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-200 dark:border-slate-700'
+                        : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-tl-none border border-zinc-200 dark:border-zinc-700'
                     }`}
                   >
                     {msg.content}
                   </div>
                   {msg.role === 'user' && (
-                    <div className="shrink-0 w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center mt-0.5">
-                      <User className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                    <div className="shrink-0 w-7 h-7 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center mt-0.5">
+                      <User className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
                     </div>
                   )}
                 </div>
@@ -293,9 +293,9 @@ export const RepositoryDashboard = () => {
                 <div className="shrink-0 w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
                   <Bot className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 </div>
-                <div className="px-3 py-2 rounded-xl rounded-tl-none bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-1.5">
+                <div className="px-3 py-2 rounded-xl rounded-tl-none bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center gap-1.5">
                   <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
-                  <span className="text-sm text-slate-500">Analyzing...</span>
+                  <span className="text-sm text-zinc-500">Analyzing...</span>
                 </div>
               </div>
             )}
@@ -312,7 +312,7 @@ export const RepositoryDashboard = () => {
           </div>
 
           {/* Input Row */}
-          <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shrink-0">
+          <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shrink-0">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -320,7 +320,7 @@ export const RepositoryDashboard = () => {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleAskAI()}
                 placeholder="Ask anything about this repo..."
-                className="flex-1 px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="flex-1 px-3 py-2 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 disabled={aiLoading}
               />
               <button

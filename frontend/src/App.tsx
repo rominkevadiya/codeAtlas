@@ -112,7 +112,7 @@ export default function App() {
 
         <div className="flex-1 max-w-xl px-12 relative group">
           <div className="absolute inset-y-0 left-16 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+            <Search className="h-4 w-4 text-zinc-500 group-focus-within:text-white transition-colors" />
           </div>
           <input 
             type="text" 
@@ -122,7 +122,7 @@ export default function App() {
             className="w-full bg-[#0A0A0A] border border-white/10 rounded-md py-2 pl-10 pr-4 text-sm text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-white/20 transition-all shadow-sm"
           />
           <div className="absolute inset-y-0 right-16 flex items-center pointer-events-none gap-1">
-            <kbd className="hidden sm:inline-block bg-[#222226] border border-white/10 rounded px-1.5 py-0.5 text-[10px] font-mono text-slate-400 font-semibold shadow-sm"><Command className="w-3 h-3 inline-block -mt-0.5"/> K</kbd>
+            <kbd className="hidden sm:inline-block bg-[#222226] border border-white/10 rounded px-1.5 py-0.5 text-[10px] font-mono text-zinc-400 font-semibold shadow-sm"><Command className="w-3 h-3 inline-block -mt-0.5"/> K</kbd>
           </div>
         </div>
 
@@ -171,7 +171,7 @@ export default function App() {
           <div className="mt-auto">
             <button 
               onClick={() => setShowSettingsModal(true)}
-              className="p-3 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all group"
+              className="p-3 rounded-xl text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all group"
               title="Settings & Profile"
             >
               <Settings className="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" />
@@ -195,9 +195,9 @@ export default function App() {
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center opacity-40">
-                <Layers className="w-16 h-16 text-indigo-400 mb-6" />
+                <Layers className="w-16 h-16 text-white mb-6" />
                 <p className="text-xl font-medium tracking-tight text-white mb-2">Workspace Empty</p>
-                <p className="text-sm text-slate-400">Click the folder icon in the top navbar to upload a repository.</p>
+                <p className="text-sm text-zinc-400">Click the folder icon in the top navbar to upload a repository.</p>
               </div>
             )}
           </div>
@@ -236,14 +236,14 @@ export default function App() {
                     <h3 className="text-base font-semibold text-white tracking-tight truncate">
                       {selectedNodeData?.name || selectedNodeId}
                     </h3>
-                    <p className="text-[11px] text-slate-400 font-mono truncate">
+                    <p className="text-[11px] text-zinc-400 font-mono truncate">
                       {selectedNodeData?.file_path || 'Unknown file'}
                     </p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setSelectedNode(undefined)}
-                  className="p-1.5 shrink-0 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                  className="p-1.5 shrink-0 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -255,16 +255,16 @@ export default function App() {
                 {/* Source Code */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Source Code</h4>
+                    <h4 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">Source Code</h4>
                     {selectedNodeData?.start_line && (
-                      <span className="text-[10px] text-slate-500 font-mono">Lines {selectedNodeData.start_line} - {selectedNodeData.end_line}</span>
+                      <span className="text-[10px] text-zinc-500 font-mono">Lines {selectedNodeData.start_line} - {selectedNodeData.end_line}</span>
                     )}
                   </div>
                   
                   <div className="bg-[#0a0a0c] border border-white/5 rounded-xl p-4 overflow-x-auto relative min-h-[100px]">
                     {isLoadingSnippet ? (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
+                        <Loader2 className="w-5 h-5 text-white animate-spin" />
                       </div>
                     ) : nodeSnippet ? (
                       <SyntaxHighlighter
@@ -276,7 +276,7 @@ export default function App() {
                         {nodeSnippet}
                       </SyntaxHighlighter>
                     ) : (
-                      <p className="text-sm text-slate-500 text-center italic mt-6">Source code not available.</p>
+                      <p className="text-sm text-zinc-500 text-center italic mt-6">Source code not available.</p>
                     )}
                   </div>
                 </div>
@@ -321,7 +321,7 @@ export default function App() {
                 {/* Blast Radius (Impact Analysis) */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                    <h4 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
                       <Activity className="w-3.5 h-3.5 text-rose-400" /> Blast Radius
                     </h4>
                   </div>
@@ -334,13 +334,13 @@ export default function App() {
                     ) : impactData ? (
                       <div className="space-y-4">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-slate-400">Impact Score</span>
+                          <span className="text-zinc-400">Impact Score</span>
                           <span className="font-bold text-rose-400 text-lg">{impactData.impact_score}</span>
                         </div>
                         
                         {impactData.impacted_nodes?.length > 0 && (
                           <div>
-                            <h5 className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Impacted Nodes ({impactData.impacted_nodes.length})</h5>
+                            <h5 className="text-xs font-semibold text-zinc-500 mb-2 uppercase tracking-wider">Impacted Nodes ({impactData.impacted_nodes.length})</h5>
                             <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                               {impactData.impacted_nodes.slice(0, 10).map((node: any, idx: number) => (
                                 <div key={idx} className="flex items-center gap-2 bg-rose-500/10 border border-rose-500/20 rounded-lg px-3 py-2">
@@ -350,7 +350,7 @@ export default function App() {
                                 </div>
                               ))}
                               {impactData.impacted_nodes.length > 10 && (
-                                <div className="text-center text-xs text-slate-500 pt-1">
+                                <div className="text-center text-xs text-zinc-500 pt-1">
                                   + {impactData.impacted_nodes.length - 10} more
                                 </div>
                               )}
@@ -360,7 +360,7 @@ export default function App() {
                         
                         {impactData.dependency_nodes?.length > 0 && (
                           <div className="pt-2 border-t border-white/5">
-                            <h5 className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Dependencies ({impactData.dependency_nodes.length})</h5>
+                            <h5 className="text-xs font-semibold text-zinc-500 mb-2 uppercase tracking-wider">Dependencies ({impactData.dependency_nodes.length})</h5>
                             <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                               {impactData.dependency_nodes.slice(0, 5).map((node: any, idx: number) => (
                                 <div key={idx} className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
@@ -370,7 +370,7 @@ export default function App() {
                                 </div>
                               ))}
                               {impactData.dependency_nodes.length > 5 && (
-                                <div className="text-center text-xs text-slate-500 pt-1">
+                                <div className="text-center text-xs text-zinc-500 pt-1">
                                   + {impactData.dependency_nodes.length - 5} more
                                 </div>
                               )}
@@ -379,11 +379,11 @@ export default function App() {
                         )}
                         
                         {impactData.impacted_nodes?.length === 0 && impactData.dependency_nodes?.length === 0 && (
-                          <p className="text-sm text-slate-500 text-center italic">No dependencies found.</p>
+                          <p className="text-sm text-zinc-500 text-center italic">No dependencies found.</p>
                         )}
                       </div>
                     ) : (
-                      <p className="text-sm text-slate-500 text-center italic mt-6">Impact analysis not available.</p>
+                      <p className="text-sm text-zinc-500 text-center italic mt-6">Impact analysis not available.</p>
                     )}
                   </div>
                 </div>

@@ -15,7 +15,7 @@ const StatusBadge = ({ status }: { status: Repository['status'] }) => {
   const map: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
     READY: { label: 'Ready', color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20', icon: <CheckCircle2 className="w-3 h-3" /> },
     PENDING: { label: 'Pending', color: 'text-amber-400 bg-amber-400/10 border-amber-400/20', icon: <Clock className="w-3 h-3" /> },
-    PARSING: { label: 'Parsing', color: 'text-indigo-400 bg-indigo-400/10 border-indigo-400/20', icon: <Loader2 className="w-3 h-3 animate-spin" /> },
+    PARSING: { label: 'Parsing', color: 'text-white bg-white/5 border-white/10', icon: <Loader2 className="w-3 h-3 animate-spin" /> },
     EXTRACTING: { label: 'Extracting', color: 'text-blue-400 bg-blue-400/10 border-blue-400/20', icon: <Loader2 className="w-3 h-3 animate-spin" /> },
     BUILDING_GRAPH: { label: 'Building', color: 'text-purple-400 bg-purple-400/10 border-purple-400/20', icon: <Loader2 className="w-3 h-3 animate-spin" /> },
     FAILED: { label: 'Failed', color: 'text-rose-400 bg-rose-400/10 border-rose-400/20', icon: <AlertCircle className="w-3 h-3" /> },
@@ -100,14 +100,14 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50"
             title="Refresh list"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -119,15 +119,15 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
         {userRepos.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 py-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center">
-              <FolderGit2 className="w-8 h-8 text-slate-500" />
+              <FolderGit2 className="w-8 h-8 text-zinc-500" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-300">No repositories yet</p>
-              <p className="text-xs text-slate-500 mt-1">Add your first repo to get started</p>
+              <p className="text-sm font-medium text-zinc-300">No repositories yet</p>
+              <p className="text-xs text-zinc-500 mt-1">Add your first repo to get started</p>
             </div>
             <button
               onClick={onAddNew}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-white/10 text-sm font-medium hover:bg-indigo-500/30 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
             >
               <Plus className="w-4 h-4" /> Add Repository
             </button>
@@ -168,12 +168,12 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
                   <div className="flex items-center gap-2">
                     <StatusBadge status={repo.status} />
                     {isGitHub(repo.url) && (
-                      <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                      <span className="text-[10px] text-zinc-500 flex items-center gap-1">
                         <GitBranch className="w-2.5 h-2.5" /> GitHub
                       </span>
                     )}
                     {!isGitHub(repo.url) && repo.url !== 'local://uploaded' && (
-                      <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                      <span className="text-[10px] text-zinc-500 flex items-center gap-1">
                         <GitBranch className="w-2.5 h-2.5" /> Local
                       </span>
                     )}
@@ -191,7 +191,7 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                      className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
                       title="Open on GitHub"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -200,7 +200,7 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
                   <button
                     onClick={(e) => handleDelete(repo.id, e)}
                     disabled={isDeleting}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors disabled:opacity-50"
+                    className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors disabled:opacity-50"
                     title="Delete repository"
                   >
                     {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}

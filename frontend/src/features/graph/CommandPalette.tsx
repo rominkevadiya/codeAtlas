@@ -70,7 +70,7 @@ export const CommandPalette = ({ isOpen, onClose, nodes, onSelectNode }: Command
       case 'class': return <Box className="w-4 h-4 text-amber-400" />;
       case 'function': return <FunctionSquare className="w-4 h-4 text-violet-400" />;
       case 'module': return <PackageOpen className="w-4 h-4 text-sky-400" />;
-      default: return <FileCode2 className="w-4 h-4 text-slate-400" />;
+      default: return <FileCode2 className="w-4 h-4 text-zinc-400" />;
     }
   };
 
@@ -83,7 +83,7 @@ export const CommandPalette = ({ isOpen, onClose, nodes, onSelectNode }: Command
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] bg-zinc-900/40 backdrop-blur-sm"
             onClick={onClose}
           />
           <div className="fixed inset-0 z-[101] flex items-start justify-center pt-[15vh] pointer-events-none">
@@ -95,17 +95,17 @@ export const CommandPalette = ({ isOpen, onClose, nodes, onSelectNode }: Command
               className="w-full max-w-xl bg-[#0a0a0f] border border-white/10 rounded-2xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col"
             >
               <div className="flex items-center gap-3 px-4 py-4 border-b border-white/5">
-                <Search className="w-5 h-5 text-indigo-400 shrink-0" />
+                <Search className="w-5 h-5 text-white shrink-0" />
                 <input
                   ref={inputRef}
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search files, classes, or functions..."
-                  className="flex-1 bg-transparent border-none text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-0 text-lg"
+                  className="flex-1 bg-transparent border-none text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:ring-0 text-lg"
                 />
                 <div className="flex gap-1 shrink-0">
-                  <kbd className="px-2 py-1 bg-white/5 border border-white/10 rounded text-xs text-slate-400 font-mono">esc</kbd>
+                  <kbd className="px-2 py-1 bg-white/5 border border-white/10 rounded text-xs text-zinc-400 font-mono">esc</kbd>
                 </div>
               </div>
 
@@ -122,34 +122,34 @@ export const CommandPalette = ({ isOpen, onClose, nodes, onSelectNode }: Command
                           onClose();
                         }}
                         className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-colors ${
-                          isSelected ? 'bg-indigo-500/10 border-white/10' : 'hover:bg-white/5'
+                          isSelected ? 'bg-white/5 border-white/10' : 'hover:bg-white/5'
                         } border border-transparent`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className={`p-2 rounded-lg ${isSelected ? 'bg-indigo-500/20' : 'bg-white/5'}`}>
+                          <div className={`p-2 rounded-lg ${isSelected ? 'bg-white/10' : 'bg-white/5'}`}>
                             {getIcon(node.type)}
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <span className={`font-medium truncate ${isSelected ? 'text-indigo-200' : 'text-slate-200'}`}>
+                            <span className={`font-medium truncate ${isSelected ? 'text-zinc-200' : 'text-zinc-200'}`}>
                               {node.name || node.id}
                             </span>
                             {node.file_path && (
-                              <span className="text-xs text-slate-500 truncate font-mono mt-0.5">
+                              <span className="text-xs text-zinc-500 truncate font-mono mt-0.5">
                                 {node.file_path}
                               </span>
                             )}
                           </div>
                         </div>
                         {isSelected && (
-                          <ChevronRight className="w-4 h-4 text-indigo-400 shrink-0" />
+                          <ChevronRight className="w-4 h-4 text-white shrink-0" />
                         )}
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div className="p-8 text-center text-slate-500 flex flex-col items-center gap-3">
-                  <Search className="w-8 h-8 text-slate-600 opacity-50" />
+                <div className="p-8 text-center text-zinc-500 flex flex-col items-center gap-3">
+                  <Search className="w-8 h-8 text-zinc-600 opacity-50" />
                   <p>No results found for "{query}"</p>
                 </div>
               )}
