@@ -27,20 +27,18 @@ codeAtlas/
 │
 ├── frontend/                     ← React Application (Vite, TypeScript, Tailwind v4)
 │   └── src/
-│       ├── App.tsx               ← Router: / → Home, /repository/:id → Dashboard
+│       ├── App.tsx               ← Main Workspace & Conditional Routing
 │       ├── main.tsx
 │       ├── index.css
-│       ├── components/
-│       │   ├── layout/           ← MainLayout (navbar wrapper, <Outlet />)
-│       │   └── ui/               ← shadcn/ui generated components
+│       ├── components/           ← Shared UI components (Toast, Settings, shadcn/ui)
 │       ├── features/
-│       │   └── graph/            ← ✅ ACTIVE: Graph visualization module
-│       │       ├── CodeGraph.tsx ←   Fetches data → dagre layout → ReactFlow canvas
-│       │       └── nodes/
-│       │           └── EntityNode.tsx ← Custom node: icon + filename + path
-│       ├── pages/
-│       │   ├── Home.tsx          ← Repository list + ZIP upload form
-│       │   └── RepositoryDashboard.tsx ← Graph loader + CodeGraph renderer
+│       │   ├── auth/             ← JWT Auth (Login/Register)
+│       │   ├── landing/          ← Landing Page
+│       │   ├── graph/            ← ✅ ACTIVE: Graph visualization module (CodeGraph)
+│       │   ├── repositories/     ← Repo selection and management
+│       │   ├── upload/           ← ZIP upload logic
+│       │   ├── ai/               ← Chat Assistant and Auto-Doc panels
+│       │   └── analysis/         ← Code metrics and stats
 │       └── services/
 │           └── api.ts            ← Axios instance + RepositoryService
 │
@@ -258,31 +256,28 @@ The graph is persisted and served in NetworkX **node-link format**:
 
 ```
 App.tsx
-└── BrowserRouter
-    └── MainLayout  (components/layout/MainLayout.tsx)
-        ├── Navbar / Sidebar
-        └── <Outlet />
-            ├── LandingPage.tsx (route: / if unauthenticated)
-            ├── AuthScreen.tsx (route: /auth)
-            ├── Home.tsx  (route: /)
-            │   ├── Repository list (GET /repositories/)
-            │   └── Upload form (POST /repositories/upload/)
-            └── RepositoryDashboard.tsx  (route: /repository/:id)
-                ├── useEffect → GET /repositories/:id/graph/
-                ├── Loading / Error states
-                └── CodeGraph.tsx  (features/graph/CodeGraph.tsx)
-                    ├── useNodesState / useEdgesState
-                    ├── Dagre layout engine (LR direction)
-                    ├── Blast Radius Highlight (Rose/Emerald coloring based on selectedNodeId)
-                    └── ReactFlow
-                        ├── EntityNode (nodes/EntityNode.tsx)
-                        │   ├── Icon (file=blue, class=orange, fn=purple)
-                        │   ├── Display name (basename only for files)
-                        │   └── Path (directory or source file)
-                        ├── Background (dot grid)
-                        ├── Controls (zoom in/out/fit)
-                        └── MiniMap
-                └── Source Code Panel (Absolute sliding panel rendering nodeSnippet)
+├── LandingPage.tsx (if unauthenticated & no token)
+├── AuthScreen.tsx (if logging in / registering)
+└── Workspace (if authenticated)
+    ├── RepoPanel.tsx (Sidebar for repository selection)
+    │   └── UploadModal.tsx (for new repos)
+    └── Main Canvas Area
+        ├── useEffect → GET /repositories/:id/graph/
+        ├── Loading / Error states
+        └── CodeGraph.tsx (features/graph/CodeGraph.tsx)
+            ├── useNodesState / useEdgesState
+            ├── Dagre layout engine (LR direction)
+            ├── Blast Radius Highlight (Rose/Emerald coloring)
+            └── ReactFlow
+                ├── EntityNode (nodes/EntityNode.tsx)
+                ├── Background (dot grid)
+                ├── Controls (zoom in/out/fit)
+                └── MiniMap
+        ├── CommandPalette.tsx (Cmd+K global search overlay)
+        ├── AutoDocPanel.tsx (AI architecture documentation sliding panel)
+        ├── AnalysisPanel.tsx (Code metrics floating dashboard)
+        ├── ChatPanel.tsx (AI Assistant chat sliding panel)
+        └── Source Code Panel (Absolute sliding panel rendering nodeSnippet)
 ```
 
 ---
@@ -341,11 +336,11 @@ Views should only:
 | Phase | What Was Built |
 |---|---|
 | **Phase 1** | Vite + React + TypeScript + Tailwind v4 + Django + PostgreSQL + .env + CORS |
-| **Phase 2** | Domain module scaffold (8 apps), DRF router, REST viewsets, React Router, `Home.tsx`, `RepositoryDashboard.tsx` |
+| **Phase 2** | Domain module scaffold (8 apps), DRF router, REST viewsets, React workspace scaffold |
 | **Phase 3** | `ParserService` (Tree-sitter, manual AST traversal), `GraphService` (NetworkX), `RepoService.upload_and_extract_repository()`, ZIP endpoint |
 | **Phase 4** | `GET /repositories/<id>/graph/` endpoint, `RepositoryService.getGraph()`, `CodeGraph.tsx` with Dagre LR layout, `EntityNode` with filename + path display |
 | **Phase 5** | Gemini AI integration, `AIService` query processing, `POST /ai/query/` endpoint, AI Assistant Side Panel in frontend |
-| **Phase 5 (Hardened)** | Security fixes (Zip Slip, 50MB upload limit), DRF rate limiting (`AIQueryAnonThrottle`, `AIQueryUserThrottle`), lazy Gemini model caching, PostgreSQL database env mapping, chat history panel UX, dynamic repo list on Home page |
+| **Phase 5 (Hardened)** | Security fixes (Zip Slip, 50MB upload limit), DRF rate limiting (`AIQueryAnonThrottle`, `AIQueryUserThrottle`), lazy Gemini model caching, PostgreSQL database env mapping, chat history panel UX, dynamic repo list in sidebar |
 | **Phase 5.5** | AST parser enrichment (line numbers), `node_snippet` endpoint, Blast Radius graph highlighting (Rose/Emerald), interactive source code viewer sliding panel. |
 | **Phase 6** | Frontend Intelligence: Real-time graph filtering, Cmd+K search panel (framer-motion), AI source code explanation (Auto-Doc), and updated DRF serializers. |
 | **Phase 7** | Real-time WebSocket progress via Celery + Django Channels |

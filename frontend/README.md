@@ -12,9 +12,8 @@ This is the React frontend for the CodeAtlas platform — an AI-powered reposito
 | **Tailwind CSS v4** | Utility-first styling |
 | **React Flow (`@xyflow/react`)** | Interactive graph canvas |
 | **Dagre** | Automatic Left-to-Right graph layout |
-| **Framer Motion** | Fluid animations (Cmd+K Command Palette) |
+| **Framer Motion** | Fluid animations and UI transitions |
 | **Axios** | HTTP client for the Django REST API |
-| **React Router DOM** | Client-side routing |
 | **Zustand** | Global state management (Auth, UI, Graph) |
 | **lucide-react** | Icon library |
 
@@ -22,28 +21,39 @@ This is the React frontend for the CodeAtlas platform — an AI-powered reposito
 
 ```
 src/
-├── App.tsx                        ← Router: /, /repository/:id, /auth
+├── App.tsx                        ← Main Workspace & Conditional Routing
 ├── main.tsx                       ← Entry point
 ├── index.css                      ← Global styles + Tailwind v4
 │
 ├── components/
-│   ├── layout/                    ← MainLayout: navbar + <Outlet />
+│   ├── ToastContainer.tsx         ← Global toast notifications
+│   ├── SettingsModal.tsx          ← User settings and config
 │   └── ui/                        ← shadcn/ui components
 │
 ├── features/
 │   ├── graph/
 │   │   ├── CodeGraph.tsx          ← Main canvas component
+│   │   ├── CommandPalette.tsx     ← Cmd+K search palette
 │   │   └── nodes/
 │   │       └── EntityNode.tsx     ← Custom node: icon + name + path
 │   ├── landing/
 │   │   └── LandingPage.tsx        ← Unauthenticated landing page
-│   └── auth/
-│       └── AuthScreen.tsx         ← JWT Login and Registration
+│   ├── auth/
+│   │   └── AuthScreen.tsx         ← JWT Login and Registration
+│   ├── repositories/
+│   │   └── RepoPanel.tsx          ← Repository selection panel
+│   ├── upload/
+│   │   └── UploadModal.tsx        ← ZIP upload modal
+│   ├── ai/
+│   │   ├── ChatPanel.tsx          ← AI Assistant chat interface
+│   │   └── AutoDocPanel.tsx       ← AI Architecture documentation
+│   └── analysis/
+│       └── AnalysisPanel.tsx      ← Code metrics dashboard
 │
-├── pages/
-│   ├── Home.tsx                   ← Repo list + ZIP upload form
-│   └── RepositoryDashboard.tsx   ← Graph fetcher + renderer
-│
+├── store/
+│   └── useAppStore.ts             ← Global state definition
+├── types/
+│   └── graph.ts                   ← TypeScript interfaces
 └── services/
     └── api.ts                     ← Axios + RepositoryService
 ```

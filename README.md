@@ -57,7 +57,7 @@ CodeAtlas automates this by:
 | Phase | Status | Description |
 |---|---|---|
 | **Phase 1** | ✅ **Complete** | Project setup — folder structure, Django, React, PostgreSQL, Tailwind, TypeScript, Git |
-| **Phase 2** | ✅ **Complete** | Django domain modules, REST API endpoints, React routing and page scaffold |
+| **Phase 2** | ✅ **Complete** | Django domain modules, REST API endpoints, React workspace scaffold |
 | **Phase 3** | ✅ **Complete** | Tree-sitter parser, NetworkX graph builder, ZIP upload pipeline, `knowledge_graph.json` persistence |
 | **Phase 4** | ✅ **Complete** | `GET /graph/` API, React Flow interactive visualization, Dagre auto-layout, custom node components |
 | **Phase 5** | ✅ **Complete** | Gemini AI integration — natural language code queries |
@@ -135,7 +135,6 @@ The monolith is divided into two top-level directories that are independently de
 | **Zustand** | 5.x | Global state management (Auth, Graph data, UI Overlays) |
 | **Axios** | 1.x | HTTP client for REST API calls |
 | **lucide-react** | Latest | Icon library |
-| **React Router DOM** | 7.x | Client-side routing |
 
 ### Backend
 
@@ -177,25 +176,20 @@ codeAtlas/                            ← Monolith root / Git repository
 │   ├── public/
 │   ├── src/
 │   │   ├── assets/
-│   │   ├── components/
-│   │   │   ├── layout/               ← MainLayout (navbar, sidebar, outlet)
-│   │   │   └── ui/                   ← shadcn/ui generated components
+│   │   ├── components/               ← Shared UI components (Toast, Settings, shadcn/ui)
 │   │   ├── features/
 │   │   │   ├── auth/                 ← JWT Auth (Login/Register)
 │   │   │   ├── landing/              ← Landing Page
-│   │   │   ├── graph/                ← React Flow graph canvas
-│   │   │   │   ├── CodeGraph.tsx     ← Main canvas: data → dagre layout → ReactFlow
-│   │   │   │   └── nodes/
-│   │   │   │       └── EntityNode.tsx ← Custom node: file/class/function with icon
-│start    │   │   └── repository/           ← (Placeholder for future repo features)
-│   │   ├── pages/
-│   │   │   ├── Home.tsx              ← Repository list + ZIP upload form
-│   │   │   └── RepositoryDashboard.tsx ← Fetches graph, renders CodeGraph
+│   │   │   ├── graph/                ← React Flow graph canvas (CodeGraph, CommandPalette)
+│   │   │   ├── repositories/         ← Repo selection and management
+│   │   │   ├── upload/               ← ZIP upload logic
+│   │   │   ├── ai/                   ← Chat Assistant and Auto-Doc panels
+│   │   │   └── analysis/             ← Code metrics and stats
 │   │   ├── services/
 │   │   │   └── api.ts                ← Axios instance + RepositoryService
 │   │   ├── store/                    ← Global Zustand store (useAppStore.ts)
 │   │   ├── types/                    ← Shared TypeScript interfaces
-│   │   ├── App.tsx                   ← Router: / → Home, /repository/:id → Dashboard, /auth
+│   │   ├── App.tsx                   ← Main Workspace & Conditional Routing
 │   │   ├── main.tsx
 │   │   └── index.css                 ← Global styles + Tailwind v4 directives
 │   ├── index.html
@@ -502,7 +496,7 @@ import { Button } from '@/components/ui/button'
 | Phase | Status | Description |
 |---|---|---|
 | **Phase 1** | ✅ Complete | Project environment setup — folder structure, Django, React, PostgreSQL, Tailwind, TypeScript |
-| **Phase 2** | ✅ Complete | Django domain modules (`repositories`, `parser`, `graph`, `common`), REST API, React routing |
+| **Phase 2** | ✅ Complete | Django domain modules (`repositories`, `parser`, `graph`, `common`), REST API, React workspace scaffold |
 | **Phase 3** | ✅ Complete | Tree-sitter AST parser, NetworkX graph engine, ZIP upload pipeline, `knowledge_graph.json` |
 | **Phase 4** | ✅ Complete | `GET /graph/` API endpoint, React Flow canvas, Dagre auto-layout, `EntityNode` custom node |
 | **Phase 5** | ✅ Complete | Gemini AI integration — natural language code queries ("What calls X?") |
