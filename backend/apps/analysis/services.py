@@ -95,10 +95,43 @@ class MetricsService:
         except Exception:
             pass
 
+        # 4. Architectural Hotspots (PageRank)
+        # Identifies the most critical files based on dependency graph centrality
+        hotspots = []
+        try:
+            pr = nx.pagerank(imports_graph)
+            sorted_pr = sorted(pr.items(), key=lambda x: x[1], reverse=True)[:10]
+            for node_id, score in sorted_pr:
+                hotspots.append({
+                    "id": node_id,
+                    "name": G.nodes[node_id].get("name", node_id),
+                    "score": round(score, 4)
+                })
+        except Exception:
+            pass
+
+        # 5. Potential Dead Code (Orphaned Files)
+        # Files with 0 inbound imports (excluding typical entry points)
+        dead_code_candidates = []
+        for fn in file_nodes:
+            if fn in imports_graph and imports_graph.in_degree(fn) == 0:
+                name = G.nodes[fn].get("name", fn).lower()
+                # Exclude common entrypoints
+                if not any(entry in name for entry in ['main', 'index', 'app', 'manage', 'setup', 'wsgi', 'asgi', 'urls']):
+                    dead_code_candidates.append({
+                        "id": fn,
+                        "name": G.nodes[fn].get("name", fn)
+                    })
+        
+        # Limit to top 15 dead code candidates to avoid overwhelming output
+        dead_code_candidates = dead_code_candidates[:15]
+
         return {
             "top_giant_files": top_giant_files,
             "top_coupled_files": top_coupled_files,
-            "circular_dependencies": cycles
+            "circular_dependencies": cycles,
+            "architectural_hotspots": hotspots,
+            "dead_code_candidates": dead_code_candidates
         }
 
     @staticmethod

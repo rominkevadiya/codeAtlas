@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { X, FileText, Loader2, Download, Copy, Check, RefreshCw } from 'lucide-react';
+import { X, FileText, Loader2, Download, Copy, Check, RefreshCw, Maximize2, Minimize2 } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import ReactMarkdown from 'react-markdown';
 import { AIService } from '../../services/api';
 import { useAppStore } from '../../store/useAppStore';
 
@@ -13,6 +15,7 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { addToast } = useAppStore();
 
   useEffect(() => {
@@ -76,8 +79,8 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
     }
   };
 
-  return (
-    <div className="w-[32rem] h-full bg-slate-900 border-l border-slate-800 shadow-2xl flex flex-col z-50 overflow-hidden animate-in slide-in-from-right-8 duration-200">
+  const panelContent = (
+    <div className={`flex flex-col bg-slate-900 shadow-2xl overflow-hidden animate-in duration-200 ${isExpanded ? 'w-full h-full max-w-5xl max-h-[85vh] rounded-2xl mx-auto border border-slate-800 fade-in' : 'w-[32rem] h-full border-l border-slate-800 z-50 slide-in-from-right-8'}`}>
       {/* Header */}
       <div className="flex justify-between items-center p-4 border-b border-slate-800 bg-slate-950/80 shrink-0">
         <div className="flex items-center gap-2 text-indigo-400 font-semibold text-sm">
@@ -87,6 +90,13 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
         <div className="flex items-center gap-1.5">
           {doc && !loading && (
             <>
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                title={isExpanded ? "Minimize" : "Expand Full Screen"}
+              >
+                {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              </button>
               <button
                 onClick={generateDoc}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
@@ -110,12 +120,14 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
               </button>
             </>
           )}
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors ml-1"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          {isExpanded ? null : (
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors ml-1"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -143,14 +155,50 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
             </div>
           </div>
         ) : doc ? (
-          <div className="prose prose-sm prose-invert max-w-none">
-            <pre className="text-xs font-mono whitespace-pre-wrap leading-relaxed text-slate-300 bg-transparent border-0 p-0 m-0">
+          <div className="w-full">
+            <ReactMarkdown
+              components={{
+                h1: ({...props}) => <h1 className="text-2xl font-bold text-white mb-6 border-b border-white/10 pb-3 mt-8 first:mt-0" {...props} />,
+                h2: ({...props}) => <h2 className="text-xl font-semibold text-slate-100 mb-4 mt-8" {...props} />,
+                h3: ({...props}) => <h3 className="text-lg font-medium text-slate-200 mb-3 mt-6" {...props} />,
+                p: ({...props}) => <p className="text-sm text-slate-300 mb-4 leading-relaxed" {...props} />,
+                ul: ({...props}) => <ul className="list-disc pl-5 space-y-2 mb-4 text-sm text-slate-300" {...props} />,
+                ol: ({...props}) => <ol className="list-decimal pl-5 space-y-2 mb-4 text-sm text-slate-300" {...props} />,
+                li: ({...props}) => <li className="text-slate-300" {...props} />,
+                pre: ({...props}) => <pre className="bg-[#0a0a0c] p-4 rounded-xl border border-white/10 my-4 overflow-x-auto text-xs" {...props} />,
+                code: ({...props}: any) => props.inline ? <code className="bg-white/10 px-1.5 py-0.5 rounded-md text-indigo-300 font-mono text-[11px]" {...props} /> : <code className="font-mono text-slate-300" {...props} />,
+                strong: ({...props}) => <strong className="font-semibold text-white" {...props} />,
+                blockquote: ({...props}) => <blockquote className="border-l-4 border-indigo-500/50 pl-4 py-1 my-4 text-slate-400 bg-indigo-500/5 rounded-r-lg" {...props} />,
+              }}
+            >
               {doc}
-            </pre>
+            </ReactMarkdown>
           </div>
         ) : null}
       </div>
     </div>
   );
+
+  if (isExpanded) {
+    return (
+      <>
+        <div className="w-[32rem] h-full border-l border-slate-800 bg-slate-900/50 flex flex-col items-center justify-center p-6 text-center shadow-2xl z-50">
+          <FileText className="w-8 h-8 text-indigo-400/50 mb-3" />
+          <p className="text-sm text-slate-400">Documentation is opened in full screen</p>
+          <button onClick={() => setIsExpanded(false)} className="mt-4 px-4 py-2 bg-white/5 hover:bg-white/10 text-xs text-white rounded-lg transition-colors">
+            Close Full Screen
+          </button>
+        </div>
+        {createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            {panelContent}
+          </div>,
+          document.body
+        )}
+      </>
+    );
+  }
+
+  return panelContent;
 };
 

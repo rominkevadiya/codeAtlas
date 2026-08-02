@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Send, Bot, User, Sparkles, Loader2, Plus, Trash2, MessageSquare } from 'lucide-react';
+import { X, Send, Bot, User, Sparkles, Loader2, Plus, Trash2, MessageSquare, Maximize2, Minimize2 } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import ReactMarkdown from 'react-markdown';
 import { ChatService, type ChatSession, type ChatMessage } from '../../services/api';
 
@@ -22,6 +23,7 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
   const [isTyping, setIsTyping] = useState(false);
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const [isDeletingSession, setIsDeletingSession] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -142,8 +144,8 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
     }
   };
 
-  return (
-    <div className="h-full flex flex-col glass-card border border-indigo-500/20 rounded-2xl shadow-[0_0_40px_rgba(99,102,241,0.1)] overflow-hidden">
+  const panelContent = (
+    <div className={`flex flex-col glass-card border border-indigo-500/20 shadow-[0_0_40px_rgba(99,102,241,0.1)] overflow-hidden ${isExpanded ? 'w-full h-full max-w-5xl max-h-[85vh] rounded-2xl mx-auto bg-[#0B0B0F]' : 'h-full rounded-2xl'}`}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-white/5 bg-indigo-500/5 shrink-0">
         <div className="flex items-center gap-3">
@@ -167,9 +169,18 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
               <Plus className="w-4 h-4" />
             </button>
           )}
-          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
-            <X className="w-4 h-4" />
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            title={isExpanded ? "Minimize" : "Expand Full Screen"}
+          >
+            {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
+          {isExpanded ? null : (
+            <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -341,4 +352,26 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
       )}
     </div>
   );
+
+  if (isExpanded) {
+    return (
+      <>
+        <div className="h-full flex flex-col items-center justify-center p-6 text-center border border-indigo-500/20 rounded-2xl bg-indigo-500/5 shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+          <MessageSquare className="w-8 h-8 text-indigo-400/50 mb-3" />
+          <p className="text-sm text-slate-400">Chat is opened in full screen</p>
+          <button onClick={() => setIsExpanded(false)} className="mt-4 px-4 py-2 bg-white/5 hover:bg-white/10 text-xs text-white rounded-lg transition-colors">
+            Close Full Screen
+          </button>
+        </div>
+        {createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            {panelContent}
+          </div>,
+          document.body
+        )}
+      </>
+    );
+  }
+
+  return panelContent;
 };

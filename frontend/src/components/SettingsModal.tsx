@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useAppStore } from '../store/useAppStore';
 import { X, User, Settings, Shield, Trash2, LogOut, Sliders } from 'lucide-react';
 
@@ -31,7 +32,7 @@ export const SettingsModal: React.FC = () => {
 
   const userInitial = currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : 'U';
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
         {/* Header */}
@@ -204,6 +205,7 @@ export const SettingsModal: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
