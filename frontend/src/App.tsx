@@ -61,7 +61,7 @@ export default function App() {
     if (isAuthenticated) {
       loadUserData();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, loadUserData]);
 
   useEffect(() => {
     if (isAuthenticated) {

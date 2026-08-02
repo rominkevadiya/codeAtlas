@@ -82,7 +82,7 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return api(originalRequest);
         }
-      } catch (refreshError) {
+      } catch {
         // Refresh failed — clear storage and redirect to home
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');

@@ -20,6 +20,7 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
 
   useEffect(() => {
     loadOrGenerateDoc();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [repositoryId]);
 
   const loadOrGenerateDoc = async () => {
@@ -33,7 +34,7 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
       } else {
         await generateDoc();
       }
-    } catch (err: any) {
+    } catch {
       // If fetching fails, attempt generation
       await generateDoc();
     }
