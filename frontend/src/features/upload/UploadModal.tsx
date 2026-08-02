@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { X, UploadCloud, FileArchive, Loader2, AlertCircle, GitBranch } from 'lucide-react';
 import { RepositoryService } from '../../services/api';
 
@@ -7,19 +8,15 @@ interface UploadModalProps {
  onUploadComplete: (repoId: string) => void;
 }
 
-export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => {
+export const UploadModal = React.forwardRef<HTMLDivElement, UploadModalProps>(({ onClose, onUploadComplete }, ref) => {
  const [file, setFile] = useState<File | null>(null);
  const [repoName, setRepoName] = useState('');
  const [githubUrl, setGithubUrl] = useState('');
  const [uploadMode, setUploadMode] = useState<'zip' | 'github'>('github');
  const [isUploading, setIsUploading] = useState(false);
  const [uploadError, setUploadError] = useState('');
- 
- const [progressState, setProgressState] = useState({
-  status: '',
-  progress: 0,
-  message: ''
- });
+
+ const [progressState, setProgressState] = useState({ status: '', progress: 0, message: '' });
 
  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   if (e.target.files && e.target.files.length > 0) {
@@ -29,12 +26,12 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
 
  const handleUpload = async (e: React.FormEvent) => {
   e.preventDefault();
-  
+
   if (uploadMode === 'zip' && (!file || !repoName)) {
    setUploadError('Please provide a repository name and select a zip file.');
    return;
   }
-  
+
   if (uploadMode === 'github' && !githubUrl) {
    setUploadError('Please provide a GitHub URL.');
    return;
@@ -42,7 +39,7 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
 
   setIsUploading(true);
   setUploadError('');
-  setProgressState({ status: 'UPLOADING', progress: 10, message: uploadMode === 'zip' ? 'Uploading archive...' : 'Initiating import...' });
+  setProgressState({ status: 'UPLOADING', progress: 12, message: uploadMode === 'zip' ? 'Preparing archive for analysis...' : 'Preparing repository import...' });
 
   try {
    let response;
@@ -51,13 +48,13 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
    } else {
     response = await RepositoryService.importGithub(githubUrl);
    }
-   
+
    const repoId = response.data.id;
 
    setProgressState({
     status: response.data.status || 'PENDING',
-    progress: 20,
-    message: uploadMode === 'zip' ? 'Uploaded archive. Connecting to progress stream...' : 'Import started. Connecting to progress stream...',
+    progress: 24,
+    message: uploadMode === 'zip' ? 'Archive received. Waiting for processing...' : 'Import request accepted. Waiting for processing...',
    });
 
    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -70,17 +67,11 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
    ws.onmessage = (event) => {
     try {
      const data = JSON.parse(event.data);
-     setProgressState({
-      status: data.status,
-      progress: data.progress || 0,
-      message: data.message || '',
-     });
+     setProgressState({ status: data.status, progress: data.progress || 0, message: data.message || '' });
 
      if (data.status === 'READY') {
       ws.close();
-      setTimeout(() => {
-       onUploadComplete(repoId);
-      }, 800);
+      setTimeout(() => { onUploadComplete(repoId); }, 800);
      } else if (data.status === 'FAILED') {
       ws.close();
       setUploadError(data.error || 'Processing failed.');
@@ -107,7 +98,6 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
      return prev;
     });
    };
-
   } catch (err: any) {
    console.error(err);
    setUploadError(err.response?.data?.error || 'Failed to process repository');
@@ -116,123 +106,87 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
  };
 
  return (
-  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-   <div className="w-full max-w-md bg-[#0a0a0f] border border-white/10 rounded-2xl shadow-sm overflow-hidden">
-    
-    {/* Header */}
-    <div className="flex items-center justify-between p-5 border-b border-white/5 bg-zinc-950/5">
+   <motion.div
+    ref={ref}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+   >
+     <motion.div 
+      initial={{ scale: 0.95, opacity: 0, y: 20 }}
+      animate={{ scale: 1, opacity: 1, y: 0 }}
+      exit={{ scale: 0.95, opacity: 0, y: 20 }}
+      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+      className="w-full max-w-md overflow-hidden rounded-[28px] border border-zinc-800 bg-zinc-950 shadow-[0_24px_80px_rgba(0,0,0,0.35)]"
+     >
+        <div className="flex items-center justify-between border-b border-zinc-800 bg-black p-5">
      <div className="flex items-center gap-3">
-      <div className="w-8 h-8 rounded-lg bg-zinc-950/10 flex items-center justify-center">
-       <UploadCloud className="w-4 h-4 text-white" />
+    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-800 text-zinc-300 border border-zinc-700">
+       <UploadCloud className="h-5 w-5" />
       </div>
-      <div>
-       <h2 className="text-base font-semibold text-white tracking-tight">Add Repository</h2>
-       <p className="text-[11px] text-zinc-400 font-medium">Import or upload codebase</p>
-      </div>
+      <motion.div>
+             <h2 className="text-base font-semibold text-zinc-200">Add repository</h2>
+             <p className="text-xs text-zinc-500">Import public code or upload a ZIP</p>
+      </motion.div>
      </div>
      {!isUploading && (
-      <button
-       onClick={onClose}
-       className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-950/10 transition-colors"
-      >
-       <X className="w-4 h-4" />
+            <button onClick={onClose} className="rounded-xl p-2 text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-200">
+       <X className="h-4 w-4" />
       </button>
      )}
     </div>
 
-    {/* Content */}
     <div className="p-6">
      {isUploading ? (
-      <div className="py-8 flex flex-col items-center justify-center gap-6">
-       <div className="relative flex items-center justify-center w-16 h-16 rounded-full bg-zinc-950/5">
-        <Loader2 className="w-8 h-8 text-white animate-spin absolute" />
-        <FileArchive className="w-4 h-4 text-white" />
+      <div className="flex flex-col items-center justify-center gap-6 py-8">
+    <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-zinc-200/10">
+     <Loader2 className="absolute h-8 w-8 animate-spin text-zinc-200" />
+     <FileArchive className="h-5 w-5 text-zinc-200" />
        </div>
-       
-       <div className="w-full space-y-2 text-center">
-        <div className="flex justify-between items-center text-xs font-semibold px-1">
-         <span className="text-zinc-300">{progressState.message || 'Processing...'}</span>
-         <span className="text-white">{progressState.progress}%</span>
+       <div className="w-full space-y-3 text-center">
+        <div className="flex items-center justify-between px-1 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
+         <span>{progressState.message || 'Processing repository...'}</span>
+         <span className="text-zinc-200">{progressState.progress}%</span>
         </div>
-        <div className="w-full bg-zinc-900 rounded-full h-1.5 mb-2 overflow-hidden">
-         <div 
-          className="h-full bg-zinc-950 rounded-full transition-all duration-300"
-          style={{ width: `${Math.max(5, progressState.progress)}%` }}
-         />
+        <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+         <div className="h-full rounded-full bg-zinc-200 transition-all duration-300" style={{ width: `${Math.max(12, progressState.progress)}%` }} />
         </div>
        </div>
       </div>
      ) : (
       <form onSubmit={handleUpload} className="space-y-5">
-       
-       {/* Mode Toggle */}
-       <div className="flex bg-[#111115] rounded-xl p-1 border border-white/5">
-        <button
-         type="button"
-         onClick={() => setUploadMode('github')}
-         className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-colors ${uploadMode === 'github' ? 'bg-zinc-950/10 text-white' : 'text-zinc-400 hover:text-zinc-300'}`}
-        >
-         <GitBranch className="w-4 h-4" />
-         GitHub URL
+    <div className="flex rounded-2xl border border-zinc-800 bg-black p-1">
+     <button type="button" onClick={() => setUploadMode('github')} className={`flex-1 rounded-xl px-3 py-2 text-sm font-medium transition ${uploadMode === 'github' ? 'bg-zinc-950 text-zinc-200 shadow-sm' : 'text-zinc-400'}`}>
+         <div className="flex items-center justify-center gap-2"><GitBranch className="h-4 w-4" /> GitHub / GitLab</div>
         </button>
-        <button
-         type="button"
-         onClick={() => setUploadMode('zip')}
-         className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-medium rounded-lg transition-colors ${uploadMode === 'zip' ? 'bg-zinc-950/10 text-white' : 'text-zinc-400 hover:text-zinc-300'}`}
-        >
-         <FileArchive className="w-4 h-4" />
-         ZIP Archive
+        <button type="button" onClick={() => setUploadMode('zip')} className={`flex-1 rounded-xl px-3 py-2 text-sm font-medium transition ${uploadMode === 'zip' ? 'bg-zinc-950 text-zinc-200 shadow-sm' : 'text-zinc-400'}`}>
+         <div className="flex items-center justify-center gap-2"><FileArchive className="h-4 w-4" /> ZIP archive</div>
         </button>
        </div>
 
        {uploadMode === 'github' ? (
-        <div className="space-y-1.5 animate-in slide-in-from-right-4 duration-300">
-         <label className="text-xs font-medium text-zinc-400 uppercase tracking-wide px-1">GitHub / GitLab URL</label>
-         <input
-          type="url"
-          placeholder="https://github.com/user/repo"
-          value={githubUrl}
-          onChange={(e) => setGithubUrl(e.target.value)}
-          className="w-full bg-[#111115] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-white/20 transition-all placeholder:text-zinc-600"
-         />
-         <p className="text-[10px] text-zinc-500 px-1 mt-1">
-          Public repositories only. Example: https://github.com/facebook/react
-         </p>
+        <div className="space-y-2">
+         <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Repository URL</label>
+         <input type="url" placeholder="https://github.com/user/repo" value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-zinc-200 outline-none transition focus:border-zinc-400" />
+         <p className="text-xs text-zinc-500">Public repositories only. Example: https://github.com/facebook/react</p>
         </div>
        ) : (
-        <div className="space-y-5 animate-in slide-in-from-left-4 duration-300">
-         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-zinc-400 uppercase tracking-wide px-1">Repository Name</label>
-          <input
-           type="text"
-           placeholder="e.g., CodeAtlas Core"
-           value={repoName}
-           onChange={(e) => setRepoName(e.target.value)}
-           className="w-full bg-[#111115] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-white/20 transition-all placeholder:text-zinc-600"
-          />
+        <div className="space-y-4">
+         <div>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Repository name</label>
+          <input type="text" placeholder="CodeAtlas Core" value={repoName} onChange={(e) => setRepoName(e.target.value)} className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-zinc-200 outline-none transition focus:border-zinc-400" />
          </div>
-
-         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-zinc-400 uppercase tracking-wide px-1">Archive (.zip)</label>
-          <div className="relative group cursor-pointer">
-           <input
-            type="file"
-            accept=".zip"
-            onChange={handleFileChange}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-           />
-           <div className={`w-full border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-3 transition-colors ${file ? 'border-white/10 bg-zinc-950/5' : 'border-white/10 bg-[#111115] group-hover:border-white/20 group-hover:bg-zinc-950/5'}`}>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${file ? 'bg-zinc-950/10' : 'bg-zinc-950/5'}`}>
-             <FileArchive className={`w-5 h-5 ${file ? 'text-white' : 'text-zinc-400'}`} />
+         <div>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Archive (.zip)</label>
+          <div className="relative cursor-pointer">
+           <input type="file" accept=".zip" onChange={handleFileChange} className="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
+           <div className={`rounded-[20px] border-2 border-dashed p-6 text-center transition ${file ? 'border-zinc-400 bg-zinc-200/10' : 'border-zinc-800 bg-zinc-900 hover:border-zinc-400'}`}>
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700 shadow-sm">
+             <FileArchive className="h-5 w-5" />
             </div>
-            <div className="text-center">
-             <p className="text-sm font-medium text-zinc-200">
-              {file ? file.name : 'Click or drag ZIP file here'}
-             </p>
-             <p className="text-xs text-zinc-500 mt-1">
-              {file ? `${(file.size / (1024 * 1024)).toFixed(2)} MB` : 'Maximum file size: 50MB'}
-             </p>
-            </div>
+            <p className="mt-4 text-sm font-semibold text-zinc-200">{file ? file.name : 'Click or drag a ZIP file here'}</p>
+            <p className="mt-2 text-xs text-zinc-500">{file ? `${(file.size / (1024 * 1024)).toFixed(2)} MB` : 'Maximum file size: 50MB'}</p>
            </div>
           </div>
          </div>
@@ -240,23 +194,19 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
        )}
 
        {uploadError && (
-        <div className="flex items-start gap-2 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20">
-         <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-         <p className="text-xs text-rose-300">{uploadError}</p>
+        <div className="flex items-start gap-2 rounded-2xl border border-rose-900/50 bg-rose-950/30 p-3 text-sm text-rose-300">
+         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+         <span>{uploadError}</span>
         </div>
        )}
 
-       <button
-        type="submit"
-        disabled={(uploadMode === 'zip' && (!file || !repoName)) || (uploadMode === 'github' && !githubUrl)}
-        className="w-full py-3 rounded-md bg-white text-black font-semibold text-sm hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-       >
+    <button type="submit" disabled={(uploadMode === 'zip' && (!file || !repoName)) || (uploadMode === 'github' && !githubUrl)} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-zinc-800 border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-700 hover:text-zinc-200 disabled:cursor-not-allowed disabled:opacity-70">
         {uploadMode === 'zip' ? 'Upload & Process' : 'Import & Process'}
        </button>
       </form>
      )}
-    </div>
-   </div>
-  </div>
- );
-};
+     </div>
+    </motion.div>
+   </motion.div>
+  );
+});

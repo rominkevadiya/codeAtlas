@@ -228,7 +228,9 @@ export const useAppStore = create<AppState>((set, get) => ({
  fetchNodeData: async () => {
   const { repoId, selectedNodeId, selectedNodeData } = get();
 
-  if (!selectedNodeId || !repoId || !selectedNodeData?.file_path) {
+  const filePath = selectedNodeData?.file_path || (selectedNodeData?.type === 'file' ? selectedNodeData?.name : undefined);
+
+  if (!selectedNodeId || !repoId || !filePath) {
    set({ nodeSnippet: null, aiExplanation: null, impactData: null });
    return;
   }
@@ -244,7 +246,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   try {
    const snippetRes = await RepositoryService.getNodeSnippet(
     repoId,
-    selectedNodeData.file_path,
+    filePath,
     selectedNodeData.start_line,
     selectedNodeData.end_line
    );

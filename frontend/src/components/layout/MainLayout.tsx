@@ -7,11 +7,11 @@ export const MainLayout = () => {
    <header className="border-b border-zinc-200 bg-zinc-950 sticky top-0 z-50">
     <div className="container mx-auto px-4 h-16 flex items-center justify-between">
      <Link to="/" className="flex items-center gap-2 font-bold text-lg text-primary">
-      <Code className="h-6 w-6 text-white " />
+      <Code className="h-6 w-6 text-zinc-200 " />
       <span>CodeAtlas</span>
      </Link>
      <nav className="flex items-center gap-6">
-      <Link to="/" className="text-sm font-medium hover:text-white :text-blue-400 transition-colors">
+      <Link to="/" className="text-sm font-medium hover:text-zinc-200 :text-blue-400 transition-colors">
        Dashboard
       </Link>
      </nav>

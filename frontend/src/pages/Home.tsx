@@ -153,7 +153,7 @@ export const Home = () => {
         <li key={repo.id}>
          <Link
           to={`/repository/${repo.id}`}
-          className="flex items-center gap-3 p-3 rounded-lg border border-zinc-100 hover:border-blue-300 :border-blue-700 hover:bg-zinc-900 :bg-blue-950/20 transition-all group"
+          className="flex items-center gap-3 p-3 rounded-lg border border-zinc-400 hover:border-blue-300 :border-blue-700 hover:bg-zinc-900 :bg-blue-950/20 transition-all group"
          >
           <GitFork className="w-4 h-4 text-zinc-400 group-hover:text-blue-500 transition-colors shrink-0" />
           <div className="flex flex-col overflow-hidden">
@@ -192,13 +192,13 @@ export const Home = () => {
          <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
          {progressState.message || 'Processing repository...'}
         </span>
-        <span className="text-white font-bold">{progressState.progress}%</span>
+        <span className="text-zinc-200 font-bold">{progressState.progress}%</span>
        </div>
 
        {/* Progress Bar Container */}
-       <div className="w-full bg-zinc-100 rounded-full h-2.5 overflow-hidden">
+       <div className="w-full bg-zinc-200 rounded-full h-2.5 overflow-hidden">
         <div
-         className="bg-white h-2.5 rounded-full transition-all duration-500 ease-out"
+         className="bg-zinc-200 h-2.5 rounded-full transition-all duration-500 ease-out"
          style={{ width: `${progressState.progress}%` }}
         />
        </div>
@@ -236,7 +236,7 @@ export const Home = () => {
        <button
         type="submit"
         disabled={isUploading || !file || !repoName}
-        className="bg-white text-black px-4 py-2 rounded-md font-medium hover:bg-zinc-200 transition-colors disabled:opacity-50 mt-2 flex items-center justify-center gap-2"
+        className="bg-zinc-800 text-zinc-300 border border-zinc-700 px-4 py-2 rounded-md font-medium hover:bg-zinc-700 hover:text-zinc-200 transition-colors disabled:opacity-50 mt-2 flex items-center justify-center gap-2"
        >
         Upload & Extract
        </button>

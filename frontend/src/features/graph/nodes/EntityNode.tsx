@@ -22,7 +22,7 @@ export const EntityNode = ({ data }: EntityNodeProps) => {
    case 'class': return { icon: <Box className="w-4 h-4 text-amber-400" />, border: 'border-amber-500/30 hover:border-amber-500/60', bg: 'bg-amber-500/10', text: 'text-amber-300' };
    case 'function': return { icon: <FunctionSquare className="w-4 h-4 text-violet-400" />, border: 'border-violet-500/30 hover:border-violet-500/60', bg: 'bg-violet-500/10', text: 'text-violet-300' };
    case 'module': return { icon: <PackageOpen className="w-4 h-4 text-sky-400" />, border: 'border-sky-500/30 hover:border-sky-500/60', bg: 'bg-sky-500/10', text: 'text-sky-300' };
-   default: return { icon: <Database className="w-4 h-4 text-zinc-400" />, border: 'border-white/10 hover:border-white/20', bg: 'bg-zinc-950/5', text: 'text-zinc-300' };
+   default: return { icon: <Database className="w-4 h-4 text-zinc-400" />, border: 'border-zinc-400/10 hover:border-zinc-400/20', bg: 'bg-zinc-950/5', text: 'text-zinc-200' };
   }
  };
 
@@ -39,7 +39,7 @@ export const EntityNode = ({ data }: EntityNodeProps) => {
   if (data.isImpactRoot) return 'ring-2 ring-violet-500 shadow-sm border-transparent scale-105';
   if (data.isImpacted) return 'ring-2 ring-rose-500 shadow-sm border-transparent scale-105';
   if (data.isDependency) return 'ring-2 ring-emerald-500 shadow-sm border-transparent scale-105';
-  if (data.isSelected) return 'ring-2 ring-white/50 shadow-sm border-transparent scale-105';
+  if (data.isSelected) return 'ring-2 ring-zinc-400/50 shadow-sm border-transparent scale-105';
   return data.isFaded ? 'opacity-20 grayscale-[80%]' : 'hover:-translate-y-0.5 hover:shadow-lg';
  };
 
@@ -68,7 +68,7 @@ export const EntityNode = ({ data }: EntityNodeProps) => {
    </div>
    
    {/* Name */}
-   <span className="font-semibold text-[13px] tracking-tight text-white truncate drop-shadow-sm" title={displayName}>
+   <span className="font-semibold text-[13px] tracking-tight text-zinc-200 truncate drop-shadow-sm" title={displayName}>
     {displayName}
    </span>
 

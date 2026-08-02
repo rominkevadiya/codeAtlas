@@ -13,16 +13,16 @@ interface RepoPanelProps {
 
 const StatusBadge = ({ status }: { status: Repository['status'] }) => {
  const map: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  READY: { label: 'Ready', color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20', icon: <CheckCircle2 className="w-3 h-3" /> },
-  PENDING: { label: 'Pending', color: 'text-amber-400 bg-amber-400/10 border-amber-400/20', icon: <Clock className="w-3 h-3" /> },
-  PARSING: { label: 'Parsing', color: 'text-white bg-zinc-950/5 border-white/10', icon: <Loader2 className="w-3 h-3 animate-spin" /> },
-  EXTRACTING: { label: 'Extracting', color: 'text-blue-400 bg-blue-400/10 border-blue-400/20', icon: <Loader2 className="w-3 h-3 animate-spin" /> },
-  BUILDING_GRAPH: { label: 'Building', color: 'text-purple-400 bg-purple-400/10 border-purple-400/20', icon: <Loader2 className="w-3 h-3 animate-spin" /> },
-  FAILED: { label: 'Failed', color: 'text-rose-400 bg-rose-400/10 border-rose-400/20', icon: <AlertCircle className="w-3 h-3" /> },
+    READY: { label: 'Ready', color: 'text-emerald-300 bg-emerald-950/30 border-emerald-900/50', icon: <CheckCircle2 className="w-3 h-3" /> },
+    PENDING: { label: 'Pending', color: 'text-amber-300 bg-amber-950/30 border-amber-900/50', icon: <Clock className="w-3 h-3" /> },
+    PARSING: { label: 'Parsing', color: 'text-slate-300 bg-slate-950/30 border-slate-800', icon: <Loader2 className="w-3 h-3 animate-spin" /> },
+    EXTRACTING: { label: 'Extracting', color: 'text-blue-300 bg-blue-950/30 border-blue-900/50', icon: <Loader2 className="w-3 h-3 animate-spin" /> },
+    BUILDING_GRAPH: { label: 'Building', color: 'text-violet-300 bg-violet-950/30 border-violet-900/50', icon: <Loader2 className="w-3 h-3 animate-spin" /> },
+    FAILED: { label: 'Failed', color: 'text-rose-300 bg-rose-950/30 border-rose-900/50', icon: <AlertCircle className="w-3 h-3" /> },
  };
  const s = map[status] || map.PENDING;
  return (
-  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${s.color}`}>
+  <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${s.color}`}>
    {s.icon} {s.label}
   </span>
  );
@@ -31,10 +31,10 @@ const StatusBadge = ({ status }: { status: Repository['status'] }) => {
 const getInitials = (name: string) => name.slice(0, 2).toUpperCase();
 
 const REPO_COLORS = [
- 'bg-zinc-800 text-white',
- 'bg-zinc-700 text-white',
- 'bg-black text-white border border-zinc-700',
- 'bg-zinc-900 text-zinc-300',
+ 'bg-zinc-800 text-zinc-200',
+ 'bg-zinc-700 text-zinc-200',
+ 'bg-zinc-950 text-zinc-200 border border-zinc-800',
+ 'bg-zinc-900 text-zinc-200 border border-zinc-800',
 ];
 
 const getRepoColor = (id: string) => {
@@ -84,52 +84,39 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
  const isGitHub = (url: string) => url.startsWith('https://github.com') || url.startsWith('https://gitlab.com');
 
  return (
-  <div className="h-full flex flex-col glass-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
-   {/* Header */}
-   <div className="flex items-center justify-between p-5 border-b border-white/5 bg-transparent shrink-0">
+    <div className="flex h-full flex-col overflow-hidden rounded-[24px] border border-zinc-800 bg-zinc-950 shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+     <div className="flex shrink-0 items-center justify-between border-b border-zinc-800 bg-black p-5">
     <div className="flex items-center gap-3">
-     <div className="w-8 h-8 rounded-md bg-zinc-950 flex items-center justify-center">
-      <FolderGit2 className="w-4 h-4 text-black" />
+    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-800 text-zinc-300 border border-zinc-700">
+      <FolderGit2 className="h-5 w-5" />
      </div>
      <div>
-      <h2 className="text-base font-semibold text-white tracking-tight">My Repositories</h2>
-      <p className="text-[11px] text-zinc-400">{userRepos.length} repo{userRepos.length !== 1 ? 's' : ''} analysed</p>
+    <h2 className="text-base font-semibold text-zinc-200">My repositories</h2>
+    <p className="text-[11px] text-zinc-500">{userRepos.length} repository{userRepos.length !== 1 ? 'ies' : 'y'} tracked</p>
      </div>
     </div>
     <div className="flex items-center gap-2">
-     <button
-      onClick={handleRefresh}
-      disabled={isRefreshing}
-      className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-950/10 transition-colors disabled:opacity-50"
-      title="Refresh list"
-     >
-      <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+    <button onClick={handleRefresh} disabled={isRefreshing} className="rounded-xl p-1.5 text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-200 disabled:opacity-50" title="Refresh list">
+      <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
      </button>
-     <button
-      onClick={onClose}
-      className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-950/10 transition-colors"
-     >
-      <X className="w-4 h-4" />
+    <button onClick={onClose} className="rounded-xl p-1.5 text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-200">
+      <X className="h-4 w-4" />
      </button>
     </div>
    </div>
 
-   {/* Repo List */}
-   <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
+    <div className="flex-1 space-y-2 overflow-y-auto p-3">
     {userRepos.length === 0 ? (
-     <div className="flex flex-col items-center justify-center h-full gap-4 py-12 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-zinc-950/5 flex items-center justify-center">
-       <FolderGit2 className="w-8 h-8 text-zinc-500" />
+     <div className="flex h-full flex-col items-center justify-center gap-4 py-12 text-center">
+    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-900 text-zinc-500">
+       <FolderGit2 className="h-8 w-8" />
       </div>
       <div>
-       <p className="text-sm font-medium text-zinc-300">No repositories yet</p>
-       <p className="text-xs text-zinc-500 mt-1">Add your first repo to get started</p>
+    <p className="text-sm font-semibold text-zinc-200">No repositories yet</p>
+    <p className="mt-1 text-xs text-zinc-500">Add your first repo to get started</p>
       </div>
-      <button
-       onClick={onAddNew}
-       className="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-950/10 text-white border border-white/10 text-sm font-medium hover:bg-zinc-950/10 transition-colors"
-      >
-       <Plus className="w-4 h-4" /> Add Repository
+    <button onClick={onAddNew} className="flex items-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:bg-black hover:text-zinc-200">
+       <Plus className="h-4 w-4" /> Add repository
       </button>
      </div>
     ) : (
@@ -139,71 +126,32 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
       const canOpen = repo.status === 'READY';
 
       return (
-       <div
-        key={repo.id}
-        onClick={() => handleSelect(repo)}
-        className={`group relative flex items-center gap-3 p-3.5 rounded-md border transition-all duration-200 ${
-         isActive
-          ? 'bg-zinc-900 border-zinc-700 shadow-sm'
-          : canOpen
-          ? 'bg-transparent border-transparent hover:bg-zinc-900/50 hover:border-zinc-800 cursor-pointer'
-          : 'bg-transparent border-transparent cursor-default opacity-50'
-        }`}
-       >
-        {/* Repo Icon */}
-        <div className={`w-10 h-10 rounded-md ${getRepoColor(repo.id)} flex items-center justify-center shrink-0 font-bold text-xs`}>
+    <div key={repo.id} onClick={() => handleSelect(repo)} className={`group relative flex items-center gap-3 rounded-[18px] border p-3.5 transition-all duration-200 ${isActive ? 'border-zinc-400 bg-zinc-900 shadow-sm' : canOpen ? 'border-transparent bg-transparent hover:border-zinc-800 hover:bg-zinc-900 cursor-pointer' : 'border-transparent cursor-default opacity-60'}`}>
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${getRepoColor(repo.id)} font-bold text-xs`}>
          {getInitials(repo.name)}
         </div>
 
-        {/* Repo Info */}
-        <div className="flex-1 min-w-0">
-         <div className="flex items-center gap-2 mb-1">
-          <p className="text-sm font-semibold text-white truncate">{repo.name}</p>
-          {isActive && (
-           <span className="text-[9px] font-bold text-black bg-zinc-950 px-1.5 py-0.5 rounded-sm">
-            ACTIVE
-           </span>
-          )}
+        <div className="min-w-0 flex-1">
+         <div className="mb-1 flex items-center gap-2">
+          <p className="truncate text-sm font-semibold text-zinc-200">{repo.name}</p>
+          {isActive && <span className="rounded-full bg-zinc-200 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-zinc-300">Active</span>}
          </div>
          <div className="flex items-center gap-2">
           <StatusBadge status={repo.status} />
-          {isGitHub(repo.url) && (
-           <span className="text-[10px] text-zinc-500 flex items-center gap-1">
-            <GitBranch className="w-2.5 h-2.5" /> GitHub
-           </span>
-          )}
-          {!isGitHub(repo.url) && repo.url !== 'local://uploaded' && (
-           <span className="text-[10px] text-zinc-500 flex items-center gap-1">
-            <GitBranch className="w-2.5 h-2.5" /> Local
-           </span>
-          )}
+          {isGitHub(repo.url) && <span className="flex items-center gap-1 text-[10px] text-zinc-500"><GitBranch className="h-2.5 w-2.5" /> GitHub</span>}
+          {!isGitHub(repo.url) && repo.url !== 'local://uploaded' && <span className="flex items-center gap-1 text-[10px] text-zinc-500"><GitBranch className="h-2.5 w-2.5" /> Local</span>}
          </div>
-         {repo.error_message && (
-          <p className="text-[10px] text-rose-400 mt-1 truncate">{repo.error_message}</p>
-         )}
+         {repo.error_message && <p className="mt-1 truncate text-[10px] text-rose-400">{repo.error_message}</p>}
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
          {isGitHub(repo.url) && (
-          <a
-           href={repo.url}
-           target="_blank"
-           rel="noopener noreferrer"
-           onClick={(e) => e.stopPropagation()}
-           className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-950/10 transition-colors"
-           title="Open on GitHub"
-          >
-           <ExternalLink className="w-3.5 h-3.5" />
+           <a href={repo.url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="rounded-xl p-1.5 text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-200" title="Open on GitHub">
+           <ExternalLink className="h-3.5 w-3.5" />
           </a>
          )}
-         <button
-          onClick={(e) => handleDelete(repo.id, e)}
-          disabled={isDeleting}
-          className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors disabled:opacity-50"
-          title="Delete repository"
-         >
-          {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+         <button onClick={(e) => handleDelete(repo.id, e)} disabled={isDeleting} className="rounded-xl p-1.5 text-zinc-400 transition hover:bg-rose-950/30 hover:text-rose-300 disabled:opacity-50" title="Delete repository">
+          {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
          </button>
         </div>
        </div>
@@ -212,14 +160,9 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
     )}
    </div>
 
-   {/* Footer - Add New */}
-   <div className="p-3 border-t border-white/5 shrink-0">
-    <button
-     onClick={onAddNew}
-     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-md bg-white hover:bg-zinc-200 text-black text-sm font-semibold transition-all duration-200"
-    >
-     <Plus className="w-4 h-4" />
-     Add New Repository
+    <div className="shrink-0 border-t border-zinc-800 p-3">
+     <button onClick={onAddNew} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-zinc-800 border border-zinc-700 px-4 py-2.5 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-700 hover:text-zinc-200">
+     <Plus className="h-4 w-4" /> Add new repository
     </button>
    </div>
   </div>

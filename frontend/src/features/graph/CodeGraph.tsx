@@ -325,8 +325,8 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
    >
    <Panel position="top-left" className="bg-zinc-950 p-4 rounded-xl flex flex-col gap-3 min-w-[280px] m-6 border border-zinc-800 shadow-sm">
     <div className="flex items-center justify-between">
-     <div className="flex items-center gap-2 text-white font-bold text-sm">
-      <Filter className="w-4 h-4 text-zinc-300" />
+     <div className="flex items-center gap-2 text-zinc-200 font-bold text-sm">
+      <Filter className="w-4 h-4 text-zinc-200" />
       Filter & Search
      </div>
      <button
@@ -342,7 +342,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
          });
        }
       }}
-      className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-900 transition-colors border border-transparent hover:border-zinc-800"
+      className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-colors border border-transparent hover:border-zinc-800"
       title="Download PNG"
      >
       <Download className="w-4 h-4" />
@@ -355,7 +355,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
       placeholder="Search nodes..."
       value={searchQuery}
       onChange={(e) => setSearchQuery(e.target.value)}
-      className="w-full bg-black border border-zinc-800 rounded-lg pl-9 pr-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder:text-slate-400"
+      className="w-full bg-black border border-zinc-800 rounded-lg pl-9 pr-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder:text-slate-400"
      />
     </div>
     <div className="flex flex-wrap gap-2 mt-2">
@@ -366,7 +366,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
        className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 border ${
         visibleTypes.has(type)
          ? 'bg-zinc-900 text-zinc-200 border-zinc-700 shadow-sm'
-         : 'bg-zinc-950 text-zinc-500 border-zinc-800 hover:bg-black hover:text-zinc-300'
+         : 'bg-zinc-950 text-zinc-500 border-zinc-800 hover:bg-black hover:text-zinc-200'
        }`}
       >
        {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -383,7 +383,16 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
     pannable
     zoomable
     nodeBorderRadius={4}
-    nodeStrokeWidth={0}
+    nodeStrokeWidth={2}
+    nodeStrokeColor={(node) => {
+     switch (node.data?.type) {
+      case 'file': return '#34d399';
+      case 'class': return '#fbbf24';
+      case 'function': return '#a78bfa';
+      case 'module': return '#38bdf8';
+      default: return '#94a3b8';
+     }
+    }}
     nodeColor={(node) => {
      switch (node.data?.type) {
       case 'file': return '#34d399';

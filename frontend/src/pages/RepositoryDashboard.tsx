@@ -127,7 +127,7 @@ export const RepositoryDashboard = () => {
        if (isAiPanelOpen) setIsAiPanelOpen(false);
        if (isAnalysisPanelOpen) setIsAnalysisPanelOpen(false);
       }}
-      className="flex items-center gap-2 px-4 py-2 bg-zinc-50 text-zinc-700 border border-zinc-200 rounded-lg text-sm font-medium hover:bg-zinc-100 :bg-zinc-800 transition-colors shadow-sm cursor-pointer"
+      className="flex items-center gap-2 px-4 py-2 bg-zinc-50 text-zinc-700 border border-zinc-200 rounded-lg text-sm font-medium hover:bg-zinc-200 :bg-zinc-800 transition-colors shadow-sm cursor-pointer"
      >
       <FileText className="w-4 h-4" />
       Auto-Doc
@@ -138,7 +138,7 @@ export const RepositoryDashboard = () => {
        if (isAiPanelOpen) setIsAiPanelOpen(false);
        if (isAutoDocPanelOpen) setIsAutoDocPanelOpen(false);
       }}
-      className="flex items-center gap-2 px-4 py-2 bg-zinc-900 /30 text-white border border-white/10 /10 rounded-lg text-sm font-medium hover:bg-indigo-100 :bg-indigo-900/50 transition-colors shadow-sm cursor-pointer"
+      className="flex items-center gap-2 px-4 py-2 bg-zinc-900 /30 text-zinc-200 border border-zinc-400/10 /10 rounded-lg text-sm font-medium hover:bg-indigo-100 :bg-indigo-900/50 transition-colors shadow-sm cursor-pointer"
      >
       <Activity className="w-4 h-4" />
       Metrics
@@ -149,7 +149,7 @@ export const RepositoryDashboard = () => {
        if (isAnalysisPanelOpen) setIsAnalysisPanelOpen(false);
        if (isAutoDocPanelOpen) setIsAutoDocPanelOpen(false);
       }}
-      className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-zinc-200 transition-colors shadow-sm cursor-pointer"
+      className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-300 border border-zinc-700 rounded-lg text-sm font-medium hover:bg-zinc-700 hover:text-zinc-200 transition-colors shadow-sm cursor-pointer"
      >
       <MessageSquare className="w-4 h-4" />
       Ask AI
@@ -203,7 +203,7 @@ export const RepositoryDashboard = () => {
        )}
        <button
         onClick={() => setSelectedNode(null)}
-        className="text-zinc-400 hover:text-zinc-600 :text-zinc-300 transition-colors p-1"
+        className="text-zinc-400 hover:text-zinc-600 :text-zinc-200 transition-colors p-1"
        >
         <X className="w-5 h-5" />
        </button>
@@ -238,13 +238,13 @@ export const RepositoryDashboard = () => {
     <div className="absolute top-20 right-8 bottom-8 w-[22rem] bg-zinc-950 border border-zinc-200 rounded-xl shadow-2xl flex flex-col z-50 overflow-hidden animate-in slide-in-from-right-8 duration-200">
      {/* Panel Header */}
      <div className="flex justify-between items-center p-4 border-b border-zinc-200 bg-zinc-50 /50 shrink-0">
-      <div className="flex items-center gap-2 text-white font-semibold">
+      <div className="flex items-center gap-2 text-zinc-200 font-semibold">
        <MessageSquare className="w-5 h-5" />
        CodeAtlas AI
       </div>
       <button
        onClick={() => setIsAiPanelOpen(false)}
-       className="text-zinc-400 hover:text-zinc-600 :text-zinc-300 transition-colors"
+       className="text-zinc-400 hover:text-zinc-600 :text-zinc-200 transition-colors"
       >
        <X className="w-5 h-5" />
       </button>
@@ -266,14 +266,14 @@ export const RepositoryDashboard = () => {
         >
          {msg.role === 'assistant' && (
           <div className="shrink-0 w-7 h-7 rounded-full bg-zinc-800 /40 flex items-center justify-center mt-0.5">
-           <Bot className="w-4 h-4 text-white " />
+           <Bot className="w-4 h-4 text-zinc-200 " />
           </div>
          )}
          <div
           className={`max-w-[80%] px-3 py-2 rounded-xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
            msg.role === 'user'
-            ? 'bg-white text-black rounded-tr-none'
-            : 'bg-zinc-100 text-zinc-800 rounded-tl-none border border-zinc-200 '
+            ? 'bg-zinc-800 text-zinc-300 border border-zinc-700 rounded-tr-none'
+            : 'bg-zinc-800 text-zinc-300 border-zinc-700 rounded-tl-none border border-zinc-200 '
           }`}
          >
           {msg.content}
@@ -291,9 +291,9 @@ export const RepositoryDashboard = () => {
       {aiLoading && (
        <div className="flex gap-2.5 justify-start">
         <div className="shrink-0 w-7 h-7 rounded-full bg-zinc-800 /40 flex items-center justify-center">
-         <Bot className="w-4 h-4 text-white " />
+         <Bot className="w-4 h-4 text-zinc-200 " />
         </div>
-        <div className="px-3 py-2 rounded-xl rounded-tl-none bg-zinc-100 border border-zinc-200 flex items-center gap-1.5">
+        <div className="px-3 py-2 rounded-xl rounded-tl-none bg-zinc-800 border border-zinc-700 flex items-center gap-1.5">
          <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
          <span className="text-sm text-zinc-500">Analyzing...</span>
         </div>
@@ -320,13 +320,13 @@ export const RepositoryDashboard = () => {
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleAskAI()}
         placeholder="Ask anything about this repo..."
-        className="flex-1 px-3 py-2 bg-zinc-100 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+        className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
         disabled={aiLoading}
        />
        <button
         onClick={handleAskAI}
         disabled={aiLoading || !query.trim()}
-        className="p-2 bg-white text-black rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="p-2 bg-zinc-800 text-zinc-300 border border-zinc-700 rounded-lg hover:bg-zinc-700 hover:text-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
        >
         <Send className="w-4 h-4" />
        </button>

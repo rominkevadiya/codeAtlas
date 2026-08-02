@@ -77,27 +77,35 @@ export const CommandPalette = ({ isOpen, onClose, nodes, onSelectNode }: Command
  return (
   <AnimatePresence>
    {isOpen && (
-    <>
+    <motion.div
+     key="command-palette-backdrop"
+     initial={{ opacity: 0 }}
+     animate={{ opacity: 1 }}
+     exit={{ opacity: 0 }}
+     transition={{ duration: 0.15 }}
+     className="fixed inset-0 z-[100] bg-zinc-900/40 backdrop-blur-sm"
+     onClick={onClose}
+    />
+   )}
+   {isOpen && (
+    <motion.div 
+     key="command-palette-container"
+     initial={{ opacity: 0 }}
+     animate={{ opacity: 1 }}
+     exit={{ opacity: 0 }}
+     className="fixed inset-0 z-[101] flex items-start justify-center pt-[15vh] pointer-events-none"
+    >
      <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.15 }}
-      className="fixed inset-0 z-[100] bg-zinc-900/40 backdrop-blur-sm"
-      onClick={onClose}
-     />
-     <div className="fixed inset-0 z-[101] flex items-start justify-center pt-[15vh] pointer-events-none">
-      <motion.div
-       initial={{ opacity: 0, scale: 0.95, y: -20 }}
-       animate={{ opacity: 1, scale: 1, y: 0 }}
-       exit={{ opacity: 0, scale: 0.95, y: -20 }}
-       transition={{ duration: 0.15, ease: "easeOut" }}
-       className="w-full max-w-xl bg-[#0a0a0f] border border-white/10 rounded-2xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col"
-      >
-       <div className="flex items-center gap-3 px-4 py-4 border-b border-white/5">
-        <Search className="w-5 h-5 text-white shrink-0" />
-        <input
-         ref={inputRef}
+      initial={{ opacity: 0, scale: 0.95, y: -20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, y: -20 }}
+      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+      className="w-full max-w-xl bg-[#0a0a0f] border border-zinc-400/10 rounded-2xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col"
+     >
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-zinc-400/5">
+       <Search className="w-5 h-5 text-zinc-200 shrink-0" />
+       <input
+        ref={inputRef}
          type="text"
          value={query}
          onChange={(e) => setQuery(e.target.value)}
@@ -105,7 +113,7 @@ export const CommandPalette = ({ isOpen, onClose, nodes, onSelectNode }: Command
          className="flex-1 bg-transparent border-none text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:ring-0 text-lg"
         />
         <div className="flex gap-1 shrink-0">
-         <kbd className="px-2 py-1 bg-zinc-950/5 border border-white/10 rounded text-xs text-zinc-400 font-mono">esc</kbd>
+         <kbd className="px-2 py-1 bg-zinc-950/5 border border-zinc-400/10 rounded text-xs text-zinc-400 font-mono">esc</kbd>
         </div>
        </div>
 
@@ -122,7 +130,7 @@ export const CommandPalette = ({ isOpen, onClose, nodes, onSelectNode }: Command
              onClose();
             }}
             className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-colors ${
-             isSelected ? 'bg-zinc-950/5 border-white/10' : 'hover:bg-zinc-950/5'
+             isSelected ? 'bg-zinc-950/5 border-zinc-400/10' : 'hover:bg-zinc-950/5'
             } border border-transparent`}
            >
             <div className="flex items-center gap-3 min-w-0">
@@ -141,7 +149,7 @@ export const CommandPalette = ({ isOpen, onClose, nodes, onSelectNode }: Command
              </div>
             </div>
             {isSelected && (
-             <ChevronRight className="w-4 h-4 text-white shrink-0" />
+             <ChevronRight className="w-4 h-4 text-zinc-200 shrink-0" />
             )}
            </div>
           );
@@ -154,8 +162,7 @@ export const CommandPalette = ({ isOpen, onClose, nodes, onSelectNode }: Command
         </div>
        )}
       </motion.div>
-     </div>
-    </>
+    </motion.div>
    )}
   </AnimatePresence>
  );
