@@ -71,21 +71,21 @@ export const AuthScreen: React.FC = () => {
         Back to Home
       </button>
 
-      <div className="w-full max-w-md p-8 relative z-10">
-        <div className="flex flex-col items-center mb-10">
-          <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-sm mb-6">
-            <Layers className="w-6 h-6 text-black" />
+      <div className="w-full max-w-md p-6 relative z-10 flex flex-col justify-center h-full max-h-screen">
+        <div className="flex flex-col items-center mb-6">
+          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm mb-4">
+            <Layers className="w-5 h-5 text-black" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-white">
             CodeAtlas <span className="text-zinc-500 font-normal">Pro</span>
           </h1>
-          <p className="text-zinc-400 mt-2 text-sm text-center">
-            Intelligent architecture exploration & code analysis
+          <p className="text-zinc-400 mt-1 text-sm text-center">
+            Intelligent architecture exploration
           </p>
         </div>
 
-        <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-8 shadow-2xl">
-          <h2 className="text-xl font-semibold text-white mb-6">
+        <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6 shadow-2xl">
+          <h2 className="text-lg font-semibold text-white mb-4">
             {isLogin ? 'Sign in to your account' : 'Create a new account'}
           </h2>
 
@@ -95,35 +95,35 @@ export const AuthScreen: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">Username</label>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Username</label>
               <input 
                 type="text" 
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="w-full bg-[#000000] border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all"
+                className="w-full bg-[#000000] border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all"
                 placeholder="developer"
               />
             </div>
             
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-1.5">Email</label>
+                <label className="block text-xs font-medium text-zinc-400 mb-1">Email</label>
                 <input 
                   type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#000000] border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all"
+                  className="w-full bg-[#000000] border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all"
                   placeholder="dev@company.com"
                 />
               </div>
             )}
 
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-sm font-medium text-zinc-400">Password</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-medium text-zinc-400">Password</label>
                 {isLogin && <a href="#" className="text-xs text-zinc-500 hover:text-white transition-colors">Forgot password?</a>}
               </div>
               <input 
@@ -131,7 +131,7 @@ export const AuthScreen: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-[#000000] border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all"
+                className="w-full bg-[#000000] border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -139,7 +139,7 @@ export const AuthScreen: React.FC = () => {
             <button 
               type="submit" 
               disabled={isLoading}
-              className="w-full bg-white hover:bg-zinc-200 text-black rounded-lg py-3 px-4 font-bold transition-all duration-200 flex items-center justify-center gap-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className="w-full bg-white hover:bg-zinc-200 text-black rounded-lg py-2.5 px-4 text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -152,7 +152,7 @@ export const AuthScreen: React.FC = () => {
             </button>
           </form>
 
-          <div className="mt-8 text-center text-sm text-zinc-500">
+          <div className="mt-6 text-center text-xs text-zinc-500">
             {isLogin ? "Don't have an account? " : "Already have an account? "}
             <button 
               onClick={() => {
