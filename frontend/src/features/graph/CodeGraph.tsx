@@ -10,7 +10,7 @@ import {
  Panel,
  Position
 } from '@xyflow/react';
-import { Search, Filter, Layers, Download } from 'lucide-react';
+import { Search, Filter, Download } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import type { Connection, Edge, Node } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -293,7 +293,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
   return (
    <div className="flex-1 w-full h-full min-h-[500px] flex flex-col items-center justify-center bg-black text-zinc-500">
     <div className="p-8 rounded-3xl border border-zinc-800 bg-zinc-950 shadow-xl flex flex-col items-center max-w-md text-center">
-     <Layers className="w-16 h-16 mb-4 text-slate-400" />
+     <img src="/logo.png" alt="CodeAtlas Logo" className="w-16 h-16 mb-4 object-contain opacity-50 grayscale" />
      <p className="text-xl font-bold text-zinc-200">No supported files found</p>
      <p className="text-sm mt-3 text-zinc-500 leading-relaxed">
       The parser currently supports Python, JavaScript/TypeScript, JSON, and EJS files. The repository has no supported source code.

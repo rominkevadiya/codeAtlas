@@ -6,7 +6,7 @@ import { ChatPanel } from './features/ai/ChatPanel';
 import { UploadModal } from './features/upload/UploadModal';
 import { RepositoryService } from './services/api';
 import { useAppStore } from './store/useAppStore';
-import { Layers, Activity, Search, Command, Settings, FolderGit2, X, Loader2, Sparkles, FileCode2, MessageSquare, FileText, Maximize2, Minimize2 } from 'lucide-react';
+import { Activity, Search, Command, Settings, FolderGit2, X, Loader2, Sparkles, FileCode2, MessageSquare, FileText, Maximize2, Minimize2 } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import './index.css';
@@ -291,8 +291,8 @@ export default function App() {
    {/* GLOBAL NAVIGATION (Top Navbar) */}
    <nav className="h-14 shrink-0 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between px-4 z-40 relative shadow-sm">
     <div className="flex items-center gap-4">
-     <div className="w-8 h-8 rounded bg-zinc-200 flex items-center justify-center text-zinc-300 shadow-sm">
-      <Layers className="w-5 h-5" />
+     <div className="w-8 h-8 rounded bg-transparent flex items-center justify-center overflow-hidden">
+      <img src="/logo.png" alt="CodeAtlas Logo" className="w-8 h-8 object-contain" />
      </div>
      <h1 className="text-lg font-bold tracking-tight text-zinc-200 hidden sm:block">
       CodeAtlas <span className="text-slate-400 font-normal">Workspace</span>
@@ -394,8 +394,8 @@ export default function App() {
        />
       ) : (
        <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 z-20 absolute inset-0">
-        <div className="w-20 h-20 bg-zinc-900 rounded-2xl flex items-center justify-center mb-6 border border-blue-100">
-         <Layers className="w-10 h-10 text-zinc-200" />
+        <div className="w-24 h-24 flex items-center justify-center mb-6">
+         <img src="/logo.png" alt="CodeAtlas Logo" className="w-full h-full object-contain drop-shadow-lg" />
         </div>
         <p className="text-2xl font-bold tracking-tight text-zinc-200 mb-2">Workspace Empty</p>
         <p className="text-zinc-500 mb-8 max-w-md text-center">Select a repository from the top navigation to analyze its architecture and begin exploring.</p>

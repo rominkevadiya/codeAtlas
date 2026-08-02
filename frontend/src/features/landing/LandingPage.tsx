@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Layers, Search, ArrowRight, ChevronDown, Network, FileCode2, Sparkles, FileText, Check, Bot, ScanSearch, Cpu, Filter } from 'lucide-react';
+import { Search, ArrowRight, ChevronDown, Network, FileCode2, Sparkles, FileText, Check, Bot, ScanSearch, Cpu, Filter } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { AnimatedTechBackground } from '../../components/AnimatedTechBackground';
 
@@ -23,8 +23,8 @@ export const LandingPage = React.forwardRef<HTMLDivElement, any>((props, ref) =>
       <nav className="sticky top-0 w-full border-b border-zinc-800 bg-black/80 backdrop-blur-md z-50">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 md:px-10">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-800 text-zinc-300 border border-zinc-700 shadow-sm">
-              <Layers className="h-5 w-5" />
+            <div className="flex h-9 w-9 items-center justify-center overflow-hidden">
+              <img src="/logo.png" alt="CodeAtlas Logo" className="h-9 w-9 object-contain" />
             </div>
             <div>
               <p className="text-sm font-semibold tracking-[0.2em] text-zinc-400 uppercase">CodeAtlas</p>
@@ -369,8 +369,8 @@ export const LandingPage = React.forwardRef<HTMLDivElement, any>((props, ref) =>
         <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-4">
           <div className="md:col-span-2">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-800 text-zinc-300 border border-zinc-700">
-                <Layers className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden">
+                <img src="/logo.png" alt="CodeAtlas Logo" className="h-10 w-10 object-contain drop-shadow-sm" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-zinc-200">CodeAtlas</p>
