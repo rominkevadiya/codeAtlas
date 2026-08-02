@@ -52,21 +52,19 @@ CodeAtlas automates this by:
 
 ---
 
-## Current Status
+## Core Features & Capabilities
 
-| Phase | Status | Description |
-|---|---|---|
-| **Phase 1** | ✅ **Complete** | Project setup — folder structure, Django, React, PostgreSQL, Tailwind, TypeScript, Git |
-| **Phase 2** | ✅ **Complete** | Django domain modules, REST API endpoints, React workspace scaffold |
-| **Phase 3** | ✅ **Complete** | Tree-sitter parser, NetworkX graph builder, ZIP upload pipeline, `knowledge_graph.json` persistence |
-| **Phase 4** | ✅ **Complete** | `GET /graph/` API, React Flow interactive visualization, Dagre auto-layout, custom node components |
-| **Phase 5** | ✅ **Complete** | Gemini AI integration — natural language code queries |
-| **Phase 5 (Hardened)** | ✅ **Complete** | Security & UX audit fixes (Zip Slip protection, 50MB upload limit, DRF rate limiting, lazy Gemini init, PostgreSQL env vars, chat history UI, live repo list) |
-| **Phase 5.5** | ✅ **Complete** | Interactive blast radius analysis, node dependency highlighting, and integrated source code viewer panel (`node_snippet` API) |
-| **Phase 6** | ✅ **Complete** | Frontend Intelligence (Graph filtering, search panel, AI source code explanation) |
-| **Phase 7** | ✅ **Complete** | Real-time WebSocket progress updates (Celery → Channels → React) |
-| **Phase 8** | ✅ **Complete** | JWT Authentication, User Registration, TokenAuthMiddleware, and Landing Page |
-| **Phase 9** | 📋 Planned | Production deployment, Docker, CI/CD |
+| Feature | Description |
+|---|---|
+| **Platform Foundation** | Django, React, PostgreSQL, Tailwind v4, TypeScript |
+| **Backend API** | Domain-driven REST API, JWT Authentication, User Registration, TokenAuthMiddleware |
+| **Analysis Engine** | Tree-sitter AST parser, NetworkX graph builder, ZIP upload pipeline |
+| **Visualization** | React Flow interactive visualization, Dagre auto-layout, custom node components |
+| **AI Integration** | Gemini AI integration for natural language code queries |
+| **Security & UX** | Zip Slip protection, 50MB upload limit, DRF rate limiting, chat history UI, live repo list |
+| **Interactive Graph** | Blast radius analysis, dependency highlighting, integrated source code viewer panel |
+| **Workspace Intelligence**| Real-time graph filtering, Cmd+K search panel, AI source code explanation (Auto-Doc) |
+| **Real-time Updates** | WebSocket progress updates via Celery & Django Channels |
 
 ---
 
@@ -81,7 +79,7 @@ CodeAtlas follows a **Modular Monolith** architecture. This is a deliberate choi
 | **Simplicity** | One repo, one deployment unit — no distributed systems complexity at this stage. |
 | **Cohesion** | The parsing, graph building, and AI layers are tightly coupled in logic. Splitting them adds friction without benefit. |
 | **Scalability path** | Well-bounded modules can be extracted into services later if needed, without a rewrite. |
-| **Developer velocity** | No inter-service network calls or contract negotiation in the early phases. |
+| **Developer velocity** | No inter-service network calls or contract negotiation overhead. |
 
 The monolith is divided into two top-level directories that are independently deployable but share a common Git repository:
 
@@ -102,7 +100,7 @@ The monolith is divided into two top-level directories that are independently de
 │   │  • Custom EntityNode │  REST   │  • RepoService (upload)    │   │
 │   │  • Zustand State     │◄───────►│  • ParserService (AST)     │   │
 │   │  • Tailwind CSS v4   │         │  • GraphService (NetworkX) │   │
-│   │  • TypeScript        │         │  • Gemini AI (Phase 5)     │   │
+│   │  • TypeScript        │         │  • Gemini AI Integration   │   │
 │   └──────────────────────┘         └────────────┬───────────────┘   │
 │                                                 │                   │
 │                          ┌──────────────────────┤                   │
@@ -144,7 +142,7 @@ The monolith is divided into two top-level directories that are independently de
 | **Django** | 5.x | Web framework |
 | **Django REST Framework** | 3.x | REST API layer (ViewSets, Routers, Serializers) |
 | **djangorestframework-simplejwt** | 5.x | JWT Authentication |
-| **Django Channels** | 4.x | WebSocket support (Phase 6) |
+| **Django Channels** | 4.x | WebSocket support |
 | **Daphne** | 4.x | ASGI server for HTTP + WebSocket |
 | **psycopg** | 3.x | PostgreSQL driver (binary) |
 | **python-dotenv** | 1.x | `.env` file loading |
@@ -159,7 +157,7 @@ The monolith is divided into two top-level directories that are independently de
 |---|---|
 | **PostgreSQL** | Primary relational database — stores repository metadata (UUID, name, local_path) |
 | **Local Filesystem** | Stores extracted ZIP content and `knowledge_graph.json` under `backend/config/media/repositories/<uuid>/` |
-| **Redis** | *(Phase 6)* Celery message broker, Django Channels layer |
+| **Redis** | Celery message broker, Django Channels layer |
 
 ---
 
@@ -203,20 +201,20 @@ codeAtlas/                            ← Monolith root / Git repository
     ├── manage.py
     │
     └── apps/                         ← Domain modules (bounded contexts)
-        ├── accounts/                 ← ✅ Active: JWT Auth, User Registration
-        ├── repositories/             ← ✅ Active: Upload, extract, list repos
+        ├── accounts/                 ← JWT Auth, User Registration
+        ├── repositories/             ← Upload, extract, list repos
         │   ├── models.py             ←   Repository(id, name, url, local_path, ...)
         │   ├── services.py           ←   RepoService: upload_and_extract_repository()
         │   ├── serializers.py
         │   ├── views.py              ←   RepositoryViewSet: upload, graph, CRUD
         │   └── urls.py
-        ├── parser/                   ← ✅ Active: Tree-sitter AST extraction
+        ├── parser/                   ← Tree-sitter AST extraction
         │   └── services.py           ←   ParserService.parse_repository(path)
-        ├── graph/                    ← ✅ Active: NetworkX graph builder
+        ├── graph/                    ← NetworkX graph builder
         │   └── services.py           ←   GraphService.build_graph(parsed_data)
-        ├── analysis/                 ← (Placeholder) Code metrics
-        ├── ai/                       ← ✅ Active: Gemini AI queries (Phase 5)
-        ├── websocket/                ← (Placeholder) Real-time events (Phase 6)
+        ├── analysis/                 ← Code metrics and dashboard API
+        ├── ai/                       ← Gemini AI queries
+        ├── websocket/                ← Real-time events
         └── common/                   ← Shared base classes & exceptions
     │
     └── config/                       ← Django project settings
@@ -240,7 +238,7 @@ codeAtlas/                            ← Monolith root / Git repository
 | **PostgreSQL** | 14+ | `psql --version` |
 | **Git** | 2+ | `git --version` |
 
-> **Note:** Redis is no longer required for the current Phase 1-4 implementation. It will be needed in Phase 6 (WebSockets/Celery).
+> **Note:** Redis is required for WebSockets and Celery background task processing.
 
 ---
 
@@ -285,7 +283,7 @@ pip install django djangorestframework django-cors-headers \
 | `django` | Core web framework |
 | `djangorestframework` | REST API serializers, viewsets, routers |
 | `django-cors-headers` | Allows the Vite dev server (`localhost:5173`) to call the Django API |
-| `channels` + `daphne` | ASGI server for HTTP (+ WebSocket in Phase 6) |
+| `channels` + `daphne` | ASGI server for HTTP and WebSockets |
 | `psycopg[binary]` | PostgreSQL adapter for Python |
 | `python-dotenv` | Loads `backend/.env` into `os.environ` |
 | `tree-sitter` + `tree-sitter-python` | AST parsing of Python source files |
@@ -350,10 +348,10 @@ DB_PASSWORD=postgres
 DB_HOST=localhost
 DB_PORT=5432
 
-# Redis (not used until Phase 6)
+# Redis
 REDIS_URL=redis://127.0.0.1:6379/0
 
-# Gemini AI (Phase 5)
+# Gemini AI
 # GEMINI_API_KEY=your-api-key-here
 ```
 
@@ -363,7 +361,7 @@ REDIS_URL=redis://127.0.0.1:6379/0
 
 ## Running the Development Environment
 
-You need **two terminal windows** for the current phase.
+You need **two terminal windows** to run the complete environment.
 
 ### Start the Django Backend
 
@@ -456,8 +454,8 @@ All endpoints are prefixed with `/api/v1/`.
 | `DB_PASSWORD` | `postgres` | PostgreSQL password |
 | `DB_HOST` | `localhost` | PostgreSQL host |
 | `DB_PORT` | `5432` | PostgreSQL port |
-| `REDIS_URL` | `redis://127.0.0.1:6379/0` | Redis URL (required from Phase 6) |
-| `GEMINI_API_KEY` | — | Gemini AI API key (required for Phase 5 AI features) |
+| `REDIS_URL` | `redis://127.0.0.1:6379/0` | Redis connection URL |
+| `GEMINI_API_KEY` | — | Gemini AI API key |
 
 ### Frontend Environment Variables (`frontend/.env`)
 
@@ -491,22 +489,7 @@ import { Button } from '@/components/ui/button'
 
 ---
 
-## Roadmap
 
-| Phase | Status | Description |
-|---|---|---|
-| **Phase 1** | ✅ Complete | Project environment setup — folder structure, Django, React, PostgreSQL, Tailwind, TypeScript |
-| **Phase 2** | ✅ Complete | Django domain modules (`repositories`, `parser`, `graph`, `common`), REST API, React workspace scaffold |
-| **Phase 3** | ✅ Complete | Tree-sitter AST parser, NetworkX graph engine, ZIP upload pipeline, `knowledge_graph.json` |
-| **Phase 4** | ✅ Complete | `GET /graph/` API endpoint, React Flow canvas, Dagre auto-layout, `EntityNode` custom node |
-| **Phase 5** | ✅ Complete | Gemini AI integration — natural language code queries ("What calls X?") |
-| **Phase 5.5** | ✅ Complete | Interactive blast radius analysis, dependency highlighting, and integrated source code viewer |
-| **Phase 6** | ✅ Complete | Frontend Intelligence (Graph filtering, Cmd+K search panel with framer-motion, AI Auto-Doc) |
-| **Phase 7** | ✅ Complete | Real-time WebSocket progress via Celery + Django Channels |
-| **Phase 8** | ✅ Complete | JWT Authentication, User Registration, TokenAuthMiddleware, Landing Page, Zustand Global Store |
-| **Phase 9** | 📋 Planned | Production deployment, Docker, CI/CD |
-
----
 
 ## Contributing
 

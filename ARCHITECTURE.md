@@ -1,6 +1,6 @@
 # CodeAtlas — System Architecture
 
-> Last updated: **Phase 8 Complete** (August 2026)
+> Last updated: **August 2026 (Final Release)**
 
 This document defines the **Modular Monolith** architecture, Domain-Driven Design (DDD) principles, module boundaries, and coding standards for the CodeAtlas platform. It serves as the single source of truth for system design decisions.
 
@@ -34,7 +34,7 @@ codeAtlas/
 │       ├── features/
 │       │   ├── auth/             ← JWT Auth (Login/Register)
 │       │   ├── landing/          ← Landing Page
-│       │   ├── graph/            ← ✅ ACTIVE: Graph visualization module (CodeGraph)
+│       │   ├── graph/            ← Graph visualization module (CodeGraph)
 │       │   ├── repositories/     ← Repo selection and management
 │       │   ├── upload/           ← ZIP upload logic
 │       │   ├── ai/               ← Chat Assistant and Auto-Doc panels
@@ -53,14 +53,14 @@ codeAtlas/
     │       └── repositories/
     │           └── <uuid>/       ←   Extracted ZIP + knowledge_graph.json
     └── apps/                     ← Domain Modules (bounded contexts)
-        ├── common/               ← ✅ Shared exceptions, base classes
-        ├── repositories/         ← ✅ ACTIVE: Full CRUD + upload + graph endpoint
-        ├── parser/               ← ✅ ACTIVE: Tree-sitter AST extraction
-        ├── graph/                ← ✅ ACTIVE: NetworkX graph builder
-        ├── accounts/             ← ✅ ACTIVE: JWT Auth, user profiles
-        ├── ai/                   ← ✅ ACTIVE: Gemini AI queries
-        ├── analysis/             ← 📋 Planned: Code metrics & pattern detection
-        └── websocket/            ← ✅ ACTIVE: Real-time events, Celery Tasks
+        ├── common/               ← Shared exceptions, base classes
+        ├── repositories/         ← Full CRUD + upload + graph endpoint
+        ├── parser/               ← Tree-sitter AST extraction
+        ├── graph/                ← NetworkX graph builder
+        ├── accounts/             ← JWT Auth, user profiles
+        ├── ai/                   ← Gemini AI queries
+        ├── analysis/             ← Code metrics & pattern detection
+        └── websocket/            ← Real-time events, Celery Tasks
 ```
 
 ---
@@ -69,16 +69,16 @@ codeAtlas/
 
 Each app in `backend/apps/` represents a bounded context with strict ownership of its data.
 
-| Module | Status | Responsibility | Key Services | Allowed Dependencies |
-|:---|:---|:---|:---|:---|
-| **`common`** | ✅ Active | Shared base classes, `CodeAtlasException` | `CodeAtlasException` | None |
-| **`repositories`** | ✅ Active | ZIP upload (50MB limit, Zip Slip protected), extraction, repo metadata, graph API | `RepoService` | `parser`, `graph`, `common` |
-| **`parser`** | ✅ Active | Tree-sitter AST traversal, entity & relationship extraction | `ParserService` | `common` |
-| **`graph`** | ✅ Active | NetworkX graph construction, `knowledge_graph.json` persistence | `GraphService` | `common` |
-| **accounts** | ✅ Active | Auth, user profiles, registration, JWT Tokens | `AuthService`, `UserService` | `common` |
-| **ai** | ✅ Active | Gemini API orchestration (lazy cached model), NL code queries (rate-limited 15/hr) | `AIService` | `graph`, `analysis`, `common` |
-| **analysis** | 📋 Planned | Graph algorithms, complexity, metrics | `MetricsService` | `graph`, `parser`, `common` |
-| **websocket** | ✅ Active | WebSocket channel broadcasts, TokenAuthMiddleware | `NotificationService` | `common` |
+| Module | Responsibility | Key Services | Allowed Dependencies |
+|:---|:---|:---|:---|
+| **`common`** | Shared base classes, `CodeAtlasException` | `CodeAtlasException` | None |
+| **`repositories`** | ZIP upload (50MB limit, Zip Slip protected), extraction, repo metadata, graph API | `RepoService` | `parser`, `graph`, `common` |
+| **`parser`** | Tree-sitter AST traversal, entity & relationship extraction | `ParserService` | `common` |
+| **`graph`** | NetworkX graph construction, `knowledge_graph.json` persistence | `GraphService` | `common` |
+| **accounts** | Auth, user profiles, registration, JWT Tokens | `AuthService`, `UserService` | `common` |
+| **ai** | Gemini API orchestration (lazy cached model), NL code queries (rate-limited 15/hr) | `AIService` | `graph`, `analysis`, `common` |
+| **analysis** | Graph algorithms, complexity, metrics | `MetricsService` | `graph`, `parser`, `common` |
+| **websocket** | WebSocket channel broadcasts, TokenAuthMiddleware | `NotificationService` | `common` |
 
 ---
 
@@ -142,20 +142,20 @@ sequenceDiagram
 ```mermaid
 graph TD
     UI[Frontend / API Layer]
-    UI --> Repos[repositories ✅]
-    UI --> Accounts[accounts ✅]
+    UI --> Repos[repositories]
+    UI --> Accounts[accounts]
 
-    Repos --> Parser[parser ✅]
-    Repos --> Graph[graph ✅]
-    Repos --> WS[websocket ✅]
+    Repos --> Parser[parser]
+    Repos --> Graph[graph]
+    Repos --> WS[websocket]
 
-    AI[ai 📋] --> Graph
-    AI --> Analysis[analysis 📋]
+    AI[ai] --> Graph
+    AI --> Analysis[analysis]
     Analysis --> Graph
     Graph --> Parser
 
     %% All depend on common
-    Repos -.-> Common[common ✅]
+    Repos -.-> Common[common]
     Parser -.-> Common
     Graph -.-> Common
     Analysis -.-> Common
@@ -331,21 +331,6 @@ Views should only:
 
 ---
 
-## 10. Phase Completion Summary
 
-| Phase | What Was Built |
-|---|---|
-| **Phase 1** | Vite + React + TypeScript + Tailwind v4 + Django + PostgreSQL + .env + CORS |
-| **Phase 2** | Domain module scaffold (8 apps), DRF router, REST viewsets, React workspace scaffold |
-| **Phase 3** | `ParserService` (Tree-sitter, manual AST traversal), `GraphService` (NetworkX), `RepoService.upload_and_extract_repository()`, ZIP endpoint |
-| **Phase 4** | `GET /repositories/<id>/graph/` endpoint, `RepositoryService.getGraph()`, `CodeGraph.tsx` with Dagre LR layout, `EntityNode` with filename + path display |
-| **Phase 5** | Gemini AI integration, `AIService` query processing, `POST /ai/query/` endpoint, AI Assistant Side Panel in frontend |
-| **Phase 5 (Hardened)** | Security fixes (Zip Slip, 50MB upload limit), DRF rate limiting (`AIQueryAnonThrottle`, `AIQueryUserThrottle`), lazy Gemini model caching, PostgreSQL database env mapping, chat history panel UX, dynamic repo list in sidebar |
-| **Phase 5.5** | AST parser enrichment (line numbers), `node_snippet` endpoint, Blast Radius graph highlighting (Rose/Emerald), interactive source code viewer sliding panel. |
-| **Phase 6** | Frontend Intelligence: Real-time graph filtering, Cmd+K search panel (framer-motion), AI source code explanation (Auto-Doc), and updated DRF serializers. |
-| **Phase 7** | Real-time WebSocket progress via Celery + Django Channels |
-| **Phase 8** | JWT Authentication, User Registration, TokenAuthMiddleware, Zustand Global Store Migration, Landing Page |
-
----
 
 *Built with ❤️ using Django, React, Tree-sitter, NetworkX, and React Flow.*
