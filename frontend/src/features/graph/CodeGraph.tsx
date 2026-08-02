@@ -374,7 +374,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
     showInteractive={false}
    />
    <MiniMap 
-    className="bg-zinc-950 border-zinc-800 rounded-xl overflow-hidden shadow-sm" 
+    className="bg-zinc-900 border-zinc-800 rounded-xl overflow-hidden shadow-sm" 
     maskColor="rgba(0, 0, 0, 0.7)"
     nodeColor={(node) => {
      switch (node.data?.type) {

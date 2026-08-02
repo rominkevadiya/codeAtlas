@@ -67,3 +67,9 @@
 .react-flow__panel.react-flow__attribution {
   display: none;
 }
+
+/* Make MiniMap viewport visible in dark mode */
+.react-flow__minimap-mask {
+  stroke: #3f3f46;
+  stroke-width: 1px;
+}
