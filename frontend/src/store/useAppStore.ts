@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { GraphData, GraphNode, ImpactData } from '../types/graph';
-import { RepositoryService, AIService } from '../services/api';
+import { RepositoryService, AIService, AuthService, type Repository, type CurrentUser } from '../services/api';
 
 interface AppState {
   // Global App State
@@ -18,6 +18,16 @@ interface AppState {
   showAuthScreen: boolean;
   setShowAuthScreen: (show: boolean) => void;
 
+  // Current User Profile
+  currentUser: CurrentUser | null;
+  setCurrentUser: (user: CurrentUser | null) => void;
+
+  // Repository List (user's repos from DB)
+  userRepos: Repository[];
+  setUserRepos: (repos: Repository[]) => void;
+  showRepoPanel: boolean;
+  setShowRepoPanel: (show: boolean) => void;
+
   // UI Overlays
   showAnalysis: boolean;
   setShowAnalysis: (show: boolean) => void;
@@ -32,7 +42,7 @@ interface AppState {
   selectedNodeId: string | undefined;
   selectedNodeData: GraphNode | null;
   setSelectedNode: (id: string | undefined, data?: GraphNode | null) => void;
-  
+
   // Data linked to selected node
   nodeSnippet: string | null;
   isLoadingSnippet: boolean;
@@ -44,11 +54,17 @@ interface AppState {
   // Actions
   fetchNodeData: () => Promise<void>;
   explainSelectedNode: () => Promise<void>;
+  loadUserData: () => Promise<void>;
+  switchRepo: (repoId: string) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  repoId: undefined,
-  setRepoId: (id) => set({ repoId: id }),
+  repoId: localStorage.getItem('last_repo_id') || undefined,
+  setRepoId: (id) => {
+    if (id) localStorage.setItem('last_repo_id', id);
+    else localStorage.removeItem('last_repo_id');
+    set({ repoId: id });
+  },
   graphData: null,
   setGraphData: (data) => set({ graphData: data }),
   searchQuery: "",
@@ -60,10 +76,28 @@ export const useAppStore = create<AppState>((set, get) => ({
   logout: () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
-    set({ isAuthenticated: false, repoId: undefined, graphData: null, showAuthScreen: false });
+    localStorage.removeItem('last_repo_id');
+    set({
+      isAuthenticated: false,
+      repoId: undefined,
+      graphData: null,
+      showAuthScreen: false,
+      currentUser: null,
+      userRepos: [],
+    });
   },
   showAuthScreen: false,
   setShowAuthScreen: (show) => set({ showAuthScreen: show }),
+
+  // Current User
+  currentUser: null,
+  setCurrentUser: (user) => set({ currentUser: user }),
+
+  // Repository List
+  userRepos: [],
+  setUserRepos: (repos) => set({ userRepos: repos }),
+  showRepoPanel: false,
+  setShowRepoPanel: (show) => set({ showRepoPanel: show }),
 
   showAnalysis: false,
   setShowAnalysis: (show) => set({ showAnalysis: show }),
@@ -82,8 +116,6 @@ export const useAppStore = create<AppState>((set, get) => ({
     } else {
       set({ selectedNodeId: id, selectedNodeData: data });
     }
-    // Note: To automatically fetch node data on select, you could call get().fetchNodeData() here, 
-    // but React's useEffect in App or a watcher component might be better to decouple side-effects.
   },
 
   nodeSnippet: null,
@@ -93,19 +125,68 @@ export const useAppStore = create<AppState>((set, get) => ({
   impactData: null,
   isLoadingImpact: false,
 
+  // Load current user profile AND repository list from the API
+  loadUserData: async () => {
+    try {
+      const [meRes, reposRes] = await Promise.all([
+        AuthService.getMe(),
+        RepositoryService.getRepositories(),
+      ]);
+      set({ currentUser: meRes.data, userRepos: reposRes.data });
+
+      // Auto-restore last active repo if it belongs to this user
+      const lastRepoId = localStorage.getItem('last_repo_id');
+      if (lastRepoId && reposRes.data.some(r => r.id === lastRepoId && r.status === 'READY')) {
+        const { graphData } = get();
+        if (!graphData) {
+          // Only restore if we don't already have graph data loaded
+          try {
+            const graphRes = await RepositoryService.getGraph(lastRepoId);
+            set({ graphData: graphRes.data, repoId: lastRepoId });
+          } catch {
+            // Repo exists but graph fetch failed — clear stale id
+            localStorage.removeItem('last_repo_id');
+            set({ repoId: undefined });
+          }
+        }
+      } else if (lastRepoId && !reposRes.data.some(r => r.id === lastRepoId)) {
+        localStorage.removeItem('last_repo_id');
+        set({ repoId: undefined });
+      }
+    } catch (err) {
+      console.error('Failed to load user data:', err);
+    }
+  },
+
+  // Switch active repo and load its graph
+  switchRepo: async (newRepoId: string) => {
+    set({
+      repoId: newRepoId,
+      graphData: null,
+      selectedNodeId: undefined,
+      selectedNodeData: null,
+      nodeSnippet: null,
+      aiExplanation: null,
+      impactData: null,
+      showRepoPanel: false,
+    });
+    localStorage.setItem('last_repo_id', newRepoId);
+    try {
+      const res = await RepositoryService.getGraph(newRepoId);
+      set({ graphData: res.data });
+    } catch (err) {
+      console.error('Failed to load graph for repo:', newRepoId, err);
+    }
+  },
+
   fetchNodeData: async () => {
     const { repoId, selectedNodeId, selectedNodeData } = get();
-    
+
     if (!selectedNodeId || !repoId || !selectedNodeData?.file_path) {
-      set({
-        nodeSnippet: null,
-        aiExplanation: null,
-        impactData: null,
-      });
+      set({ nodeSnippet: null, aiExplanation: null, impactData: null });
       return;
     }
 
-    // Reset UI before fetch
     set({
       nodeSnippet: null,
       aiExplanation: null,

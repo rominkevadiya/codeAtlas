@@ -1,6 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from rest_framework.serializers import ModelSerializer
 
@@ -24,3 +25,20 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
+
+
+class MeView(APIView):
+    """
+    GET /api/v1/auth/me/
+    Returns the currently authenticated user's profile information.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user = request.user
+        return Response({
+            'id': str(user.id),
+            'username': user.username,
+            'email': user.email,
+            'date_joined': user.date_joined.isoformat(),
+        })

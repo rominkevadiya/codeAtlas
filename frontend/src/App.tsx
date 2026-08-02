@@ -12,6 +12,7 @@ import './index.css';
 import { AutoDocPanel } from './features/ai/AutoDocPanel';
 import { AuthScreen } from './features/auth/AuthScreen';
 import { LandingPage } from './features/landing/LandingPage';
+import { RepoPanel } from './features/repositories/RepoPanel';
 
 export default function App() {
   const {
@@ -27,6 +28,8 @@ export default function App() {
     setShowUpload,
     showAutoDoc,
     setShowAutoDoc,
+    showRepoPanel,
+    setShowRepoPanel,
     selectedNodeId,
     selectedNodeData,
     setSelectedNode,
@@ -38,16 +41,25 @@ export default function App() {
     isLoadingImpact,
     fetchNodeData,
     explainSelectedNode,
-    setRepoId,
-    setGraphData,
     isAuthenticated,
     showAuthScreen,
-    logout
+    logout,
+    currentUser,
+    setUserRepos,
+    loadUserData,
+    switchRepo,
   } = useAppStore();
 
   const handleNodeClick = (nodeId: string, nodeData?: any) => {
     setSelectedNode(nodeId, nodeData);
   };
+
+  // Load user profile and repo list when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadUserData();
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -55,11 +67,16 @@ export default function App() {
     }
   }, [selectedNodeId, repoId, selectedNodeData, fetchNodeData, isAuthenticated]);
 
+  // Generate avatar initials from username
+  const avatarInitials = currentUser?.username
+    ? currentUser.username.slice(0, 2).toUpperCase()
+    : 'ME';
+
   const handleExplainCode = async () => {
     await explainSelectedNode();
   };
 
-  const getLanguage = (filePath: string) => {
+  const getLanguage = (filePath: string | undefined) => {
     if (!filePath) return 'javascript';
     if (filePath.endsWith('.py')) return 'python';
     if (filePath.endsWith('.js')) return 'javascript';
@@ -117,16 +134,21 @@ export default function App() {
             <span className="text-sm font-medium pr-1">Metrics</span>
           </button>
           <div className="w-px h-6 bg-white/10 mx-2" />
+          {/* Repo Switcher */}
           <button 
-            onClick={() => setShowUpload(true)}
-            className="p-2 rounded-lg hover:bg-white/5 text-slate-400 transition-colors"
+            onClick={() => setShowRepoPanel(!showRepoPanel)}
+            className={`p-2 rounded-lg transition-all duration-300 ${showRepoPanel ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'hover:bg-white/5 text-slate-400 border border-transparent'}`}
+            title="My Repositories"
           >
             <FolderGit2 className="w-5 h-5" />
           </button>
-          <button onClick={logout} className="w-8 h-8 rounded-full bg-gradient-to-tr from-rose-400 to-orange-400 p-0.5 flex items-center justify-center hover:opacity-80 transition-opacity" title="Log out">
-            <div className="w-full h-full bg-[#111] rounded-full border-2 border-transparent flex items-center justify-center">
-              <span className="text-[10px] font-bold text-slate-300">LO</span>
-            </div>
+          {/* Dynamic User Avatar */}
+          <button
+            onClick={logout}
+            className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center hover:opacity-80 transition-opacity shadow-lg shadow-indigo-500/20"
+            title={`Logged in as ${currentUser?.username || '...'} — Click to logout`}
+          >
+            <span className="text-[10px] font-bold text-white">{avatarInitials}</span>
           </button>
         </div>
       </nav>
@@ -366,20 +388,24 @@ export default function App() {
         </main>
       </div>
 
+      {/* Repo Panel Overlay */}
+      {showRepoPanel && (
+        <div className="absolute top-0 right-0 bottom-0 w-80 z-50 animate-in slide-in-from-right-8 duration-300 fade-in shadow-2xl p-4">
+          <RepoPanel
+            onClose={() => setShowRepoPanel(false)}
+            onAddNew={() => { setShowRepoPanel(false); setShowUpload(true); }}
+          />
+        </div>
+      )}
+
       {showUpload && (
         <UploadModal 
           onClose={() => setShowUpload(false)} 
           onUploadComplete={(newRepoId) => {
-            console.log("Upload complete for repo:", newRepoId);
-            setRepoId(newRepoId);
             setShowUpload(false);
-            
-            // Fetch the real graph data
-            RepositoryService.getGraph(newRepoId).then(res => {
-              setGraphData(res.data);
-            }).catch(err => {
-              console.error("Failed to fetch graph data:", err);
-            });
+            switchRepo(newRepoId);
+            // Refresh repo list to include the new one
+            RepositoryService.getRepositories().then(res => setUserRepos(res.data));
           }} 
         />
       )}

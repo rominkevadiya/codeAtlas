@@ -16,9 +16,13 @@ class RepositoryViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows repositories to be viewed or edited.
     """
-    queryset = Repository.objects.all()
     serializer_class = RepositorySerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_queryset(self):
+        if self.request.user and self.request.user.is_authenticated:
+            return Repository.objects.filter(owner=self.request.user)
+        return Repository.objects.none()
 
     def create(self, request, *args, **kwargs):
         name = request.data.get('name')
@@ -192,16 +196,15 @@ class RepositoryViewSet(viewsets.ModelViewSet):
         if not os.path.exists(full_path):
             return Response({"error": "File not found."}, status=status.HTTP_404_NOT_FOUND)
             
+        import itertools
         try:
             with open(full_path, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-                
-            if start_line is not None and end_line is not None:
-                start = int(start_line)
-                end = int(end_line)
-                snippet = "".join(lines[start:end+1])
-            else:
-                snippet = "".join(lines)
+                if start_line is not None and end_line is not None:
+                    start = int(start_line)
+                    end = int(end_line)
+                    snippet = "".join(itertools.islice(f, start, end + 1))
+                else:
+                    snippet = f.read()
                 
             return Response({"snippet": snippet}, status=status.HTTP_200_OK)
         except Exception as e:

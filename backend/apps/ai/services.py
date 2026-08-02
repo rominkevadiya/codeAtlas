@@ -84,6 +84,71 @@ Instructions:
             raise ValueError(f"Failed to generate response from AI: {str(e)}")
 
     @staticmethod
+    def query_repository_with_context(repository_id: str, query: str, conversation_context: str = "") -> str:
+        """
+        Query a repository using Gemini AI, including multi-turn conversation context.
+        Used by the persistent chat history feature.
+        """
+        try:
+            repo = Repository.objects.get(id=repository_id)
+        except Repository.DoesNotExist:
+            raise ValueError(f"Repository with id {repository_id} does not exist.")
+
+        if not repo.local_path:
+            raise ValueError("Repository local path is missing.")
+
+        graph_path = os.path.join(repo.local_path, 'knowledge_graph.json')
+        if not os.path.exists(graph_path):
+            raise ValueError("Knowledge graph not found. Has the repository been fully parsed?")
+
+        try:
+            with open(graph_path, 'r', encoding='utf-8') as f:
+                graph_data = json.load(f)
+        except Exception as e:
+            logger.error(f"Failed to load knowledge graph: {e}")
+            raise ValueError("Failed to load knowledge graph data.")
+
+        graph_str = json.dumps(graph_data)
+        if len(graph_str) > 50000:
+            graph_str = graph_str[:50000] + "\n... (graph truncated due to size)"
+
+        context_section = ""
+        if conversation_context:
+            context_section = f"""
+Previous Conversation:
+{conversation_context}
+"""
+
+        prompt = f"""
+You are a senior principal engineer and architectural assistant helping a developer understand their codebase named '{repo.name}'.
+
+Codebase Architecture Data:
+{graph_str}
+{context_section}
+Current Question:
+{query}
+
+Instructions:
+1. Answer the user's question conversationally and directly.
+2. Use the previous conversation for context if relevant (for follow-up questions).
+3. DO NOT use phrases like "Based on the provided knowledge graph...". Just answer directly.
+4. If you don't have the specific answer, say so clearly.
+"""
+
+        try:
+            client = _get_gemini_client()
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt
+            )
+            return response.text
+        except ValueError:
+            raise
+        except Exception as e:
+            logger.error(f"Gemini API error (context): {e}")
+            raise ValueError(f"Failed to generate response from AI: {str(e)}")
+
+    @staticmethod
     def explain_node(repository_id: str, node_name: str, node_type: str, snippet: str) -> str:
         """
         Explain a specific code node (file, class, function) using its source snippet.

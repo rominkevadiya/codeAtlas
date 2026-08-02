@@ -141,7 +141,8 @@ class RepoService:
             result = subprocess.run(
                 ["git", "clone", "--depth", "1", github_url, extract_path],
                 capture_output=True,
-                text=True
+                text=True,
+                timeout=120
             )
             if result.returncode != 0:
                 raise ValueError(f"Failed to clone repository: {result.stderr}")
@@ -176,6 +177,13 @@ class RepoService:
 
             return repo
 
+        except subprocess.TimeoutExpired as e:
+            repo.status = RepositoryStatus.FAILED
+            error_msg = "Failed to clone repository: Timeout exceeded (120s)."
+            repo.error_message = error_msg
+            repo.save(update_fields=['status', 'error_message'])
+            broadcast_progress(repo_uuid, RepositoryStatus.FAILED, 0, error_msg, error=error_msg)
+            raise e
         except Exception as e:
             repo.status = RepositoryStatus.FAILED
             repo.error_message = str(e)

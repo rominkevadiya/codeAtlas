@@ -18,6 +18,31 @@ export interface Repository {
   websocket_url?: string;
 }
 
+export interface CurrentUser {
+  id: string;
+  username: string;
+  email: string;
+  date_joined: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  created_at: string;
+}
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  repository_id: string;
+  message_count: number;
+  last_message: { role: string; content: string } | null;
+  messages?: ChatMessage[];
+  created_at: string;
+  updated_at: string;
+}
+
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -34,19 +59,45 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor for handling errors globally
+// Interceptor for handling 401 errors with auto-refresh
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    console.error('API Error:', error.response?.data || error.message);
-    if (error.response?.status === 401) {
-      // Optional: Handle token refresh or logout here
-      // localStorage.removeItem('access_token');
-      // window.location.href = '/login';
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If it's a 401 error and we haven't retried this request yet
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken) {
+          const response = await axios.post(`${API_BASE_URL}/auth/token/refresh/`, {
+            refresh: refreshToken
+          });
+
+          const newAccessToken = response.data.access;
+          localStorage.setItem('access_token', newAccessToken);
+
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        // Refresh failed — clear storage and redirect to home
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.location.href = '/';
+      }
     }
+
+    console.error('API Error:', error.response?.data || error.message);
     return Promise.reject(error);
   }
 );
+
+export const AuthService = {
+  getMe: () => api.get<CurrentUser>('/auth/me/'),
+};
 
 export const RepositoryService = {
   getRepositories: () => api.get<Repository[]>('/repositories/'),
@@ -55,14 +106,13 @@ export const RepositoryService = {
     formData.append('name', name);
     formData.append('file', file);
     return api.post<Repository>('/repositories/upload/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
-  importGithub: (githubUrl: string) => 
+  importGithub: (githubUrl: string) =>
     api.post('/repositories/import_github/', { github_url: githubUrl }),
-    
+  deleteRepository: (id: string) =>
+    api.delete(`/repositories/${id}/`),
   getImpactAnalysis: (id: string, nodeId: string) =>
     api.get(`/analysis/${id}/impact/?node_id=${encodeURIComponent(nodeId)}`),
   getGraph: (id: string) => api.get(`/repositories/${id}/graph/`),
@@ -79,6 +129,22 @@ export const AIService = {
     api.post('/ai/query/', { repository_id, query }),
   explainNode: (repository_id: string, node_name: string, node_type: string, snippet: string) =>
     api.post('/ai/explain/', { repository_id, node_name, node_type, snippet }),
+};
+
+export const ChatService = {
+  getSessions: (repository_id: string) =>
+    api.get<ChatSession[]>(`/ai/chat/?repository_id=${repository_id}`),
+  createSession: (repository_id: string, title: string = 'New Chat') =>
+    api.post<ChatSession>('/ai/chat/', { repository_id, title }),
+  getSession: (session_id: string) =>
+    api.get<ChatSession>(`/ai/chat/${session_id}/`),
+  deleteSession: (session_id: string) =>
+    api.delete(`/ai/chat/${session_id}/`),
+  sendMessage: (session_id: string, content: string) =>
+    api.post<{ user_message: ChatMessage; assistant_message: ChatMessage }>(
+      `/ai/chat/${session_id}/send/`,
+      { content }
+    ),
 };
 
 export const AnalysisService = {
