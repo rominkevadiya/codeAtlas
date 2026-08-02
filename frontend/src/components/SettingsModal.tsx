@@ -134,12 +134,12 @@ export const SettingsModal: React.FC = () => {
                       <button
                         onClick={() => setAutoZoom(!autoZoom)}
                         className={`w-10 h-5 rounded-full transition-colors relative flex items-center ${
-                          autoZoom ? 'bg-white text-black' : 'bg-zinc-700'
+                          autoZoom ? 'bg-white' : 'bg-zinc-700'
                         }`}
                       >
                         <div
-                          className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                            autoZoom ? 'translate-x-5' : 'translate-x-1'
+                          className={`w-4 h-4 rounded-full transition-transform ${
+                            autoZoom ? 'translate-x-5 bg-black' : 'translate-x-1 bg-white'
                           }`}
                         />
                       </button>
@@ -153,12 +153,12 @@ export const SettingsModal: React.FC = () => {
                       <button
                         onClick={() => setHighQualityGraph(!highQualityGraph)}
                         className={`w-10 h-5 rounded-full transition-colors relative flex items-center ${
-                          highQualityGraph ? 'bg-white text-black' : 'bg-zinc-700'
+                          highQualityGraph ? 'bg-white' : 'bg-zinc-700'
                         }`}
                       >
                         <div
-                          className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                            highQualityGraph ? 'translate-x-5' : 'translate-x-1'
+                          className={`w-4 h-4 rounded-full transition-transform ${
+                            highQualityGraph ? 'translate-x-5 bg-black' : 'translate-x-1 bg-white'
                           }`}
                         />
                       </button>
