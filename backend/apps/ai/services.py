@@ -24,9 +24,10 @@ def _get_gemini_client():
 
 class AIService:
     @staticmethod
-    def query_repository(repository_id: str, query: str) -> str:
+    def _get_graph_data(repository_id: str) -> str:
         """
-        Query a repository using Gemini AI based on its knowledge graph.
+        Retrieves and formats the knowledge graph data for a given repository.
+        Truncates the graph if it exceeds the maximum context size to prevent token limits.
         """
         try:
             repo = Repository.objects.get(id=repository_id)
@@ -47,15 +48,40 @@ class AIService:
             logger.error(f"Failed to load knowledge graph: {e}")
             raise ValueError("Failed to load knowledge graph data.")
 
-        # Serialize graph — truncate if too large to avoid token limit issues
         graph_str = json.dumps(graph_data)
         if len(graph_str) > 50000:
-            # Simple truncation for the prototype; future: use RAG / embeddings
             graph_str = graph_str[:50000] + "\n... (graph truncated due to size)"
+        return graph_str, repo.name
 
+    @staticmethod
+    def _generate_response(prompt: str) -> str:
+        """
+        Invokes the Gemini API with the constructed prompt.
+        Handles API communication and basic error reporting.
+        """
+        try:
+            client = _get_gemini_client()
+            return client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt
+            ).text
+        except ValueError:
+            raise  # config error
+        except Exception as e:
+            logger.error(f"Gemini API error: {e}")
+            raise ValueError(f"Failed to generate response from AI: {str(e)}")
+
+    @staticmethod
+    def query_repository(repository_id: str, query: str) -> str:
+        """
+        Executes a single-turn query against the repository's architecture.
+        Uses the knowledge graph as context to answer architectural and structural questions.
+        """
+        graph_str, repo_name = AIService._get_graph_data(repository_id)
+        
         prompt = f"""
 You are a senior principal engineer and architectural assistant helping a developer understand their codebase.
-Below is the structural data (files, classes, functions, and their connections) extracted from their repository named '{repo.name}'.
+Below is the structural data (files, classes, functions, and their connections) extracted from their repository named '{repo_name}'.
 
 Codebase Architecture Data:
 {graph_str}
@@ -69,58 +95,20 @@ Instructions:
 3. DO NOT use phrases like "Based on the provided knowledge graph..." or "The graph indicates...". Just give the answer directly based on the data you see.
 4. If you don't have the specific answer in the architecture, feel free to say so clearly.
 """
-
-        try:
-            client = _get_gemini_client()
-            response = client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=prompt
-            )
-            return response.text
-        except ValueError:
-            raise  # re-raise config errors as-is
-        except Exception as e:
-            logger.error(f"Gemini API error: {e}")
-            raise ValueError(f"Failed to generate response from AI: {str(e)}")
+        return AIService._generate_response(prompt)
 
     @staticmethod
     def query_repository_with_context(repository_id: str, query: str, conversation_context: str = "") -> str:
         """
-        Query a repository using Gemini AI, including multi-turn conversation context.
-        Used by the persistent chat history feature.
+        Executes a context-aware query against the repository's architecture.
+        Maintains conversational state to allow for follow-up questions and deeper exploration.
         """
-        try:
-            repo = Repository.objects.get(id=repository_id)
-        except Repository.DoesNotExist:
-            raise ValueError(f"Repository with id {repository_id} does not exist.")
-
-        if not repo.local_path:
-            raise ValueError("Repository local path is missing.")
-
-        graph_path = os.path.join(repo.local_path, 'knowledge_graph.json')
-        if not os.path.exists(graph_path):
-            raise ValueError("Knowledge graph not found. Has the repository been fully parsed?")
-
-        try:
-            with open(graph_path, 'r', encoding='utf-8') as f:
-                graph_data = json.load(f)
-        except Exception as e:
-            logger.error(f"Failed to load knowledge graph: {e}")
-            raise ValueError("Failed to load knowledge graph data.")
-
-        graph_str = json.dumps(graph_data)
-        if len(graph_str) > 50000:
-            graph_str = graph_str[:50000] + "\n... (graph truncated due to size)"
-
-        context_section = ""
-        if conversation_context:
-            context_section = f"""
-Previous Conversation:
-{conversation_context}
-"""
+        graph_str, repo_name = AIService._get_graph_data(repository_id)
+        
+        context_section = f"\nPrevious Conversation:\n{conversation_context}\n" if conversation_context else ""
 
         prompt = f"""
-You are a senior principal engineer and architectural assistant helping a developer understand their codebase named '{repo.name}'.
+You are a senior principal engineer and architectural assistant helping a developer understand their codebase named '{repo_name}'.
 
 Codebase Architecture Data:
 {graph_str}
@@ -134,24 +122,13 @@ Instructions:
 3. DO NOT use phrases like "Based on the provided knowledge graph...". Just answer directly.
 4. If you don't have the specific answer, say so clearly.
 """
-
-        try:
-            client = _get_gemini_client()
-            response = client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=prompt
-            )
-            return response.text
-        except ValueError:
-            raise
-        except Exception as e:
-            logger.error(f"Gemini API error (context): {e}")
-            raise ValueError(f"Failed to generate response from AI: {str(e)}")
+        return AIService._generate_response(prompt)
 
     @staticmethod
     def explain_node(repository_id: str, node_name: str, node_type: str, snippet: str) -> str:
         """
-        Explain a specific code node (file, class, function) using its source snippet.
+        Generates a detailed explanation for a specific code entity (e.g., function, class).
+        Analyzes the source snippet to explain its logic, purpose, and behavior.
         """
         prompt = f"""
 You are an expert software developer.
@@ -164,15 +141,4 @@ Provide a clear, concise explanation of what this code does, its main logic, and
 Act as if you are intimately familiar with this codebase.
 Do not use phrases like "Based on the provided snippet..." just answer directly.
 """
-        try:
-            client = _get_gemini_client()
-            response = client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=prompt
-            )
-            return response.text
-        except ValueError:
-            raise
-        except Exception as e:
-            logger.error(f"Gemini API error (explain): {e}")
-            raise ValueError(f"Failed to generate explanation from AI: {str(e)}")
+        return AIService._generate_response(prompt)

@@ -18,6 +18,10 @@ class AIQueryView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        """
+        Processes a single-turn AI query for a repository.
+        Validates ownership, queries the AI service, and returns the generated answer.
+        """
         serializer = AIQuerySerializer(data=request.data)
         if serializer.is_valid():
             repository_id = serializer.validated_data['repository_id']
@@ -46,6 +50,10 @@ class AIExplainNodeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        """
+        Processes a request to explain a specific code node (file, class, or function).
+        Validates ownership and utilizes the AI service to generate a technical explanation.
+        """
         repository_id = request.data.get('repository_id')
         node_name = request.data.get('node_name')
         node_type = request.data.get('node_type')
@@ -122,6 +130,11 @@ class ChatSendMessageView(APIView):
     throttle_classes = [AIQueryUserThrottle]
 
     def post(self, request, session_id):
+        """
+        Processes a new user message within a chat session.
+        Validates the session, fetches the last 10 messages for context, queries the AI,
+        and saves both the user and AI messages to the database.
+        """
         try:
             session = ChatSession.objects.get(id=session_id, user=request.user)
         except ChatSession.DoesNotExist:

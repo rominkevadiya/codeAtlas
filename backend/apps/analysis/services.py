@@ -8,7 +8,11 @@ from apps.repositories.models import Repository
 
 class MetricsService:
     @staticmethod
-    def calculate_metrics(repository_id):
+    def _get_graph(repository_id: str):
+        """
+        Loads and reconstructs the NetworkX knowledge graph for a given repository.
+        Returns the parsed graph object for further structural analysis.
+        """
         try:
             repo = Repository.objects.get(id=repository_id)
         except Repository.DoesNotExist:
@@ -21,172 +25,129 @@ class MetricsService:
         try:
             with open(graph_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            G = json_graph.node_link_graph(data)
+            return json_graph.node_link_graph(data)
         except Exception as e:
             raise CodeAtlasException(f"Failed to load graph: {str(e)}", code="GRAPH_LOAD_ERROR", status_code=500)
 
-        # Separate nodes by type
-        file_nodes = [n for n, attr in G.nodes(data=True) if attr.get("type") == "file"]
-        
-        # 1. God Classes / Giant Files
-        # We can calculate LOC (Lines of Code) from start_line and end_line
-        file_metrics = []
+    @staticmethod
+    def _calc_giant_files(G, file_nodes):
+        """
+        Calculates file size and complexity metrics across the repository.
+        Identifies 'giant' files based on lines of code and internal entity count.
+        """
+        metrics = []
         for fn in file_nodes:
             attr = G.nodes[fn]
-            start_line = attr.get("start_line", 0)
-            end_line = attr.get("end_line", 0)
-            loc = end_line - start_line + 1 if end_line >= start_line else 0
+            start_line, end_line = attr.get("start_line", 0), attr.get("end_line", 0)
+            loc = max(0, end_line - start_line + 1)
+            contains_count = sum(1 for _, _, e_data in G.out_edges(fn, data=True) if e_data.get("type") == "contains")
             
-            # Count functions/classes contained in this file
-            contains_count = 0
-            for u, v, e_data in G.out_edges(fn, data=True):
-                if e_data.get("type") == "contains":
-                    contains_count += 1
-                    
-            file_metrics.append({
-                "id": fn,
-                "name": attr.get("name", fn),
-                "loc": loc,
-                "contains_count": contains_count
-            })
+            metrics.append({"id": fn, "name": attr.get("name", fn), "loc": loc, "contains_count": contains_count})
+        return sorted(metrics, key=lambda x: x["loc"], reverse=True)[:10]
 
-        # Sort by LOC (descending) and take top 10
-        top_giant_files = sorted(file_metrics, key=lambda x: x["loc"], reverse=True)[:10]
-        
-        # 2. Coupling Analysis (Inbound/Outbound imports)
-        # We will build an imports subgraph
+    @staticmethod
+    def _calc_coupling_and_imports(G, file_nodes):
+        """
+        Builds a dedicated import dependency graph.
+        Calculates inbound and outbound coupling metrics to identify highly dependent files.
+        """
         import_edges = [(u, v) for u, v, attr in G.edges(data=True) if attr.get("type") == "imports"]
-        imports_graph = nx.DiGraph()
-        imports_graph.add_edges_from(import_edges)
+        imports_graph = nx.DiGraph(import_edges)
         
-        coupling_metrics = []
+        metrics = []
         for fn in file_nodes:
-            if fn in imports_graph:
-                in_degree = imports_graph.in_degree(fn)
-                out_degree = imports_graph.out_degree(fn)
-            else:
-                in_degree = 0
-                out_degree = 0
-                
-            coupling_metrics.append({
-                "id": fn,
-                "name": G.nodes[fn].get("name", fn),
-                "inbound_imports": in_degree,
-                "outbound_imports": out_degree,
-                "total_coupling": in_degree + out_degree
+            in_deg = imports_graph.in_degree(fn) if fn in imports_graph else 0
+            out_deg = imports_graph.out_degree(fn) if fn in imports_graph else 0
+            metrics.append({
+                "id": fn, "name": G.nodes[fn].get("name", fn),
+                "inbound_imports": in_deg, "outbound_imports": out_deg, "total_coupling": in_deg + out_deg
             })
-            
-        top_coupled_files = sorted(coupling_metrics, key=lambda x: x["total_coupling"], reverse=True)[:10]
-        
-        # 3. Circular Dependency Detection
-        # Find cycles in the imports_graph
+        return sorted(metrics, key=lambda x: x["total_coupling"], reverse=True)[:10], imports_graph
+
+    @staticmethod
+    def _find_circular_deps(imports_graph):
+        """
+        Detects cyclic dependencies within the import graph.
+        Limits the search to the first 20 cycles to prevent excessive computation time.
+        """
         cycles = []
         try:
-            # simple_cycles can be expensive on very large graphs, limit to finding a few
-            # or use recursive_simple_cycles for NetworkX >= 2.8, but simple_cycles is standard
-            # To avoid hanging on huge graphs, we might want to restrict or timeout, but we'll try it directly.
-            # Convert simple_cycles generator to a list, limit to 20 cycles
-            cycle_gen = nx.simple_cycles(imports_graph)
-            for i, cycle in enumerate(cycle_gen):
-                if i >= 20:
-                    break
-                if len(cycle) > 1: # Ignore self-imports if any
-                    cycles.append(cycle)
+            for i, cycle in enumerate(nx.simple_cycles(imports_graph)):
+                if i >= 20: break
+                if len(cycle) > 1: cycles.append(cycle)
         except Exception:
             pass
+        return cycles
 
-        # 4. Architectural Hotspots (PageRank)
-        # Identifies the most critical files based on dependency graph centrality
-        hotspots = []
+    @staticmethod
+    def _find_hotspots(G, imports_graph):
+        """
+        Identifies architectural hotspots using the PageRank algorithm.
+        Highlights files that act as critical hubs in the dependency network.
+        """
         try:
             pr = nx.pagerank(imports_graph)
-            sorted_pr = sorted(pr.items(), key=lambda x: x[1], reverse=True)[:10]
-            for node_id, score in sorted_pr:
-                hotspots.append({
-                    "id": node_id,
-                    "name": G.nodes[node_id].get("name", node_id),
-                    "score": round(score, 4)
-                })
+            return [{"id": n, "name": G.nodes[n].get("name", n), "score": round(s, 4)} 
+                    for n, s in sorted(pr.items(), key=lambda x: x[1], reverse=True)[:10]]
         except Exception:
-            pass
+            return []
 
-        # 5. Potential Dead Code (Orphaned Files)
-        # Files with 0 inbound imports (excluding typical entry points)
-        dead_code_candidates = []
+    @staticmethod
+    def _find_dead_code(G, file_nodes, imports_graph):
+        """
+        Finds files with no inbound imports, excluding common entrypoints.
+        Helps identify potential dead code or isolated modules.
+        """
+        candidates = []
+        entrypoints = ['main', 'index', 'app', 'manage', 'setup', 'wsgi', 'asgi', 'urls']
         for fn in file_nodes:
             if fn in imports_graph and imports_graph.in_degree(fn) == 0:
-                name = G.nodes[fn].get("name", fn).lower()
-                # Exclude common entrypoints
-                if not any(entry in name for entry in ['main', 'index', 'app', 'manage', 'setup', 'wsgi', 'asgi', 'urls']):
-                    dead_code_candidates.append({
-                        "id": fn,
-                        "name": G.nodes[fn].get("name", fn)
-                    })
-        
-        # Limit to top 15 dead code candidates to avoid overwhelming output
-        dead_code_candidates = dead_code_candidates[:15]
+                name = G.nodes[fn].get("name", fn)
+                if not any(e in name.lower() for e in entrypoints):
+                    candidates.append({"id": fn, "name": name})
+        return candidates[:15]
 
+    @staticmethod
+    def calculate_metrics(repository_id):
+        G = MetricsService._get_graph(repository_id)
+        file_nodes = [n for n, attr in G.nodes(data=True) if attr.get("type") == "file"]
+        
+        giant_files = MetricsService._calc_giant_files(G, file_nodes)
+        coupled_files, imports_graph = MetricsService._calc_coupling_and_imports(G, file_nodes)
+        
         return {
-            "top_giant_files": top_giant_files,
-            "top_coupled_files": top_coupled_files,
-            "circular_dependencies": cycles,
-            "architectural_hotspots": hotspots,
-            "dead_code_candidates": dead_code_candidates
+            "top_giant_files": giant_files,
+            "top_coupled_files": coupled_files,
+            "circular_dependencies": MetricsService._find_circular_deps(imports_graph),
+            "architectural_hotspots": MetricsService._find_hotspots(G, imports_graph),
+            "dead_code_candidates": MetricsService._find_dead_code(G, file_nodes, imports_graph)
         }
 
     @staticmethod
     def calculate_blast_radius(repository_id, node_id):
-        try:
-            repo = Repository.objects.get(id=repository_id)
-        except Repository.DoesNotExist:
-            raise CodeAtlasException("Repository not found", code="REPO_NOT_FOUND", status_code=404)
-
-        graph_path = os.path.join(repo.local_path, "knowledge_graph.json")
-        if not os.path.exists(graph_path):
-            raise CodeAtlasException("Knowledge graph not found", code="GRAPH_NOT_FOUND", status_code=404)
-
-        try:
-            with open(graph_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            G = nx.DiGraph(json_graph.node_link_graph(data))
-        except Exception as e:
-            raise CodeAtlasException(f"Failed to load graph: {str(e)}", code="GRAPH_LOAD_ERROR", status_code=500)
-
+        """
+        Calculates the impact (blast radius) of modifying a specific node.
+        Performs forward and backward BFS traversal to find all dependent and impacted nodes.
+        """
+        G = MetricsService._get_graph(repository_id)
         if node_id not in G:
             raise CodeAtlasException("Node not found in graph", code="NODE_NOT_FOUND", status_code=404)
 
-        # Forward dependencies (things this node depends on)
-        forward_edges = list(nx.bfs_edges(G, source=node_id))
-        forward_nodes = set([v for u, v in forward_edges])
+        G_dir = nx.DiGraph(G)
         
-        # Backward dependencies (impacted nodes - things that depend on this node)
-        # Reverse graph to find ancestors
-        R = G.reverse(copy=False)
-        backward_edges = list(nx.bfs_edges(R, source=node_id))
-        backward_nodes = set([v for u, v in backward_edges])
+        # Forward/Backward BFS
+        forward_nodes = {v for _, v in nx.bfs_edges(G_dir, source=node_id)}
+        backward_nodes = {v for _, v in nx.bfs_edges(G_dir.reverse(copy=False), source=node_id)}
 
-        # Formatting results
-        impacted = []
-        for n in backward_nodes:
-            impacted.append({
-                "id": n,
-                "name": G.nodes[n].get("name", n),
-                "type": G.nodes[n].get("type", "unknown"),
-                "file_path": G.nodes[n].get("file_path", "")
-            })
+        def format_nodes(nodes):
+            return [{"id": n, "name": G.nodes[n].get("name", n), 
+                     "type": G.nodes[n].get("type", "unknown"), "file_path": G.nodes[n].get("file_path", "")} 
+                    for n in nodes]
 
-        dependencies = []
-        for n in forward_nodes:
-            dependencies.append({
-                "id": n,
-                "name": G.nodes[n].get("name", n),
-                "type": G.nodes[n].get("type", "unknown"),
-                "file_path": G.nodes[n].get("file_path", "")
-            })
-
+        impacted = format_nodes(backward_nodes)
         return {
             "node_id": node_id,
             "impacted_nodes": impacted,
-            "dependency_nodes": dependencies,
+            "dependency_nodes": format_nodes(forward_nodes),
             "impact_score": len(impacted)
         }

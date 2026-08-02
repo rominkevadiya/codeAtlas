@@ -29,8 +29,8 @@ class ParserService:
     @staticmethod
     def parse_repository(local_path):
         """
-        Traverses a repository directory, parses files, and extracts AST entities.
-        Returns a dictionary of nodes and edges for graph construction.
+        Traverses a repository directory, parses supported source files, and extracts AST entities.
+        Generates a structured dictionary of code nodes and their relational edges for knowledge graph construction.
         """
         entities = []
         relationships = []
@@ -81,75 +81,43 @@ class ParserService:
 
     @staticmethod
     def _extract_entities_from_ast(root_node, source_code, file_path):
+        """
+        Extracts structural entities (e.g., classes, functions) and dependencies (e.g., imports) from AST nodes.
+        Recursively traverses the syntax tree to build the internal graph representation.
+        """
         entities = []
         relationships = []
         
+        def _get_name_node(node, valid_types):
+            return next((c for c in node.children if c.type in valid_types), None)
+
+        def _add_entity(node, name_node, entity_type):
+            if name_node and name_node.text:
+                name = name_node.text.decode('utf-8')
+                entity_id = f"{file_path}:{name}"
+                entities.append({
+                    "id": entity_id, "type": entity_type, "name": name, "file_path": file_path,
+                    "start_line": getattr(node, 'start_point', [0])[0],
+                    "end_line": getattr(node, 'end_point', [0])[0],
+                })
+                relationships.append({"source": file_path, "target": entity_id, "type": "contains"})
+
         def traverse(node):
-            node_type = node.type
+            if node.type in ['class_definition', 'class_declaration']:
+                name_node = _get_name_node(node, ['identifier', 'type_identifier'])
+                _add_entity(node, name_node, "class")
             
-            if node_type in ['class_definition', 'class_declaration']:
-                name_node = None
-                for child in node.children:
-                    if child.type in ['identifier', 'type_identifier']:
-                        name_node = child
-                        break
-                
-                if name_node and name_node.text:
-                    class_name = name_node.text.decode('utf-8')
-                    entity_id = f"{file_path}:{class_name}"
-                    entities.append({
-                        "id": entity_id,
-                        "type": "class",
-                        "name": class_name,
-                        "file_path": file_path,
-                        "start_line": node.start_point[0] if hasattr(node, 'start_point') else 0,
-                        "end_line": node.end_point[0] if hasattr(node, 'end_point') else 0,
-                    })
-                    relationships.append({
-                        "source": file_path,
-                        "target": entity_id,
-                        "type": "contains"
-                    })
-            
-            elif node_type in ['function_definition', 'function_declaration', 'method_definition', 'arrow_function']:
-                name_node = None
-                
-                # For arrow functions, we would normally look at the parent VariableDeclarator to get the name.
-                # To keep things robust without getting too complex, we look for simple identifiers in the children.
-                if node_type != 'arrow_function':
-                    for child in node.children:
-                        if child.type in ['identifier', 'property_identifier']:
-                            name_node = child
-                            break
-                
-                if name_node and name_node.text:
-                    func_name = name_node.text.decode('utf-8')
-                    entity_id = f"{file_path}:{func_name}"
-                    entities.append({
-                        "id": entity_id,
-                        "type": "function",
-                        "name": func_name,
-                        "file_path": file_path,
-                        "start_line": node.start_point[0] if hasattr(node, 'start_point') else 0,
-                        "end_line": node.end_point[0] if hasattr(node, 'end_point') else 0,
-                    })
-                    relationships.append({
-                        "source": file_path,
-                        "target": entity_id,
-                        "type": "contains"
-                    })
+            elif node.type in ['function_definition', 'function_declaration', 'method_definition', 'arrow_function']:
+                if node.type != 'arrow_function':
+                    name_node = _get_name_node(node, ['identifier', 'property_identifier'])
+                    _add_entity(node, name_node, "function")
                     
-            elif node_type in ['import_statement', 'import_from_statement', 'import_clause']:
+            elif node.type in ['import_statement', 'import_from_statement', 'import_clause']:
                 for child in node.children:
-                    # In JS, imports often use string literals for paths
                     if child.type in ['dotted_name', 'identifier', 'string', 'string_fragment'] and child.text:
                         module_name = child.text.decode('utf-8').strip('\'"')
                         if module_name not in ['import', 'from']:
-                            relationships.append({
-                                "source": file_path,
-                                "target": module_name,
-                                "type": "imports"
-                            })
+                            relationships.append({"source": file_path, "target": module_name, "type": "imports"})
                         break
                         
             for child in node.children:

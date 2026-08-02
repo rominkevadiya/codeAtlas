@@ -11,6 +11,21 @@ interface AutoDocPanelProps {
  repositoryId: string;
 }
 
+// Markdown components styling map extracted for performance and readability
+const MarkdownComponents: any = {
+ h1: ({...props}) => <h1 className="text-3xl font-bold text-zinc-200 mb-6 border-b border-zinc-800 pb-3 mt-8 first:mt-0" {...props} />,
+ h2: ({...props}) => <h2 className="text-2xl font-semibold text-zinc-200 mb-4 mt-8 pb-2 border-b border-zinc-800/50" {...props} />,
+ h3: ({...props}) => <h3 className="text-xl font-semibold text-zinc-200 mb-3 mt-6" {...props} />,
+ p: ({...props}) => <p className="text-base text-zinc-200 mb-4 leading-relaxed" {...props} />,
+ ul: ({...props}) => <ul className="list-disc pl-6 space-y-2 mb-4 text-base text-zinc-200" {...props} />,
+ ol: ({...props}) => <ol className="list-decimal pl-6 space-y-2 mb-4 text-base text-zinc-200" {...props} />,
+ li: ({...props}) => <li className="text-zinc-200" {...props} />,
+ pre: ({...props}) => <pre className="bg-[#0A0A0A] p-4 rounded-md border border-zinc-800 my-4 overflow-x-auto text-sm" {...props} />,
+ code: ({...props}: any) => props.inline ? <code className="bg-zinc-800 px-1.5 py-0.5 rounded-sm text-zinc-200 font-mono text-sm" {...props} /> : <code className="font-mono text-zinc-200 text-sm" {...props} />,
+ strong: ({...props}) => <strong className="font-semibold text-zinc-200" {...props} />,
+ blockquote: ({...props}) => <blockquote className="border-l-4 border-zinc-700 pl-4 py-1 my-4 text-zinc-400 bg-zinc-900/50 rounded-r-md italic" {...props} />,
+};
+
 export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
  const [doc, setDoc] = useState<string | null>(null);
  const [loading, setLoading] = useState(true);
@@ -24,6 +39,10 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
  }, [repositoryId]);
 
+ /**
+  * Tries to fetch an existing document from the backend. 
+  * If none exists or an error occurs, it initiates the generation process.
+  */
  const loadOrGenerateDoc = async () => {
   setLoading(true);
   setError(null);
@@ -41,6 +60,9 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
   }
  };
 
+ /**
+  * Calls the AI service to generate a new architecture document for the repository.
+  */
  const generateDoc = async () => {
   setLoading(true);
   setError(null);
@@ -159,21 +181,7 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
      </div>
     ) : doc ? (
      <div className="w-full">
-      <ReactMarkdown
-       components={{
-        h1: ({...props}) => <h1 className="text-3xl font-bold text-zinc-200 mb-6 border-b border-zinc-800 pb-3 mt-8 first:mt-0" {...props} />,
-        h2: ({...props}) => <h2 className="text-2xl font-semibold text-zinc-200 mb-4 mt-8 pb-2 border-b border-zinc-800/50" {...props} />,
-        h3: ({...props}) => <h3 className="text-xl font-semibold text-zinc-200 mb-3 mt-6" {...props} />,
-        p: ({...props}) => <p className="text-base text-zinc-200 mb-4 leading-relaxed" {...props} />,
-        ul: ({...props}) => <ul className="list-disc pl-6 space-y-2 mb-4 text-base text-zinc-200" {...props} />,
-        ol: ({...props}) => <ol className="list-decimal pl-6 space-y-2 mb-4 text-base text-zinc-200" {...props} />,
-        li: ({...props}) => <li className="text-zinc-200" {...props} />,
-        pre: ({...props}) => <pre className="bg-[#0A0A0A] p-4 rounded-md border border-zinc-800 my-4 overflow-x-auto text-sm" {...props} />,
-        code: ({...props}: any) => props.inline ? <code className="bg-zinc-800 px-1.5 py-0.5 rounded-sm text-zinc-200 font-mono text-sm" {...props} /> : <code className="font-mono text-zinc-200 text-sm" {...props} />,
-        strong: ({...props}) => <strong className="font-semibold text-zinc-200" {...props} />,
-        blockquote: ({...props}) => <blockquote className="border-l-4 border-zinc-700 pl-4 py-1 my-4 text-zinc-400 bg-zinc-900/50 rounded-r-md italic" {...props} />,
-       }}
-      >
+      <ReactMarkdown components={MarkdownComponents}>
        {doc}
       </ReactMarkdown>
      </div>

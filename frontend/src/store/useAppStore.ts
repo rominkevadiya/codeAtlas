@@ -74,6 +74,11 @@ interface AppState {
  clearActiveRepo: () => void;
 }
 
+/**
+ * Main application state store using Zustand.
+ * Manages global UI state, authentication, repository selection,
+ * and interactions with the knowledge graph and AI features.
+ */
 export const useAppStore = create<AppState>((set, get) => ({
  repoId: localStorage.getItem('last_repo_id') || undefined,
  setRepoId: (id) => {
@@ -158,7 +163,14 @@ export const useAppStore = create<AppState>((set, get) => ({
  impactData: null,
  isLoadingImpact: false,
 
- // Load current user profile AND repository list from the API
+ // ──────────────────────────────
+ // Data Fetching & Sync Methods
+ // ──────────────────────────────
+
+ /**
+  * Loads the current user's profile and their associated repositories.
+  * Automatically attempts to restore the last active repository and fetch its graph.
+  */
  loadUserData: async () => {
   try {
    const [meRes, reposRes] = await Promise.all([
@@ -191,7 +203,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   }
  },
 
- // Switch active repo and load its graph
+ /**
+  * Switches the active repository context.
+  * Resets active node selections and fetches the new repository's knowledge graph.
+  * @param newRepoId - The unique ID of the target repository.
+  */
  switchRepo: async (newRepoId: string) => {
   set({
    repoId: newRepoId,
@@ -212,6 +228,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   }
  },
 
+ /**
+  * Clears the current repository context and all associated analysis state.
+  * Useful when closing a repository or logging out.
+  */
  clearActiveRepo: () => {
   localStorage.removeItem('last_repo_id');
   set({
@@ -225,6 +245,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   });
  },
 
+ /**
+  * Fetches detailed data for the currently selected graph node.
+  * Includes the source code snippet and the structural impact analysis (blast radius).
+  */
  fetchNodeData: async () => {
   const { repoId, selectedNodeId, selectedNodeData } = get();
 
@@ -265,6 +289,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   }
  },
 
+ /**
+  * Requests an AI-generated explanation for the currently selected node.
+  * Utilizes the node's source code snippet and type for context.
+  */
  explainSelectedNode: async () => {
   const { repoId, selectedNodeData, nodeSnippet } = get();
   if (!repoId || !selectedNodeData || !nodeSnippet) return;

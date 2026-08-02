@@ -24,6 +24,48 @@ export const UploadModal = React.forwardRef<HTMLDivElement, UploadModalProps>(({
   }
  };
 
+ const _connectWebSocket = (repoId: string) => {
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsHost = window.location.hostname || 'localhost';
+  const token = localStorage.getItem('access_token') || '';
+  const ws = new WebSocket(`${wsProtocol}//${wsHost}:8000/ws/repositories/${repoId}/progress/?token=${token}`);
+
+  ws.onmessage = (event) => {
+   try {
+    const data = JSON.parse(event.data);
+    setProgressState({ status: data.status, progress: data.progress || 0, message: data.message || '' });
+
+    if (data.status === 'READY') {
+     ws.close();
+     setTimeout(() => { onUploadComplete(repoId); }, 800);
+    } else if (data.status === 'FAILED') {
+     ws.close();
+     setUploadError(data.error || 'Processing failed.');
+     setIsUploading(false);
+    }
+   } catch (err) {
+    console.error('Error parsing WebSocket message:', err);
+   }
+  };
+
+  ws.onerror = (err) => {
+   console.error('WebSocket error:', err);
+   setUploadError('Connection to progress stream failed.');
+   setIsUploading(false);
+  };
+
+  ws.onclose = () => {
+   setProgressState(prev => {
+    if (prev.status !== 'READY' && prev.status !== 'FAILED') {
+     setUploadError('WebSocket connection closed unexpectedly.');
+     setIsUploading(false);
+     return { ...prev, status: 'FAILED' };
+    }
+    return prev;
+   });
+  };
+ };
+
  const handleUpload = async (e: React.FormEvent) => {
   e.preventDefault();
 
@@ -42,12 +84,9 @@ export const UploadModal = React.forwardRef<HTMLDivElement, UploadModalProps>(({
   setProgressState({ status: 'UPLOADING', progress: 12, message: uploadMode === 'zip' ? 'Preparing archive for analysis...' : 'Preparing repository import...' });
 
   try {
-   let response;
-   if (uploadMode === 'zip') {
-    response = await RepositoryService.uploadRepository(repoName, file!);
-   } else {
-    response = await RepositoryService.importGithub(githubUrl);
-   }
+   const response = uploadMode === 'zip' 
+     ? await RepositoryService.uploadRepository(repoName, file!) 
+     : await RepositoryService.importGithub(githubUrl);
 
    const repoId = response.data.id;
 
@@ -57,47 +96,9 @@ export const UploadModal = React.forwardRef<HTMLDivElement, UploadModalProps>(({
     message: uploadMode === 'zip' ? 'Archive received. Waiting for processing...' : 'Import request accepted. Waiting for processing...',
    });
 
-   const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-   const wsHost = window.location.hostname || 'localhost';
-   const token = localStorage.getItem('access_token') || '';
-   const wsUrl = `${wsProtocol}//${wsHost}:8000/ws/repositories/${repoId}/progress/?token=${token}`;
+   // Connect to progress stream
+   _connectWebSocket(repoId);
 
-   const ws = new WebSocket(wsUrl);
-
-   ws.onmessage = (event) => {
-    try {
-     const data = JSON.parse(event.data);
-     setProgressState({ status: data.status, progress: data.progress || 0, message: data.message || '' });
-
-     if (data.status === 'READY') {
-      ws.close();
-      setTimeout(() => { onUploadComplete(repoId); }, 800);
-     } else if (data.status === 'FAILED') {
-      ws.close();
-      setUploadError(data.error || 'Processing failed.');
-      setIsUploading(false);
-     }
-    } catch (err) {
-     console.error('Error parsing WebSocket message:', err);
-    }
-   };
-
-   ws.onerror = (err) => {
-    console.error('WebSocket error:', err);
-    setUploadError('Connection to progress stream failed.');
-    setIsUploading(false);
-   };
-
-   ws.onclose = () => {
-    setProgressState(prev => {
-     if (prev.status !== 'READY' && prev.status !== 'FAILED') {
-      setUploadError('WebSocket connection closed unexpectedly.');
-      setIsUploading(false);
-      return { ...prev, status: 'FAILED' };
-     }
-     return prev;
-    });
-   };
   } catch (err: any) {
    console.error(err);
    setUploadError(err.response?.data?.error || 'Failed to process repository');

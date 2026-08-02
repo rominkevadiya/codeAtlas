@@ -36,6 +36,21 @@ class RepositoryViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(repo)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def _dispatch_task(self, name, owner_id, repo_id, temp_file_path=None, github_url=None):
+        """Helper to dispatch background celery task with daemon thread fallback."""
+        try:
+            if temp_file_path:
+                process_repository_task.delay(name, temp_file_path, owner_id, repo_id)
+            else:
+                process_repository_task.delay(name=name, github_url=github_url, owner_id=owner_id, repo_id=repo_id)
+        except Exception:
+            if temp_file_path:
+                thread = threading.Thread(target=process_repository_task, args=(name, temp_file_path, owner_id, repo_id))
+            else:
+                thread = threading.Thread(target=process_repository_task, kwargs={"name": name, "github_url": github_url, "owner_id": owner_id, "repo_id": repo_id})
+            thread.daemon = True
+            thread.start()
+
     @action(detail=False, methods=['post'])
     def upload(self, request):
         name = request.data.get('name')
@@ -43,92 +58,53 @@ class RepositoryViewSet(viewsets.ModelViewSet):
 
         if not name or not zip_file:
             return Response({"error": "Name and zip file are required."}, status=status.HTTP_400_BAD_REQUEST)
-
         if not zip_file.name.endswith('.zip'):
             return Response({"error": "Only .zip files are supported."}, status=status.HTTP_400_BAD_REQUEST)
 
         # ── Security: Enforce a 50MB max upload size ──
-        MAX_ZIP_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB
-        if zip_file.size > MAX_ZIP_SIZE_BYTES:
-            return Response(
-                {"error": "File size exceeds the 50MB limit. Please upload a smaller archive."},
-                status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            )
+        if zip_file.size > 50 * 1024 * 1024:
+            return Response({"error": "File size exceeds the 50MB limit."}, status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
 
         owner = None if request.user.is_anonymous else request.user
         owner_id = str(owner.id) if owner else None
-
-        # Reserve repository record with PENDING status
         repo_id = str(uuid.uuid4())
+
         repo = Repository.objects.create(
-            id=repo_id,
-            name=name,
-            url="local://uploaded",
-            owner=owner,
-            is_cloned=False,
-            status=RepositoryStatus.PENDING,
+            id=repo_id, name=name, url="local://uploaded", owner=owner,
+            is_cloned=False, status=RepositoryStatus.PENDING,
         )
 
-        # Write uploaded file to disk temp file
-        temp_dir = tempfile.gettempdir()
-        temp_file_path = os.path.join(temp_dir, f"repo_upload_{repo_id}.zip")
+        temp_file_path = os.path.join(tempfile.gettempdir(), f"repo_upload_{repo_id}.zip")
         with open(temp_file_path, 'wb+') as destination:
             for chunk in zip_file.chunks():
                 destination.write(chunk)
 
-        # Try async celery dispatch, fallback to daemon thread if Redis is offline
-        try:
-            process_repository_task.delay(name, temp_file_path, owner_id, repo_id)
-        except Exception:
-            # Fallback: process in background thread with WebSocket progress broadcasts
-            thread = threading.Thread(
-                target=process_repository_task,
-                args=(name, temp_file_path, owner_id, repo_id)
-            )
-            thread.daemon = True
-            thread.start()
+        self._dispatch_task(name, owner_id, repo_id, temp_file_path=temp_file_path)
 
-        serializer = self.get_serializer(repo)
-        data = serializer.data
+        data = self.get_serializer(repo).data
         data['websocket_url'] = f"ws/repositories/{repo_id}/progress/"
         return Response(data, status=status.HTTP_202_ACCEPTED)
 
     @action(detail=False, methods=['post'])
     def import_github(self, request):
         github_url = request.data.get('github_url')
-
         if not github_url:
             return Response({"error": "github_url is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Basic validation
         if not github_url.startswith("https://github.com/") and not github_url.startswith("https://gitlab.com/"):
             return Response({"error": "Only GitHub or GitLab HTTPS URLs are supported."}, status=status.HTTP_400_BAD_REQUEST)
 
         name = github_url.rstrip('/').split('/')[-1]
-        if name.endswith('.git'):
-            name = name[:-4]
+        if name.endswith('.git'): name = name[:-4]
 
         owner = None if request.user.is_anonymous else request.user
         owner_id = str(owner.id) if owner else None
-
-        # Generate ID early to return to user immediately
         repo_id = str(uuid.uuid4())
 
-        # Try async celery dispatch, fallback to daemon thread if Redis is offline
-        try:
-            process_repository_task.delay(name=name, github_url=github_url, owner_id=owner_id, repo_id=repo_id)
-        except Exception:
-            thread = threading.Thread(
-                target=process_repository_task,
-                kwargs={"name": name, "github_url": github_url, "owner_id": owner_id, "repo_id": repo_id}
-            )
-            thread.daemon = True
-            thread.start()
+        self._dispatch_task(name, owner_id, repo_id, github_url=github_url)
 
         return Response({
-            "id": repo_id,
-            "name": name,
-            "url": github_url,
+            "id": repo_id, "name": name, "url": github_url,
             "status": RepositoryStatus.PENDING,
             "websocket_url": f"ws/repositories/{repo_id}/progress/"
         }, status=status.HTTP_202_ACCEPTED)
@@ -200,10 +176,12 @@ class RepositoryViewSet(viewsets.ModelViewSet):
         try:
             with open(full_path, 'r', encoding='utf-8') as f:
                 if start_line is not None and end_line is not None:
-                    start = int(start_line)
-                    end = int(end_line)
-                    snippet = "".join(itertools.islice(f, start, end + 1))
+                    # Fetch specific line range using 0-indexed slicing
+                    start, end = int(start_line), int(end_line)
+                    lines = f.readlines()
+                    snippet = "".join(lines[start:end + 1])
                 else:
+                    # Fetch entire file if no range is specified
                     snippet = f.read()
                 
             return Response({"snippet": snippet}, status=status.HTTP_200_OK)
