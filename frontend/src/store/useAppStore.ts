@@ -2,6 +2,12 @@ import { create } from 'zustand';
 import type { GraphData, GraphNode, ImpactData } from '../types/graph';
 import { RepositoryService, AIService, AuthService, type Repository, type CurrentUser } from '../services/api';
 
+export interface ToastItem {
+  id: string;
+  type: 'success' | 'error' | 'info';
+  message: string;
+}
+
 interface AppState {
   // Global App State
   repoId: string | undefined;
@@ -10,6 +16,15 @@ interface AppState {
   setGraphData: (data: GraphData | null) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+
+  // Toast Notifications
+  toasts: ToastItem[];
+  addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+  removeToast: (id: string) => void;
+
+  // Settings Modal State
+  showSettingsModal: boolean;
+  setShowSettingsModal: (show: boolean) => void;
 
   // Auth State
   isAuthenticated: boolean;
@@ -69,6 +84,23 @@ export const useAppStore = create<AppState>((set, get) => ({
   setGraphData: (data) => set({ graphData: data }),
   searchQuery: "",
   setSearchQuery: (query) => set({ searchQuery: query }),
+
+  // Toast State Implementation
+  toasts: [],
+  addToast: (message, type = 'info') => {
+    const id = Math.random().toString(36).substring(2, 9);
+    set((state) => ({ toasts: [...state.toasts, { id, message, type }] }));
+    setTimeout(() => {
+      get().removeToast(id);
+    }, 4000);
+  },
+  removeToast: (id) => {
+    set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }));
+  },
+
+  // Settings Modal Implementation
+  showSettingsModal: false,
+  setShowSettingsModal: (show) => set({ showSettingsModal: show }),
 
   // Auth State
   isAuthenticated: !!localStorage.getItem('access_token'),

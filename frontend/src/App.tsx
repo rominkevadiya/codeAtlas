@@ -13,6 +13,8 @@ import { AutoDocPanel } from './features/ai/AutoDocPanel';
 import { AuthScreen } from './features/auth/AuthScreen';
 import { LandingPage } from './features/landing/LandingPage';
 import { RepoPanel } from './features/repositories/RepoPanel';
+import { ToastContainer } from './components/ToastContainer';
+import { SettingsModal } from './components/SettingsModal';
 
 export default function App() {
   const {
@@ -43,11 +45,11 @@ export default function App() {
     explainSelectedNode,
     isAuthenticated,
     showAuthScreen,
-    logout,
     currentUser,
     setUserRepos,
     loadUserData,
     switchRepo,
+    setShowSettingsModal,
   } = useAppStore();
 
   const handleNodeClick = (nodeId: string, nodeData?: any) => {
@@ -144,9 +146,9 @@ export default function App() {
           </button>
           {/* Dynamic User Avatar */}
           <button
-            onClick={logout}
+            onClick={() => setShowSettingsModal(true)}
             className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center hover:opacity-80 transition-opacity shadow-lg shadow-indigo-500/20"
-            title={`Logged in as ${currentUser?.username || '...'} — Click to logout`}
+            title={`Logged in as ${currentUser?.username || '...'} — Settings & Account`}
           >
             <span className="text-[10px] font-bold text-white">{avatarInitials}</span>
           </button>
@@ -167,7 +169,11 @@ export default function App() {
           </button>
           
           <div className="mt-auto">
-            <button className="p-3 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all group">
+            <button 
+              onClick={() => setShowSettingsModal(true)}
+              className="p-3 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all group"
+              title="Settings & Profile"
+            >
               <Settings className="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" />
             </button>
           </div>
@@ -409,6 +415,10 @@ export default function App() {
           }} 
         />
       )}
+
+      {/* Global Notifications & Settings */}
+      <ToastContainer />
+      <SettingsModal />
     </div>
   );
 }

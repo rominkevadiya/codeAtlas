@@ -4,7 +4,7 @@ from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated
 from apps.ai.serializers import AIQuerySerializer, ChatSessionSerializer, ChatSessionListSerializer, ChatMessageSerializer
 from apps.ai.services import AIService
-from apps.ai.models import ChatSession, ChatMessage
+from apps.ai.models import ChatSession, ChatMessage, ArchitectureDocument
 from apps.ai.throttles import AIQueryAnonThrottle, AIQueryUserThrottle
 
 
@@ -160,3 +160,38 @@ class ChatSendMessageView(APIView):
             "user_message": ChatMessageSerializer(user_msg).data,
             "assistant_message": ChatMessageSerializer(ai_msg).data,
         }, status=status.HTTP_200_OK)
+
+
+class ArchitectureDocView(APIView):
+    """
+    GET  /api/v1/ai/autodoc/<repo_id>/  → Get existing persisted auto-doc
+    POST /api/v1/ai/autodoc/<repo_id>/ → Generate or regenerate auto-doc and save to DB
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, repository_id):
+        doc = ArchitectureDocument.objects.filter(user=request.user, repository_id=repository_id).first()
+        if not doc:
+            return Response({"content": None})
+        return Response({"content": doc.content, "updated_at": doc.updated_at})
+
+    def post(self, request, repository_id):
+        prompt = (
+            "You are an expert Software Architect. Analyze the provided repository graph data "
+            "and write a comprehensive, high-level ARCHITECTURE.md document. Summarize the main domain modules, "
+            "key entry points, architectural patterns, and dependencies. Format entirely in professional Markdown "
+            "with clear headings. Do not output anything except the Markdown document."
+        )
+        try:
+            content = AIService.query_repository(repository_id, prompt)
+            doc, _ = ArchitectureDocument.objects.update_or_create(
+                user=request.user,
+                repository_id=repository_id,
+                defaults={"content": content}
+            )
+            return Response({"content": doc.content, "updated_at": doc.updated_at})
+        except ValueError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            return Response({"error": "Failed to generate documentation."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

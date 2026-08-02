@@ -129,6 +129,10 @@ export const AIService = {
     api.post('/ai/query/', { repository_id, query }),
   explainNode: (repository_id: string, node_name: string, node_type: string, snippet: string) =>
     api.post('/ai/explain/', { repository_id, node_name, node_type, snippet }),
+  getAutoDoc: (repository_id: string) =>
+    api.get<{ content: string | null; updated_at?: string }>(`/ai/autodoc/${repository_id}/`),
+  generateAutoDoc: (repository_id: string) =>
+    api.post<{ content: string; updated_at: string }>(`/ai/autodoc/${repository_id}/`),
 };
 
 export const ChatService = {

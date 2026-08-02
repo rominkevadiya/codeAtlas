@@ -38,3 +38,22 @@ class ChatMessage(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"[{self.role}] {self.content[:60]}"
+
+
+class ArchitectureDocument(UUIDModel, TimeStampedModel):
+    """
+    Persisted AI-generated ARCHITECTURE.md document per repository for a user.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='architecture_docs')
+    repository_id = models.CharField(max_length=255, db_index=True)
+    content = models.TextField()
+
+    class Meta:
+        ordering = ['-updated_at']
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'repository_id'], name='unique_user_repo_doc')
+        ]
+
+    def __str__(self):
+        return f"Doc for {self.repository_id[:8]} by {self.user.username}"
+
