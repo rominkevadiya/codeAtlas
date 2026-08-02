@@ -31,11 +31,10 @@ const StatusBadge = ({ status }: { status: Repository['status'] }) => {
 const getInitials = (name: string) => name.slice(0, 2).toUpperCase();
 
 const REPO_COLORS = [
-  'from-indigo-500 to-purple-600',
-  'from-emerald-500 to-teal-600',
-  'from-rose-500 to-pink-600',
-  'from-amber-500 to-orange-600',
-  'from-sky-500 to-blue-600',
+  'bg-zinc-800 text-white',
+  'bg-zinc-700 text-white',
+  'bg-black text-white border border-zinc-700',
+  'bg-zinc-900 text-zinc-300',
 ];
 
 const getRepoColor = (id: string) => {
@@ -87,14 +86,14 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
   return (
     <div className="h-full flex flex-col glass-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-5 border-b border-white/5 bg-white/[0.02] shrink-0">
+      <div className="flex items-center justify-between p-5 border-b border-white/5 bg-transparent shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-            <FolderGit2 className="w-4 h-4 text-indigo-400" />
+          <div className="w-8 h-8 rounded-md bg-white flex items-center justify-center">
+            <FolderGit2 className="w-4 h-4 text-black" />
           </div>
           <div>
             <h2 className="text-base font-semibold text-white tracking-tight">My Repositories</h2>
-            <p className="text-[11px] text-slate-400">{userRepos.length} repo{userRepos.length !== 1 ? 's' : ''} analysed</p>
+            <p className="text-[11px] text-zinc-400">{userRepos.length} repo{userRepos.length !== 1 ? 's' : ''} analysed</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -143,16 +142,16 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
               <div
                 key={repo.id}
                 onClick={() => handleSelect(repo)}
-                className={`group relative flex items-center gap-3 p-3.5 rounded-xl border transition-all duration-200 ${
+                className={`group relative flex items-center gap-3 p-3.5 rounded-md border transition-all duration-200 ${
                   isActive
-                    ? 'bg-indigo-500/10 border-white/10 shadow-sm'
+                    ? 'bg-zinc-900 border-zinc-700 shadow-sm'
                     : canOpen
-                    ? 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10 cursor-pointer'
-                    : 'bg-white/[0.01] border-white/5 cursor-default opacity-70'
+                    ? 'bg-transparent border-transparent hover:bg-zinc-900/50 hover:border-zinc-800 cursor-pointer'
+                    : 'bg-transparent border-transparent cursor-default opacity-50'
                 }`}
               >
                 {/* Repo Icon */}
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getRepoColor(repo.id)} flex items-center justify-center shrink-0 shadow-lg text-white font-bold text-xs`}>
+                <div className={`w-10 h-10 rounded-md ${getRepoColor(repo.id)} flex items-center justify-center shrink-0 font-bold text-xs`}>
                   {getInitials(repo.name)}
                 </div>
 
@@ -161,8 +160,8 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
                   <div className="flex items-center gap-2 mb-1">
                     <p className="text-sm font-semibold text-white truncate">{repo.name}</p>
                     {isActive && (
-                      <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider bg-indigo-500/10 px-1.5 py-0.5 rounded-md border border-white/10">
-                        Active
+                      <span className="text-[9px] font-bold text-black bg-white px-1.5 py-0.5 rounded-sm">
+                        ACTIVE
                       </span>
                     )}
                   </div>
@@ -217,7 +216,7 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
       <div className="p-3 border-t border-white/5 shrink-0">
         <button
           onClick={onAddNew}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-slate-300 hover:text-white text-sm font-medium transition-all duration-200"
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-md bg-white hover:bg-zinc-200 text-black text-sm font-semibold transition-all duration-200"
         >
           <Plus className="w-4 h-4" />
           Add New Repository

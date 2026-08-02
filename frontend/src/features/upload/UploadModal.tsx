@@ -154,9 +154,9 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
                   <span className="text-slate-300">{progressState.message || 'Processing...'}</span>
                   <span className="text-indigo-400">{progressState.progress}%</span>
                 </div>
-                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                <div className="w-full bg-zinc-900 rounded-full h-1.5 mb-2 overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300"
+                    className="h-full bg-white rounded-full transition-all duration-300"
                     style={{ width: `${Math.max(5, progressState.progress)}%` }}
                   />
                 </div>
@@ -249,7 +249,7 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
               <button
                 type="submit"
                 disabled={(uploadMode === 'zip' && (!file || !repoName)) || (uploadMode === 'github' && !githubUrl)}
-                className="w-full py-3 rounded-xl bg-zinc-800 text-white font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                className="w-full py-3 rounded-md bg-white text-black font-semibold text-sm hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
                 {uploadMode === 'zip' ? 'Upload & Process' : 'Import & Process'}
               </button>

@@ -80,10 +80,9 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
   };
 
   const panelContent = (
-    <div className={`flex flex-col bg-slate-900 shadow-2xl overflow-hidden animate-in duration-200 ${isExpanded ? 'w-full h-full max-w-5xl max-h-[85vh] rounded-2xl mx-auto border border-slate-800 fade-in' : 'w-[32rem] h-full border-l border-slate-800 z-50 slide-in-from-right-8'}`}>
-      {/* Header */}
-      <div className="flex justify-between items-center p-4 border-b border-slate-800 bg-slate-950/80 shrink-0">
-        <div className="flex items-center gap-2 text-indigo-400 font-semibold text-sm">
+    <div className={`flex flex-col bg-[#000000] shadow-2xl overflow-hidden animate-in duration-200 ${isExpanded ? 'w-full h-full max-w-5xl max-h-[85vh] rounded-2xl mx-auto border border-white/10 fade-in' : 'w-[32rem] h-full border-l border-white/5 z-50 slide-in-from-right-8'}`}>
+      <div className="flex justify-between items-center p-4 border-b border-white/5 bg-transparent shrink-0">
+        <div className="flex items-center gap-2 text-zinc-300 font-semibold text-sm">
           <FileText className="w-4 h-4" />
           AI Architect Auto-Doc
         </div>
@@ -132,13 +131,13 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto bg-slate-950/50 p-6 relative">
+      <div className="flex-1 overflow-y-auto bg-transparent p-6 relative">
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-4">
-            <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+          <div className="flex flex-col items-center justify-center h-full text-zinc-400 gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-zinc-500" />
             <div className="text-center">
-              <p className="font-medium text-slate-200 text-sm">Analyzing Repository Architecture</p>
-              <p className="text-xs text-slate-400 mt-1">Extracting modules, patterns, and entry points...</p>
+              <p className="font-medium text-zinc-300 text-sm">Analyzing Repository Architecture</p>
+              <p className="text-xs text-zinc-500 mt-1">Extracting modules, patterns, and entry points...</p>
             </div>
           </div>
         ) : error ? (
@@ -158,17 +157,17 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
           <div className="w-full">
             <ReactMarkdown
               components={{
-                h1: ({...props}) => <h1 className="text-2xl font-bold text-white mb-6 border-b border-white/10 pb-3 mt-8 first:mt-0" {...props} />,
-                h2: ({...props}) => <h2 className="text-xl font-semibold text-slate-100 mb-4 mt-8" {...props} />,
-                h3: ({...props}) => <h3 className="text-lg font-medium text-slate-200 mb-3 mt-6" {...props} />,
-                p: ({...props}) => <p className="text-sm text-slate-300 mb-4 leading-relaxed" {...props} />,
-                ul: ({...props}) => <ul className="list-disc pl-5 space-y-2 mb-4 text-sm text-slate-300" {...props} />,
-                ol: ({...props}) => <ol className="list-decimal pl-5 space-y-2 mb-4 text-sm text-slate-300" {...props} />,
-                li: ({...props}) => <li className="text-slate-300" {...props} />,
-                pre: ({...props}) => <pre className="bg-[#0a0a0c] p-4 rounded-xl border border-white/10 my-4 overflow-x-auto text-xs" {...props} />,
-                code: ({...props}: any) => props.inline ? <code className="bg-white/10 px-1.5 py-0.5 rounded-md text-indigo-300 font-mono text-[11px]" {...props} /> : <code className="font-mono text-slate-300" {...props} />,
+                h1: ({...props}) => <h1 className="text-3xl font-bold text-white mb-6 border-b border-zinc-800 pb-3 mt-8 first:mt-0" {...props} />,
+                h2: ({...props}) => <h2 className="text-2xl font-semibold text-white mb-4 mt-8 pb-2 border-b border-zinc-800/50" {...props} />,
+                h3: ({...props}) => <h3 className="text-xl font-semibold text-zinc-200 mb-3 mt-6" {...props} />,
+                p: ({...props}) => <p className="text-base text-zinc-300 mb-4 leading-relaxed" {...props} />,
+                ul: ({...props}) => <ul className="list-disc pl-6 space-y-2 mb-4 text-base text-zinc-300" {...props} />,
+                ol: ({...props}) => <ol className="list-decimal pl-6 space-y-2 mb-4 text-base text-zinc-300" {...props} />,
+                li: ({...props}) => <li className="text-zinc-300" {...props} />,
+                pre: ({...props}) => <pre className="bg-[#0A0A0A] p-4 rounded-md border border-zinc-800 my-4 overflow-x-auto text-sm" {...props} />,
+                code: ({...props}: any) => props.inline ? <code className="bg-zinc-800 px-1.5 py-0.5 rounded-sm text-zinc-200 font-mono text-sm" {...props} /> : <code className="font-mono text-zinc-300 text-sm" {...props} />,
                 strong: ({...props}) => <strong className="font-semibold text-white" {...props} />,
-                blockquote: ({...props}) => <blockquote className="border-l-4 border-white/10 pl-4 py-1 my-4 text-slate-400 bg-indigo-500/5 rounded-r-lg" {...props} />,
+                blockquote: ({...props}) => <blockquote className="border-l-4 border-zinc-700 pl-4 py-1 my-4 text-zinc-400 bg-zinc-900/50 rounded-r-md italic" {...props} />,
               }}
             >
               {doc}
@@ -182,15 +181,15 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
   if (isExpanded) {
     return (
       <>
-        <div className="w-[32rem] h-full border-l border-slate-800 bg-slate-900/50 flex flex-col items-center justify-center p-6 text-center shadow-2xl z-50">
-          <FileText className="w-8 h-8 text-indigo-400/50 mb-3" />
-          <p className="text-sm text-slate-400">Documentation is opened in full screen</p>
-          <button onClick={() => setIsExpanded(false)} className="mt-4 px-4 py-2 bg-white/5 hover:bg-white/10 text-xs text-white rounded-lg transition-colors">
+        <div className="w-[32rem] h-full border-l border-white/5 bg-black flex flex-col items-center justify-center p-6 text-center shadow-2xl z-50">
+          <FileText className="w-8 h-8 text-zinc-600 mb-3" />
+          <p className="text-sm text-zinc-400">Documentation is opened in full screen</p>
+          <button onClick={() => setIsExpanded(false)} className="mt-4 px-4 py-2 bg-white/5 hover:bg-white/10 text-xs text-white rounded-md transition-colors">
             Close Full Screen
           </button>
         </div>
         {createPortal(
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="fixed top-16 left-16 right-0 bottom-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/40 animate-in fade-in duration-200 pointer-events-auto">
             {panelContent}
           </div>,
           document.body

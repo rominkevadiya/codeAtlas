@@ -32,8 +32,8 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
   if (loading) {
     return (
       <div className="h-full flex flex-col glass-card border border-white/10 rounded-2xl shadow-sm overflow-hidden items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-500 animate-spin mb-4" />
-        <p className="text-slate-400">Analyzing architecture...</p>
+        <Loader2 className="w-8 h-8 text-zinc-500 animate-spin mb-4" />
+        <p className="text-zinc-400">Analyzing architecture...</p>
       </div>
     );
   }
@@ -41,8 +41,8 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
   if (!data) {
      return (
       <div className="h-full flex flex-col glass-card border border-white/10 rounded-2xl shadow-sm overflow-hidden items-center justify-center p-8 text-center">
-        <ShieldAlert className="w-8 h-8 text-slate-500 mb-4" />
-        <p className="text-slate-400">No analysis data available. Please upload a repository first.</p>
+        <ShieldAlert className="w-8 h-8 text-zinc-500 mb-4" />
+        <p className="text-zinc-400">No analysis data available. Please upload a repository first.</p>
       </div>
     );
   }
@@ -65,10 +65,10 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
   const panelContent = isExpanded ? (
     <div className="w-full h-full max-w-6xl max-h-[85vh] flex flex-col bg-[#0B0B0F] border border-white/10 rounded-2xl shadow-sm overflow-hidden mx-auto animate-in fade-in duration-200">
       {/* Expanded Header */}
-      <div className="flex items-center justify-between p-6 border-b border-white/10 bg-indigo-500/5 shrink-0">
+      <div className="flex items-center justify-between p-6 border-b border-white/10 bg-transparent shrink-0">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center shadow-lg shadow-indigo-500/10">
-            <Cpu className="w-6 h-6 text-indigo-400" />
+          <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-sm">
+            <Cpu className="w-6 h-6 text-black" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-white tracking-tight">Codebase Intelligence</h2>
@@ -96,13 +96,13 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
                 onClick={() => setActiveTabId(tab.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-all duration-200 ${
                   activeTabId === tab.id 
-                  ? 'bg-indigo-500/20 text-white shadow-lg border border-white/10' 
-                  : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 border border-transparent'
+                  ? 'bg-zinc-800 text-white shadow-sm border border-zinc-700' 
+                  : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200 border border-transparent'
                 }`}
               >
-                <tab.icon className={`w-5 h-5 ${tab.color}`} />
+                <tab.icon className={`w-5 h-5 ${activeTabId === tab.id ? 'text-white' : tab.color}`} />
                 <span className="text-sm font-medium flex-1">{tab.label}</span>
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${activeTabId === tab.id ? tab.bg : 'bg-black/50 text-slate-300'}`}>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${activeTabId === tab.id ? 'bg-white text-black' : 'bg-black/50 text-slate-300'}`}>
                   {tab.count}
                 </span>
               </button>
@@ -110,7 +110,7 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
         </div>
         
         {/* Main Area */}
-        <div className="flex-1 overflow-y-auto p-8 bg-[#0a0a0c] custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-8 bg-black custom-scrollbar">
           <div className="flex items-center gap-4 mb-8 pb-4 border-b border-white/5">
               <div className={`p-3 rounded-xl ${activeTab.bg}`}>
                 <activeTab.icon className={`w-6 h-6 ${activeTab.color}`} />
@@ -235,14 +235,14 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
   ) : (
     <div className="h-full flex flex-col glass-card border border-white/10 rounded-2xl shadow-sm overflow-hidden">
       {/* Mini Header */}
-      <div className="flex items-center justify-between p-5 border-b border-white/5 bg-indigo-500/5 backdrop-blur-md shrink-0">
+      <div className="flex items-center justify-between p-5 border-b border-white/5 bg-transparent backdrop-blur-md shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-            <Cpu className="w-4 h-4 text-indigo-400" />
+          <div className="w-8 h-8 rounded-md bg-white flex items-center justify-center">
+            <Cpu className="w-4 h-4 text-black" />
           </div>
           <div>
             <h2 className="text-base font-semibold text-white tracking-tight">Codebase Intelligence</h2>
-            <p className="text-[11px] text-slate-400 font-medium">Real-time architecture metrics</p>
+            <p className="text-[11px] text-zinc-400 font-medium">Real-time architecture metrics</p>
           </div>
         </div>
         <button
@@ -285,7 +285,7 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
           </div>
         </section>
 
-        <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="h-px w-full bg-white/5" />
 
         {/* Circular Dependencies */}
         <section className="space-y-3">
@@ -315,14 +315,14 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
           </div>
         </section>
 
-        <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="h-px w-full bg-white/5" />
 
         {/* Coupling */}
         <section className="space-y-3">
           <div className="flex items-center gap-2 px-1">
-            <div className="w-1.5 h-4 bg-indigo-500 rounded-full" />
+            <div className="w-1.5 h-4 bg-zinc-500 rounded-full" />
             <h3 className="text-sm font-semibold text-slate-200">High Coupling Modules</h3>
-            <span className="ml-auto bg-indigo-500/20 text-indigo-400 text-[10px] font-bold px-2 py-0.5 rounded-full">{data.top_coupled_files?.length || 0}</span>
+            <span className="ml-auto bg-zinc-800 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{data.top_coupled_files?.length || 0}</span>
             <button onClick={() => handleExpand('coupling')} className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-colors ml-1" title="Expand Coupling">
               <Maximize2 className="w-3.5 h-3.5" />
             </button>
@@ -349,7 +349,7 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
           </div>
         </section>
 
-        <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="h-px w-full bg-white/5" />
 
         {/* Architectural Hotspots */}
         <section className="space-y-3">
@@ -371,7 +371,7 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
           </div>
         </section>
 
-        <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="h-px w-full bg-white/5" />
 
         {/* Dead Code */}
         <section className="space-y-3 pb-4">
@@ -400,15 +400,15 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
   if (isExpanded) {
     return (
       <>
-        <div className="h-full flex flex-col items-center justify-center p-6 text-center border border-white/10 rounded-2xl bg-indigo-500/5 shadow-sm">
-          <Cpu className="w-8 h-8 text-indigo-400/50 mb-3" />
+        <div className="h-full flex flex-col items-center justify-center p-6 text-center border border-white/10 rounded-2xl bg-transparent shadow-sm">
+          <Cpu className="w-8 h-8 text-zinc-500 mb-3" />
           <p className="text-sm text-slate-400">Analysis is opened in full screen</p>
           <button onClick={() => setIsExpanded(false)} className="mt-4 px-4 py-2 bg-white/5 hover:bg-white/10 text-xs text-white rounded-lg transition-colors">
             Close Full Screen
           </button>
         </div>
         {createPortal(
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="fixed top-16 left-16 right-0 bottom-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/40 animate-in fade-in duration-200 pointer-events-auto">
             {panelContent}
           </div>,
           document.body

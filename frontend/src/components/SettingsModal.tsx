@@ -93,7 +93,7 @@ export const SettingsModal: React.FC = () => {
             {activeTab === 'profile' && (
               <div className="space-y-6">
                 <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-800">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-indigo-500/20">
+                  <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center text-xl font-bold text-black shadow-sm">
                     {userInitial}
                   </div>
                   <div>

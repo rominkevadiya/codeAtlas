@@ -97,16 +97,16 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen w-screen bg-[#050505] text-slate-200 overflow-hidden flex flex-col font-sans selection:bg-indigo-500/30">
+    <div className="h-screen w-screen bg-[#000000] text-zinc-300 overflow-hidden flex flex-col font-sans selection:bg-zinc-800">
       
       {/* Top Navbar */}
       <nav className="h-16 shrink-0 glass-panel border-b border-white/5 flex items-center justify-between px-6 z-40 relative">
         <div className="flex items-center gap-4">
-          <div className="w-8 h-8 rounded-xl bg-zinc-800 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <Layers className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
+            <Layers className="w-5 h-5 text-black" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-            CodeAtlas <span className="text-indigo-400 font-normal">Pro</span>
+          <h1 className="text-xl font-bold tracking-tight text-white">
+            CodeAtlas <span className="text-zinc-500 font-normal">Pro</span>
           </h1>
         </div>
 
@@ -119,7 +119,7 @@ export default function App() {
             placeholder="Search nodes, functions, files... (Cmd + K)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#111115] border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-indigo-500/50 transition-all shadow-inner"
+            className="w-full bg-[#0A0A0A] border border-white/10 rounded-md py-2 pl-10 pr-4 text-sm text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-white/20 transition-all shadow-sm"
           />
           <div className="absolute inset-y-0 right-16 flex items-center pointer-events-none gap-1">
             <kbd className="hidden sm:inline-block bg-[#222226] border border-white/10 rounded px-1.5 py-0.5 text-[10px] font-mono text-slate-400 font-semibold shadow-sm"><Command className="w-3 h-3 inline-block -mt-0.5"/> K</kbd>
@@ -127,30 +127,30 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button onClick={() => setShowAutoDoc(!showAutoDoc)} className={`p-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${showAutoDoc ? 'bg-indigo-500/20 text-indigo-400 border border-white/10 shadow-sm' : 'hover:bg-white/5 text-slate-400 border border-transparent'}`}>
-            <FileText className="w-5 h-5" />
+          <button onClick={() => setShowAutoDoc(!showAutoDoc)} className={`p-2 rounded-md transition-all duration-200 flex items-center gap-2 ${showAutoDoc ? 'bg-zinc-800 text-white border border-white/10' : 'hover:bg-zinc-900 text-zinc-400 border border-transparent'}`}>
+            <FileText className="w-4 h-4" />
             <span className="text-sm font-medium pr-1">Auto-Doc</span>
           </button>
-          <button onClick={() => setShowAnalysis(!showAnalysis)} className={`p-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${showAnalysis ? 'bg-indigo-500/20 text-indigo-400 border border-white/10 shadow-sm' : 'hover:bg-white/5 text-slate-400 border border-transparent'}`}>
-            <Activity className="w-5 h-5" />
+          <button onClick={() => setShowAnalysis(!showAnalysis)} className={`p-2 rounded-md transition-all duration-200 flex items-center gap-2 ${showAnalysis ? 'bg-zinc-800 text-white border border-white/10' : 'hover:bg-zinc-900 text-zinc-400 border border-transparent'}`}>
+            <Activity className="w-4 h-4" />
             <span className="text-sm font-medium pr-1">Metrics</span>
           </button>
           <div className="w-px h-6 bg-white/10 mx-2" />
           {/* Repo Switcher */}
           <button 
             onClick={() => setShowRepoPanel(!showRepoPanel)}
-            className={`p-2 rounded-lg transition-all duration-300 ${showRepoPanel ? 'bg-indigo-500/20 text-indigo-400 border border-white/10' : 'hover:bg-white/5 text-slate-400 border border-transparent'}`}
+            className={`p-2 rounded-md transition-all duration-200 ${showRepoPanel ? 'bg-zinc-800 text-white border border-white/10' : 'hover:bg-zinc-900 text-zinc-400 border border-transparent'}`}
             title="My Repositories"
           >
-            <FolderGit2 className="w-5 h-5" />
+            <FolderGit2 className="w-4 h-4" />
           </button>
           {/* Dynamic User Avatar */}
           <button
             onClick={() => setShowSettingsModal(true)}
-            className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center hover:opacity-80 transition-opacity shadow-lg shadow-indigo-500/20"
+            className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:opacity-80 transition-opacity ml-1"
             title={`Logged in as ${currentUser?.username || '...'} — Settings & Account`}
           >
-            <span className="text-[10px] font-bold text-white">{avatarInitials}</span>
+            <span className="text-[10px] font-bold text-black">{avatarInitials}</span>
           </button>
         </div>
       </nav>
@@ -158,14 +158,14 @@ export default function App() {
       <div className="flex-1 flex overflow-hidden relative">
         {/* Sidebar */}
         <aside className="w-16 shrink-0 glass-panel border-r border-white/5 flex flex-col items-center py-6 gap-6 z-30 relative">
-          <button className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-white/10 hover:bg-indigo-500/20 transition-all group">
-            <Box className="w-5 h-5 group-hover:scale-110 transition-transform" />
+          <button className="p-3 rounded-md bg-zinc-900 text-white border border-white/10 hover:bg-zinc-800 transition-all group">
+            <Box className="w-5 h-5" />
           </button>
           <button 
             onClick={() => setShowChat(!showChat)}
-            className={`p-3 rounded-xl transition-all group ${showChat ? 'bg-purple-500/20 text-purple-400 border border-white/10 shadow-sm' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5 border border-transparent'}`}
+            className={`p-3 rounded-md transition-all group ${showChat ? 'bg-zinc-900 text-white border border-white/10 shadow-sm' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900 border border-transparent'}`}
           >
-            <MessageSquare className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            <MessageSquare className="w-5 h-5" />
           </button>
           
           <div className="mt-auto">
@@ -180,7 +180,7 @@ export default function App() {
         </aside>
 
         {/* Main Canvas Container */}
-        <main className="flex-1 relative overflow-hidden bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/10 via-[#050505] to-[#050505]">
+        <main className="flex-1 relative overflow-hidden bg-[#000000]">
           
           {/* Decorative Grid */}
           <div className="absolute inset-0 z-0 opacity-[0.03] bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
@@ -229,8 +229,8 @@ export default function App() {
               {/* Header */}
               <div className="p-5 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.02]">
                 <div className="flex items-center gap-3 overflow-hidden pr-4">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center shrink-0">
-                    <FileCode2 className="w-4 h-4 text-indigo-400" />
+                  <div className="w-8 h-8 rounded-md bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
+                    <FileCode2 className="w-4 h-4 text-zinc-300" />
                   </div>
                   <div className="truncate">
                     <h3 className="text-base font-semibold text-white tracking-tight truncate">
@@ -284,14 +284,14 @@ export default function App() {
                 {/* AI Explanation */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" /> AI Insights
+                    <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                      <Sparkles className="w-3.5 h-3.5 text-zinc-300" /> AI Insights
                     </h4>
                   </div>
                   
                   {aiExplanation ? (
-                    <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
-                      <p className="text-sm text-amber-200/90 leading-relaxed whitespace-pre-wrap">
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-md p-4">
+                      <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
                         {aiExplanation}
                       </p>
                     </div>
@@ -299,18 +299,18 @@ export default function App() {
                     <button 
                       onClick={handleExplainCode}
                       disabled={isExplaining || !nodeSnippet}
-                      className="w-full relative overflow-hidden group bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-white/10 hover:border-white/10 rounded-xl p-4 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full relative overflow-hidden group bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-md p-3 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <div className="flex items-center justify-center gap-2">
                         {isExplaining ? (
                           <>
-                            <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
-                            <span className="text-sm font-medium text-indigo-300">Analyzing syntax tree...</span>
+                            <Loader2 className="w-4 h-4 text-zinc-400 animate-spin" />
+                            <span className="text-sm font-medium text-zinc-300">Analyzing syntax tree...</span>
                           </>
                         ) : (
                           <>
-                            <Sparkles className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
-                            <span className="text-sm font-medium text-indigo-300 group-hover:text-indigo-200 transition-colors">Generate AI Documentation</span>
+                            <Sparkles className="w-4 h-4 text-zinc-400" />
+                            <span className="text-sm font-medium text-zinc-300">Generate AI Documentation</span>
                           </>
                         )}
                       </div>
