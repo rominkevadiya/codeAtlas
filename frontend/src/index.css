@@ -3,21 +3,17 @@
 @theme {
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-  --color-brand: #0f172a; /* Slate 900 for primary elements */
-  --color-accent: #2563eb; /* Blue 600 for the sophisticated accent */
-  --color-accent-hover: #1d4ed8;
-  --color-accent-light: #eff6ff;
-  --color-surface: #ffffff;
-  --color-surface-alt: #f8fafc; /* Slate 50 */
-  --color-surface-dark: #0f172a;
-  --color-border: #e2e8f0;
+  --color-brand: #000000;
+  --color-surface: #09090b; /* zinc-950 */
+  --color-surface-alt: #18181b; /* zinc-900 */
+  --color-border: #27272a; /* zinc-800 */
 }
 
 @layer base {
   :root {
-    --background: #f8fafc;
-    --foreground: #0f172a;
-    --border: #e2e8f0;
+    --background: #000000;
+    --foreground: #ffffff;
+    --border: #27272a;
   }
 
   body {
@@ -26,6 +22,15 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .bg-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    pointer-events: none;
   }
 }
 
@@ -40,12 +45,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #3f3f46; /* zinc-700 */
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #52525b; /* zinc-600 */
 }
 
 /* Node Animations */
@@ -54,8 +59,8 @@
 }
 
 .node-selected {
-  border-color: var(--color-accent) !important;
-  box-shadow: 0 0 0 4px var(--color-accent-light) !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Utility to hide react-flow attribution for a cleaner look */

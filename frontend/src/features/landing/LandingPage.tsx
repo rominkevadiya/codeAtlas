@@ -5,35 +5,36 @@ export const LandingPage: React.FC = () => {
   const { setShowAuthScreen } = useAppStore();
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 overflow-x-hidden">
+    <div className="min-h-screen w-full bg-black text-white font-sans selection:bg-white/20 overflow-x-hidden relative">
+      <div className="absolute inset-0 bg-noise z-0 pointer-events-none"></div>
       
       {/* 1. Navbar */}
-      <nav className="sticky top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-50">
+      <nav className="sticky top-0 w-full bg-black/80 backdrop-blur-md border-b border-zinc-800 z-50">
         <div className="max-w-[1400px] mx-auto px-6 md:px-12 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white">
+            <div className="w-8 h-8 rounded bg-white flex items-center justify-center text-black">
               <Layers className="w-5 h-5" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-xl font-bold tracking-tight text-white">
               CodeAtlas
             </h1>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-            <a href="#how-it-works" className="hover:text-blue-600 transition-colors">How It Works</a>
-            <a href="#features" className="hover:text-blue-600 transition-colors">Features</a>
-            <a href="#use-cases" className="hover:text-blue-600 transition-colors">Use Cases</a>
-            <a href="#faq" className="hover:text-blue-600 transition-colors">FAQ</a>
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
+            <a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a>
+            <a href="#features" className="hover:text-white transition-colors">Features</a>
+            <a href="#use-cases" className="hover:text-white transition-colors">Use Cases</a>
+            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
           </div>
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setShowAuthScreen(true)}
-              className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors hidden sm:block"
+              className="text-sm font-medium text-zinc-400 hover:text-white transition-colors hidden sm:block"
             >
               Sign In
             </button>
             <button 
               onClick={() => setShowAuthScreen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 shadow-sm"
+              className="bg-white hover:bg-zinc-200 text-black text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 shadow-sm"
             >
               Get Started
             </button>
@@ -44,38 +45,38 @@ export const LandingPage: React.FC = () => {
       {/* 2. Hero Section */}
       <main className="max-w-[1400px] mx-auto px-6 md:px-12 pt-24 pb-20 relative z-20">
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-slate-900 leading-tight">
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-white leading-tight">
             Understand any codebase without reading every file.
           </h2>
-          <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-3xl leading-relaxed">
+          <p className="text-lg md:text-xl text-zinc-400 mb-10 max-w-3xl leading-relaxed">
             CodeAtlas transforms repositories into an interactive map of architecture, dependencies and relationships — helping developers explore unfamiliar systems, understand execution flow and generate useful documentation from real source code.
           </p>
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
             <button 
               onClick={() => setShowAuthScreen(true)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white hover:bg-blue-700 px-8 py-3.5 rounded-lg text-base font-semibold transition-all duration-200 shadow-md"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-black hover:bg-zinc-200 px-8 py-3.5 rounded-lg text-base font-semibold transition-all duration-200 shadow-md"
             >
               Analyze Repository
             </button>
             <button 
               onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-900 px-8 py-3.5 rounded-lg text-base font-medium transition-all duration-200 shadow-sm"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white/5 border border-zinc-800 hover:bg-white/10 text-white relative px-8 py-3.5 rounded-lg text-base font-medium transition-all duration-200 shadow-sm backdrop-blur-sm"
             >
               Explore How It Works
             </button>
           </div>
-          <p className="mt-6 text-sm text-slate-500 font-medium">From repository to architecture map in minutes.</p>
+          <p className="mt-6 text-sm text-zinc-500 font-medium">From repository to architecture map in minutes.</p>
         </div>
 
         {/* 3. Product Preview Mockup */}
-        <div className="mt-20 relative rounded-2xl overflow-hidden border border-slate-200 shadow-2xl bg-white mx-auto max-w-5xl">
-          <div className="h-12 bg-slate-50 border-b border-slate-200 flex items-center px-4 justify-between">
+        <div className="mt-20 relative rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl bg-black mx-auto max-w-5xl">
+          <div className="h-12 bg-zinc-950 border-b border-zinc-800 flex items-center px-4 justify-between">
             <div className="flex gap-2">
-              <div className="w-3 h-3 rounded-full bg-slate-300" />
-              <div className="w-3 h-3 rounded-full bg-slate-300" />
-              <div className="w-3 h-3 rounded-full bg-slate-300" />
+              <div className="w-3 h-3 rounded-full bg-zinc-700" />
+              <div className="w-3 h-3 rounded-full bg-zinc-700" />
+              <div className="w-3 h-3 rounded-full bg-zinc-700" />
             </div>
-            <div className="flex items-center gap-2 bg-white px-32 py-1.5 rounded-md border border-slate-200 text-xs text-slate-500 font-mono shadow-sm">
+            <div className="flex items-center gap-2 bg-black px-32 py-1.5 rounded-md border border-zinc-800 text-xs text-zinc-500 font-mono shadow-sm">
               <Search className="w-3.5 h-3.5" />
               github.com/company/core-api
             </div>
@@ -84,46 +85,46 @@ export const LandingPage: React.FC = () => {
           
           <div className="aspect-[16/9] w-full relative flex">
             {/* Mock Sidebar */}
-            <div className="w-64 border-r border-slate-200 bg-slate-50 p-4 hidden md:flex flex-col gap-6">
+            <div className="w-64 border-r border-zinc-800 bg-zinc-950 p-4 hidden md:flex flex-col gap-6">
               <div className="space-y-1">
-                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2">Navigation</div>
-                <div className="flex items-center gap-2 px-2 py-1.5 bg-blue-50 text-blue-700 rounded-md text-sm font-medium"><Network className="w-4 h-4"/> Architecture Graph</div>
-                <div className="flex items-center gap-2 px-2 py-1.5 text-slate-600 hover:bg-slate-100 rounded-md text-sm font-medium"><Code2 className="w-4 h-4"/> Source Explorer</div>
-                <div className="flex items-center gap-2 px-2 py-1.5 text-slate-600 hover:bg-slate-100 rounded-md text-sm font-medium"><FileText className="w-4 h-4"/> Documentation</div>
+                <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 px-2">Navigation</div>
+                <div className="flex items-center gap-2 px-2 py-1.5 bg-white/10 text-white rounded-md text-sm font-medium border border-white/5"><Network className="w-4 h-4"/> Architecture Graph</div>
+                <div className="flex items-center gap-2 px-2 py-1.5 text-zinc-400 hover:bg-white/5 rounded-md text-sm font-medium"><Code2 className="w-4 h-4"/> Source Explorer</div>
+                <div className="flex items-center gap-2 px-2 py-1.5 text-zinc-400 hover:bg-white/5 rounded-md text-sm font-medium"><FileText className="w-4 h-4"/> Documentation</div>
               </div>
             </div>
             
             {/* Mock Graph Area */}
-            <div className="flex-1 relative overflow-hidden bg-slate-900 p-8">
+            <div className="flex-1 relative overflow-hidden bg-black p-8">
               {/* Nodes visualization mockup */}
-              <div className="absolute top-1/4 left-1/4 px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-sm font-mono text-white shadow-lg">auth_service.py</div>
-              <div className="absolute top-1/2 left-[45%] px-4 py-2 bg-blue-600 border border-blue-500 rounded-lg flex items-center justify-center text-sm font-mono text-white shadow-lg shadow-blue-900/50 ring-2 ring-blue-400">user_controller.ts</div>
-              <div className="absolute bottom-1/4 right-1/4 px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-sm font-mono text-slate-300 shadow-lg">database.go</div>
+              <div className="absolute top-1/4 left-1/4 px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-lg flex items-center justify-center text-sm font-mono text-zinc-300 shadow-lg">auth_service.py</div>
+              <div className="absolute top-1/2 left-[45%] px-4 py-2 bg-zinc-950 border border-white rounded-lg flex items-center justify-center text-sm font-mono text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]">user_controller.ts</div>
+              <div className="absolute bottom-1/4 right-1/4 px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-lg flex items-center justify-center text-sm font-mono text-zinc-300 shadow-lg">database.go</div>
               
               {/* Lines */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
-                <path d="M 350 200 Q 450 250, 520 350" fill="none" stroke="#475569" strokeWidth="2" strokeDasharray="4 4" />
-                <path d="M 520 400 Q 650 500, 750 550" fill="none" stroke="#3b82f6" strokeWidth="2.5" />
+                <path d="M 350 200 Q 450 250, 520 350" fill="none" stroke="#3f3f46" strokeWidth="2" strokeDasharray="4 4" />
+                <path d="M 520 400 Q 650 500, 750 550" fill="none" stroke="#ffffff" strokeWidth="2.5" />
               </svg>
             </div>
             
             {/* Mock Context Panel */}
-            <div className="w-80 border-l border-slate-200 bg-white p-6 hidden lg:flex flex-col">
-              <h3 className="font-semibold text-slate-900 text-lg mb-1">user_controller.ts</h3>
-              <p className="text-xs text-slate-500 font-mono mb-6">src/api/controllers/user_controller.ts</p>
+            <div className="w-80 border-l border-zinc-800 bg-zinc-950 p-6 hidden lg:flex flex-col">
+              <h3 className="font-semibold text-white text-lg mb-1">user_controller.ts</h3>
+              <p className="text-xs text-zinc-500 font-mono mb-6">src/api/controllers/user_controller.ts</p>
               
               <div className="space-y-6">
                 <div>
-                  <h4 className="text-sm font-semibold text-slate-900 mb-2">Dependencies (3)</h4>
+                  <h4 className="text-sm font-semibold text-white mb-2">Dependencies (3)</h4>
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 p-2 rounded border border-slate-200 bg-slate-50 text-xs font-mono text-slate-700"><ArrowRight className="w-3 h-3 text-slate-400"/> auth_service.py</div>
-                    <div className="flex items-center gap-2 p-2 rounded border border-slate-200 bg-slate-50 text-xs font-mono text-slate-700"><ArrowRight className="w-3 h-3 text-slate-400"/> logger.ts</div>
+                    <div className="flex items-center gap-2 p-2 rounded border border-zinc-800 bg-black text-xs font-mono text-zinc-300"><ArrowRight className="w-3 h-3 text-zinc-500"/> auth_service.py</div>
+                    <div className="flex items-center gap-2 p-2 rounded border border-zinc-800 bg-black text-xs font-mono text-zinc-300"><ArrowRight className="w-3 h-3 text-zinc-500"/> logger.ts</div>
                   </div>
                 </div>
                 
                 <div>
-                  <h4 className="text-sm font-semibold text-slate-900 mb-2">AI Summary</h4>
-                  <p className="text-sm text-slate-600 leading-relaxed bg-blue-50 p-3 rounded-lg border border-blue-100">
+                  <h4 className="text-sm font-semibold text-white mb-2">AI Summary</h4>
+                  <p className="text-sm text-zinc-400 leading-relaxed bg-black p-3 rounded-lg border border-zinc-800">
                     Handles incoming HTTP requests for user profiles and delegates authentication checks to the auth_service before returning serialized user data.
                   </p>
                 </div>
@@ -134,62 +135,65 @@ export const LandingPage: React.FC = () => {
       </main>
 
       {/* 4. Problem Section */}
-      <section className="py-24 bg-white border-y border-slate-200">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-12">
+      <section className="py-24 bg-zinc-950 border-y border-zinc-900 relative">
+        <div className="absolute inset-0 bg-noise z-0 pointer-events-none opacity-50"></div>
+        <div className="max-w-[1400px] mx-auto px-6 md:px-12 relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <h3 className="text-3xl md:text-4xl font-bold mb-6 text-slate-900 leading-tight">
+              <h3 className="text-3xl md:text-4xl font-bold mb-6 text-white leading-tight">
                 Large codebases are difficult to understand.
               </h3>
-              <div className="space-y-6 text-lg text-slate-600">
+              <div className="space-y-6 text-lg text-zinc-400">
                 <p>
                   Modern software grows exponentially. As a project matures, the mental model required to safely make changes becomes impossible for any single developer to hold in their head.
                 </p>
-                <ul className="space-y-4 mt-6">
+                <ul className="space-y-4 mt-6 text-zinc-300 text-base">
                   <li className="flex gap-3 items-start">
-                    <div className="mt-1 w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                      <div className="w-2 h-2 rounded-full bg-red-600" />
+                    <div className="mt-1 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
+                      <div className="w-2 h-2 rounded-full bg-white" />
                     </div>
                     <span><strong>Unclear dependencies</strong> making refactors dangerous.</span>
                   </li>
                   <li className="flex gap-3 items-start">
-                    <div className="mt-1 w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                      <div className="w-2 h-2 rounded-full bg-amber-600" />
+                    <div className="mt-1 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
+                      <div className="w-2 h-2 rounded-full bg-white" />
                     </div>
                     <span><strong>Undocumented architecture</strong> slowing down new hires.</span>
                   </li>
                   <li className="flex gap-3 items-start">
-                    <div className="mt-1 w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                      <div className="w-2 h-2 rounded-full bg-slate-600" />
+                    <div className="mt-1 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
+                      <div className="w-2 h-2 rounded-full bg-white" />
                     </div>
                     <span><strong>Tracing execution flow</strong> manually across dozens of files.</span>
                   </li>
                 </ul>
               </div>
             </div>
-            <div className="bg-slate-50 p-8 rounded-2xl border border-slate-200 shadow-inner font-mono text-sm overflow-hidden text-slate-400">
-              <div className="text-slate-800 font-semibold mb-4 border-b border-slate-200 pb-2">grep -r "UserController" src/</div>
-              <div className="space-y-2 opacity-50">
+            <div className="bg-black p-8 rounded-2xl border border-zinc-800 shadow-2xl font-mono text-sm overflow-hidden text-zinc-400">
+              <div className="text-zinc-200 font-semibold mb-4 border-b border-zinc-800 pb-2 flex items-center gap-2">
+                <Terminal className="w-4 h-4" /> grep -r "UserController" src/
+              </div>
+              <div className="space-y-2 opacity-70">
                 <div>src/routes.ts: import {'{'} UserController {'}'} from './controllers'</div>
                 <div>src/app.ts: app.use('/users', UserController)</div>
                 <div>src/tests/user.test.ts: describe('UserController', () =&gt; ...</div>
-                <div>src/services/auth.ts: // Called by UserController</div>
-                <div>src/models/user.ts: // Returned by UserController</div>
+                <div>src/services/auth.ts: <span className="text-zinc-500">// Called by UserController</span></div>
+                <div>src/models/user.ts: <span className="text-zinc-500">// Returned by UserController</span></div>
                 <div>... 47 more matches across 12 directories.</div>
               </div>
-              <div className="mt-6 text-red-600 font-bold opacity-80">// Manual exploration doesn't scale.</div>
+              <div className="mt-6 text-white font-bold opacity-80">// Manual exploration doesn't scale.</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* 5. How CodeAtlas Works */}
-      <section id="how-it-works" className="py-24 bg-slate-50">
+      <section id="how-it-works" className="py-24 bg-black">
         <div className="max-w-[1400px] mx-auto px-6 md:px-12 text-center">
-          <h3 className="text-3xl font-bold mb-16 text-slate-900">How CodeAtlas Works</h3>
+          <h3 className="text-3xl font-bold mb-16 text-white">How CodeAtlas Works</h3>
           
           <div className="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-0 relative">
-            <div className="hidden md:block absolute top-8 left-[10%] right-[10%] h-0.5 bg-slate-200 z-0" />
+            <div className="hidden md:block absolute top-8 left-[10%] right-[10%] h-px bg-zinc-800 z-0" />
             
             <WorkflowStep num="1" title="Connect Repository" desc="Provide local access or connect Git." />
             <WorkflowDivider />
@@ -205,26 +209,27 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 6. Code Graph Section */}
-      <section className="py-24 bg-slate-900 text-white border-y border-slate-800">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-12 text-center">
+      <section className="py-24 bg-zinc-950 text-white border-y border-zinc-900 relative overflow-hidden">
+        <div className="absolute inset-0 bg-noise z-0 pointer-events-none opacity-50"></div>
+        <div className="max-w-[1400px] mx-auto px-6 md:px-12 text-center relative z-10">
           <h3 className="text-3xl md:text-4xl font-bold mb-6">See how your codebase connects.</h3>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto mb-16">
+          <p className="text-zinc-400 text-lg max-w-2xl mx-auto mb-16">
             Stop guessing how components relate. CodeAtlas renders an interactive dependency graph of your functions, classes, and files so you can visually trace execution flows and spot architectural bottlenecks.
           </p>
           
-          <div className="bg-slate-950 rounded-2xl border border-slate-700 p-2 shadow-2xl overflow-hidden aspect-video relative max-w-5xl mx-auto">
-             <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml,%3Csvg width=\\'60\\' height=\\'60\\' viewBox=\\'0 0 60 60\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Cg fill=\\'none\\' fill-rule=\\'evenodd\\'%3E%3Cg fill=\\'%239C92AC\\' fill-opacity=\\'0.4\\'%3E%3Cpath d=\\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]" />
+          <div className="bg-black rounded-2xl border border-zinc-800 p-2 shadow-2xl overflow-hidden aspect-video relative max-w-5xl mx-auto">
+             <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml,%3Csvg width=\\'60\\' height=\\'60\\' viewBox=\\'0 0 60 60\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Cg fill=\\'none\\' fill-rule=\\'evenodd\\'%3E%3Cg fill=\\'%23ffffff\\' fill-opacity=\\'1\\'%3E%3Cpath d=\\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]" />
              <div className="absolute inset-0 flex items-center justify-center">
                <div className="flex items-center gap-16 relative">
-                 <div className="p-4 bg-slate-800 rounded-lg border border-slate-600 font-mono text-sm z-10 shadow-lg">HTTP Router</div>
-                 <div className="h-0.5 w-16 bg-blue-500 absolute left-[100px]" />
-                 <div className="p-4 bg-blue-600 rounded-lg border border-blue-500 font-mono text-sm z-10 shadow-lg ring-4 ring-blue-500/20">PaymentService</div>
-                 <div className="h-0.5 w-16 bg-slate-600 absolute left-[295px] top-[15px] transform rotate-45" />
-                 <div className="h-0.5 w-16 bg-slate-600 absolute left-[295px] top-[35px] transform -rotate-45" />
+                 <div className="p-4 bg-zinc-900 rounded-lg border border-zinc-700 font-mono text-sm z-10 shadow-lg text-zinc-300">HTTP Router</div>
+                 <div className="h-px w-16 bg-zinc-700 absolute left-[100px]" />
+                 <div className="p-4 bg-zinc-950 rounded-lg border border-white font-mono text-sm z-10 shadow-[0_0_20px_rgba(255,255,255,0.1)] text-white">PaymentService</div>
+                 <div className="h-px w-16 bg-zinc-700 absolute left-[295px] top-[15px] transform rotate-45" />
+                 <div className="h-px w-16 bg-zinc-700 absolute left-[295px] top-[35px] transform -rotate-45" />
                  
                  <div className="flex flex-col gap-8 ml-8">
-                   <div className="p-4 bg-slate-800 rounded-lg border border-slate-600 font-mono text-sm z-10">StripeAdapter</div>
-                   <div className="p-4 bg-slate-800 rounded-lg border border-slate-600 font-mono text-sm z-10">ReceiptMailer</div>
+                   <div className="p-4 bg-zinc-900 rounded-lg border border-zinc-700 font-mono text-sm z-10 text-zinc-300">StripeAdapter</div>
+                   <div className="p-4 bg-zinc-900 rounded-lg border border-zinc-700 font-mono text-sm z-10 text-zinc-300">ReceiptMailer</div>
                  </div>
                </div>
              </div>
@@ -233,46 +238,46 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 7. Feature Deep Dives */}
-      <section id="features" className="py-24 bg-white">
+      <section id="features" className="py-24 bg-black">
         <div className="max-w-[1400px] mx-auto px-6 md:px-12 space-y-32">
           
           {/* Deep Dive 1 */}
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
+              <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 text-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
                 <Terminal className="w-6 h-6" />
               </div>
-              <h3 className="text-3xl font-bold text-slate-900 mb-4">Repository Intelligence</h3>
-              <p className="text-lg text-slate-600 mb-6">
+              <h3 className="text-3xl font-bold text-white mb-4">Repository Intelligence</h3>
+              <p className="text-lg text-zinc-400 mb-6">
                 CodeAtlas parses your actual source files using Tree-sitter, accurately mapping semantic tokens without executing the code.
               </p>
-              <ul className="space-y-3 text-slate-700">
-                <li className="flex gap-2 items-center"><Check className="w-5 h-5 text-blue-600" /> Extracts functions, classes, and imports</li>
-                <li className="flex gap-2 items-center"><Check className="w-5 h-5 text-blue-600" /> Language agnostic (Python, TS, JS, Go, etc.)</li>
-                <li className="flex gap-2 items-center"><Check className="w-5 h-5 text-blue-600" /> Analyzes purely locally or on your self-hosted instance</li>
+              <ul className="space-y-3 text-zinc-300">
+                <li className="flex gap-2 items-center"><Check className="w-5 h-5 text-white" /> Extracts functions, classes, and imports</li>
+                <li className="flex gap-2 items-center"><Check className="w-5 h-5 text-white" /> Language agnostic (Python, TS, JS, Go, etc.)</li>
+                <li className="flex gap-2 items-center"><Check className="w-5 h-5 text-white" /> Analyzes purely locally or on your self-hosted instance</li>
               </ul>
             </div>
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 shadow-sm">
-              <div className="flex justify-between items-center mb-6 border-b border-slate-200 pb-4">
-                <div className="font-semibold text-slate-800">Repository Stats</div>
-                <div className="text-xs font-mono bg-blue-100 text-blue-800 px-2 py-1 rounded">main</div>
+            <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8 shadow-sm">
+              <div className="flex justify-between items-center mb-6 border-b border-zinc-800 pb-4">
+                <div className="font-semibold text-zinc-200">Repository Stats</div>
+                <div className="text-xs font-mono bg-black border border-zinc-800 text-zinc-300 px-2 py-1 rounded">main</div>
               </div>
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <div className="text-3xl font-bold text-slate-900">247</div>
-                  <div className="text-sm text-slate-500 mt-1">Source Files</div>
+                  <div className="text-3xl font-bold text-white">247</div>
+                  <div className="text-sm text-zinc-500 mt-1">Source Files</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-slate-900">92</div>
-                  <div className="text-sm text-slate-500 mt-1">External Dependencies</div>
+                  <div className="text-3xl font-bold text-white">92</div>
+                  <div className="text-sm text-zinc-500 mt-1">External Dependencies</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-slate-900">38</div>
-                  <div className="text-sm text-slate-500 mt-1">Core Modules</div>
+                  <div className="text-3xl font-bold text-white">38</div>
+                  <div className="text-sm text-zinc-500 mt-1">Core Modules</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-slate-900">1,204</div>
-                  <div className="text-sm text-slate-500 mt-1">Functions / Methods</div>
+                  <div className="text-3xl font-bold text-white">1,204</div>
+                  <div className="text-sm text-zinc-500 mt-1">Functions / Methods</div>
                 </div>
               </div>
             </div>
@@ -280,33 +285,33 @@ export const LandingPage: React.FC = () => {
 
           {/* Deep Dive 2 */}
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="order-2 lg:order-1 bg-slate-50 border border-slate-200 rounded-2xl p-8 shadow-sm font-mono text-sm">
-               <div className="flex border-b border-slate-200 pb-4 mb-4 gap-4">
-                 <div className="font-bold text-slate-800">Architecture Overview.md</div>
+            <div className="order-2 lg:order-1 bg-zinc-950 border border-zinc-800 rounded-2xl p-8 shadow-sm font-mono text-sm">
+               <div className="flex border-b border-zinc-800 pb-4 mb-4 gap-4">
+                 <div className="font-bold text-zinc-200">Architecture Overview.md</div>
                </div>
-               <div className="space-y-4 text-slate-600">
-                 <p className="font-bold text-slate-800 text-lg"># Authentication Flow</p>
-                 <p>The system utilizes a JWT-based authentication flow managed by <span className="bg-slate-200 px-1 rounded">auth_service.py</span>.</p>
-                 <p className="font-bold text-slate-800 mt-4">## Dependencies</p>
-                 <ul className="list-disc pl-5 space-y-1">
-                   <li><span className="text-blue-600">user_model</span> - Defines database schema</li>
-                   <li><span className="text-blue-600">redis_cache</span> - Session invalidation</li>
-                   <li><span className="text-blue-600">smtp_client</span> - Magic link delivery</li>
+               <div className="space-y-4 text-zinc-400">
+                 <p className="font-bold text-white text-lg"># Authentication Flow</p>
+                 <p>The system utilizes a JWT-based authentication flow managed by <span className="bg-zinc-800 text-zinc-200 px-1.5 py-0.5 rounded border border-zinc-700">auth_service.py</span>.</p>
+                 <p className="font-bold text-white mt-4">## Dependencies</p>
+                 <ul className="list-disc pl-5 space-y-2">
+                   <li><span className="text-zinc-200">user_model</span> - Defines database schema</li>
+                   <li><span className="text-zinc-200">redis_cache</span> - Session invalidation</li>
+                   <li><span className="text-zinc-200">smtp_client</span> - Magic link delivery</li>
                  </ul>
                </div>
             </div>
             <div className="order-1 lg:order-2">
-              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
+              <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 text-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
                 <FileText className="w-6 h-6" />
               </div>
-              <h3 className="text-3xl font-bold text-slate-900 mb-4">Automatic Documentation</h3>
-              <p className="text-lg text-slate-600 mb-6">
+              <h3 className="text-3xl font-bold text-white mb-4">Automatic Documentation</h3>
+              <p className="text-lg text-zinc-400 mb-6">
                 Stop writing docs that go out of date the next day. CodeAtlas can automatically generate structural documentation and architectural summaries based on the real state of your code.
               </p>
-              <ul className="space-y-3 text-slate-700">
-                <li className="flex gap-2 items-center"><Check className="w-5 h-5 text-blue-600" /> Exportable to Markdown</li>
-                <li className="flex gap-2 items-center"><Check className="w-5 h-5 text-blue-600" /> Guaranteed accurate to the current commit</li>
-                <li className="flex gap-2 items-center"><Check className="w-5 h-5 text-blue-600" /> Instantly summarizes complex logic blocks</li>
+              <ul className="space-y-3 text-zinc-300">
+                <li className="flex gap-2 items-center"><Check className="w-5 h-5 text-white" /> Exportable to Markdown</li>
+                <li className="flex gap-2 items-center"><Check className="w-5 h-5 text-white" /> Guaranteed accurate to the current commit</li>
+                <li className="flex gap-2 items-center"><Check className="w-5 h-5 text-white" /> Instantly summarizes complex logic blocks</li>
               </ul>
             </div>
           </div>
@@ -315,14 +320,15 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 8. Workflow & Use Cases */}
-      <section id="use-cases" className="py-24 bg-slate-50 border-t border-slate-200">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-12">
+      <section id="use-cases" className="py-24 bg-zinc-950 border-t border-zinc-900 relative">
+        <div className="absolute inset-0 bg-noise z-0 pointer-events-none opacity-50"></div>
+        <div className="max-w-[1400px] mx-auto px-6 md:px-12 relative z-10">
           <div className="mb-16 text-center">
-            <h3 className="text-3xl font-bold mb-4 text-slate-900">Built for Engineering Workflows</h3>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">CodeAtlas adapts to how your team actually works, providing intelligence at every stage of the development lifecycle.</p>
+            <h3 className="text-3xl font-bold mb-4 text-white">Built for Engineering Workflows</h3>
+            <p className="text-lg text-zinc-400 max-w-2xl mx-auto">CodeAtlas adapts to how your team actually works, providing intelligence at every stage of the development lifecycle.</p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <UseCaseCard 
               title="New Developer Onboarding"
               desc="Help new team members understand an unfamiliar repository before making their first change."
@@ -344,10 +350,10 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 9. FAQ */}
-      <section id="faq" className="py-24 bg-white border-t border-slate-200">
+      <section id="faq" className="py-24 bg-black border-t border-zinc-800">
         <div className="max-w-3xl mx-auto px-6">
-          <h3 className="text-3xl font-bold mb-12 text-center text-slate-900">Frequently Asked Questions</h3>
-          <div className="space-y-6">
+          <h3 className="text-3xl font-bold mb-12 text-center text-white">Frequently Asked Questions</h3>
+          <div className="space-y-4">
             <FAQItem 
               q="What languages are supported?"
               a="CodeAtlas primarily supports Python, JavaScript, and TypeScript via Tree-sitter parsing. Support for Go, Java, and C++ is continually expanding."
@@ -369,15 +375,16 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 10. Final CTA */}
-      <section className="py-24 bg-blue-600 text-white text-center">
-        <div className="max-w-4xl mx-auto px-6">
-          <h3 className="text-4xl md:text-5xl font-bold mb-6">Stop searching through files.<br/>Start seeing the system.</h3>
-          <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
+      <section className="py-32 bg-black text-center relative border-t border-zinc-800">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900/50 via-black to-black pointer-events-none"></div>
+        <div className="max-w-4xl mx-auto px-6 relative z-10">
+          <h3 className="text-4xl md:text-5xl font-bold mb-6 text-white">Stop searching through files.<br/>Start seeing the system.</h3>
+          <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto">
             Understand architecture, dependencies and relationships through CodeAtlas.
           </p>
           <button 
             onClick={() => setShowAuthScreen(true)}
-            className="bg-white text-blue-600 hover:bg-slate-100 px-10 py-4 rounded-lg text-lg font-bold transition-all duration-200 shadow-xl"
+            className="bg-white text-black hover:bg-zinc-200 px-10 py-4 rounded-lg text-lg font-bold transition-all duration-200 shadow-xl"
           >
             Analyze a Repository
           </button>
@@ -385,14 +392,16 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 11. Footer */}
-      <footer className="bg-slate-900 py-16 text-slate-400">
+      <footer className="bg-zinc-950 py-16 border-t border-zinc-900 text-zinc-500">
         <div className="max-w-[1400px] mx-auto px-6 md:px-12 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12">
           <div className="col-span-2 lg:col-span-2">
             <div className="flex items-center gap-2 mb-6 text-white">
-              <Layers className="w-5 h-5 text-blue-500" />
+              <div className="w-6 h-6 rounded bg-white flex items-center justify-center text-black">
+                <Layers className="w-3.5 h-3.5" />
+              </div>
               <span className="font-bold text-lg tracking-tight">CodeAtlas</span>
             </div>
-            <p className="text-sm mb-6 max-w-sm">
+            <p className="text-sm mb-6 max-w-sm text-zinc-400">
               Professional architecture intelligence and code visualization for modern engineering teams.
             </p>
             <div className="text-sm">
@@ -433,11 +442,11 @@ export const LandingPage: React.FC = () => {
 function WorkflowStep({ num, title, desc }: { num: string, title: string, desc: string }) {
   return (
     <div className="relative z-10 flex flex-col items-center flex-1">
-      <div className="w-12 h-12 rounded-full bg-white border-2 border-blue-600 flex items-center justify-center font-bold text-blue-600 mb-4 shadow-sm">
+      <div className="w-12 h-12 rounded-full bg-black border border-zinc-700 flex items-center justify-center font-bold text-white mb-4 shadow-sm">
         {num}
       </div>
-      <h4 className="font-bold text-slate-900 mb-2">{title}</h4>
-      <p className="text-sm text-slate-600 px-4">{desc}</p>
+      <h4 className="font-bold text-white mb-2">{title}</h4>
+      <p className="text-sm text-zinc-400 px-4">{desc}</p>
     </div>
   );
 }
@@ -445,25 +454,25 @@ function WorkflowStep({ num, title, desc }: { num: string, title: string, desc: 
 function WorkflowDivider() {
   return (
     <div className="hidden md:block w-8 shrink-0 relative z-10">
-      <ChevronDown className="w-6 h-6 text-slate-300 mx-auto -rotate-90" />
+      <ChevronDown className="w-6 h-6 text-zinc-700 mx-auto -rotate-90" />
     </div>
   );
 }
 
 function UseCaseCard({ title, desc }: { title: string, desc: string }) {
   return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-      <h4 className="font-bold text-slate-900 mb-3">{title}</h4>
-      <p className="text-slate-600 text-sm leading-relaxed">{desc}</p>
+    <div className="bg-black p-6 rounded-xl border border-zinc-800 shadow-sm transition-colors hover:border-zinc-700">
+      <h4 className="font-bold text-white mb-3">{title}</h4>
+      <p className="text-zinc-400 text-sm leading-relaxed">{desc}</p>
     </div>
   );
 }
 
 function FAQItem({ q, a }: { q: string, a: string }) {
   return (
-    <div className="border border-slate-200 rounded-lg p-6 bg-slate-50">
-      <h4 className="font-bold text-slate-900 mb-2">{q}</h4>
-      <p className="text-slate-600">{a}</p>
+    <div className="border border-zinc-800 rounded-xl p-6 bg-zinc-950/50 backdrop-blur-sm transition-colors hover:bg-zinc-900/50">
+      <h4 className="font-bold text-white mb-2">{q}</h4>
+      <p className="text-zinc-400 text-sm leading-relaxed">{a}</p>
     </div>
   );
 }
