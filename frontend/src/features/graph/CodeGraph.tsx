@@ -162,6 +162,9 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
      type: 'entity',
      data: { ...n, scale }, // Basic data, selection applied later
      position: { x: 0, y: 0 },
+     width: 180,
+     height: 40,
+     style: { width: 180, height: 40 },
     };
    });
    
