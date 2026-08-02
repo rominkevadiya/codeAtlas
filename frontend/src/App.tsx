@@ -101,7 +101,7 @@ export default function App() {
    {/* GLOBAL NAVIGATION (Top Navbar) */}
    <nav className="h-14 shrink-0 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between px-4 z-40 relative shadow-sm">
     <div className="flex items-center gap-4">
-     <div className="w-8 h-8 rounded bg-white flex items-center justify-center text-white shadow-sm">
+     <div className="w-8 h-8 rounded bg-white flex items-center justify-center text-black shadow-sm">
       <Layers className="w-5 h-5" />
      </div>
      <h1 className="text-lg font-bold tracking-tight text-white hidden sm:block">
@@ -352,7 +352,7 @@ export default function App() {
             <div className="space-y-5">
              <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-zinc-400">Impact Score</span>
-              <span className="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-100">{impactData.impact_score}</span>
+              <span className="font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">{impactData.impact_score}</span>
              </div>
              
              {impactData.impacted_nodes?.length > 0 && (
@@ -360,7 +360,7 @@ export default function App() {
                <h5 className="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wider">Impacted Nodes ({impactData.impacted_nodes.length})</h5>
                <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                 {impactData.impacted_nodes.slice(0, 10).map((node: any, idx: number) => (
-                 <div key={idx} className="flex items-center gap-2 bg-rose-50 border border-rose-100 rounded md p-2">
+                 <div key={idx} className="flex items-center gap-2 bg-rose-500/10 border border-rose-500/20 rounded-md p-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></div>
                   <span className="text-xs text-zinc-300 font-medium truncate flex-1">{node.name}</span>
                   <span className="text-[9px] text-slate-400 uppercase font-bold shrink-0">{node.type}</span>
@@ -380,7 +380,7 @@ export default function App() {
                <h5 className="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wider">Dependencies ({impactData.dependency_nodes.length})</h5>
                <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                 {impactData.dependency_nodes.slice(0, 5).map((node: any, idx: number) => (
-                 <div key={idx} className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded md p-2">
+                 <div key={idx} className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-md p-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></div>
                   <span className="text-xs text-zinc-300 font-medium truncate flex-1">{node.name}</span>
                   <span className="text-[9px] text-slate-400 uppercase font-bold shrink-0">{node.type}</span>

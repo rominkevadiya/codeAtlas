@@ -314,7 +314,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
     fitView
    fitViewOptions={{ padding: 0.3 }}
    className="!bg-transparent"
-   colorMode="light"
+   colorMode="dark"
    minZoom={0.05}
    maxZoom={2}
   >
@@ -328,7 +328,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
       onClick={() => {
        const flowViewport = document.querySelector('.react-flow__viewport') as HTMLElement;
        if (flowViewport) {
-        toPng(flowViewport, { backgroundColor: '#f8fafc' })
+        toPng(flowViewport, { backgroundColor: '#09090b' })
          .then((dataUrl) => {
           const a = document.createElement('a');
           a.setAttribute('download', 'code-atlas-graph.png');
@@ -375,7 +375,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
    />
    <MiniMap 
     className="bg-zinc-950 border-zinc-800 rounded-xl overflow-hidden shadow-sm" 
-    maskColor="rgba(248, 250, 252, 0.7)"
+    maskColor="rgba(0, 0, 0, 0.7)"
     nodeColor={(node) => {
      switch (node.data?.type) {
       case 'file': return '#34d399'; // emerald-400
