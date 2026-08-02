@@ -1,0 +1,173 @@
+import React, { useState } from 'react';
+import { Layers, Loader2, ArrowRight } from 'lucide-react';
+import { useAppStore } from '../../store/useAppStore';
+import { api } from '../../services/api';
+
+export const AuthScreen: React.FC = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { setAuth, setShowAuthScreen } = useAppStore();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+    
+    try {
+      if (isLogin) {
+        const response = await api.post('/auth/token/', {
+          username,
+          password
+        });
+        localStorage.setItem('access_token', response.data.access);
+        localStorage.setItem('refresh_token', response.data.refresh);
+        setAuth(true);
+      } else {
+        await api.post('/auth/register/', {
+          username,
+          email,
+          password
+        });
+        
+        // Auto-login after registration
+        const loginResponse = await api.post('/auth/token/', {
+          username,
+          password
+        });
+        localStorage.setItem('access_token', loginResponse.data.access);
+        localStorage.setItem('refresh_token', loginResponse.data.refresh);
+        setAuth(true);
+      }
+    } catch (err: any) {
+      console.error('Authentication Error:', err);
+      setError(
+        err.response?.data?.detail || 
+        err.response?.data?.username?.[0] || 
+        'Authentication failed. Please check your credentials.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-[#050505] flex items-center justify-center relative overflow-hidden font-sans selection:bg-indigo-500/30">
+      {/* Background Elements */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/4 right-1/4 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
+      
+      {/* Grid Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none" />
+
+      {/* Back Button */}
+      <button 
+        onClick={() => setShowAuthScreen(false)}
+        className="absolute top-8 left-8 text-slate-400 hover:text-white transition-colors flex items-center gap-2 text-sm font-medium z-50 bg-[#111115]/50 px-4 py-2 rounded-full border border-white/5 backdrop-blur-md"
+      >
+        <ArrowRight className="w-4 h-4 rotate-180" />
+        Back to Home
+      </button>
+
+      <div className="w-full max-w-md p-8 relative z-10">
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-500/20 mb-6">
+            <Layers className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+            CodeAtlas <span className="text-indigo-400 font-normal">Pro</span>
+          </h1>
+          <p className="text-slate-400 mt-2 text-sm text-center">
+            Intelligent architecture exploration & code analysis
+          </p>
+        </div>
+
+        <div className="bg-[#111115]/80 backdrop-blur-xl border border-white/5 rounded-3xl p-8 shadow-2xl">
+          <h2 className="text-xl font-semibold text-white mb-6">
+            {isLogin ? 'Sign in to your account' : 'Create a new account'}
+          </h2>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-1.5">Username</label>
+              <input 
+                type="text" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                placeholder="developer"
+              />
+            </div>
+            
+            {!isLogin && (
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1.5">Email</label>
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                  placeholder="dev@company.com"
+                />
+              </div>
+            )}
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-medium text-slate-400">Password</label>
+                {isLogin && <a href="#" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Forgot password?</a>}
+              </div>
+              <input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl py-3 px-4 font-medium transition-all duration-200 flex items-center justify-center gap-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(99,102,241,0.3)]"
+            >
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  {isLogin ? 'Sign In' : 'Create Account'}
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-8 text-center text-sm text-slate-400">
+            {isLogin ? "Don't have an account? " : "Already have an account? "}
+            <button 
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setError('');
+              }}
+              className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+            >
+              {isLogin ? 'Sign up' : 'Sign in'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

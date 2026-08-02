@@ -1,6 +1,6 @@
 # CodeAtlas — System Architecture
 
-> Last updated: **Phase 6 Complete** (July 2026)
+> Last updated: **Phase 8 Complete** (August 2026)
 
 This document defines the **Modular Monolith** architecture, Domain-Driven Design (DDD) principles, module boundaries, and coding standards for the CodeAtlas platform. It serves as the single source of truth for system design decisions.
 
@@ -59,10 +59,10 @@ codeAtlas/
         ├── repositories/         ← ✅ ACTIVE: Full CRUD + upload + graph endpoint
         ├── parser/               ← ✅ ACTIVE: Tree-sitter AST extraction
         ├── graph/                ← ✅ ACTIVE: NetworkX graph builder
-        ├── accounts/             ← 📋 Planned (Phase 7): Auth & user management
+        ├── accounts/             ← ✅ ACTIVE: JWT Auth, user profiles
         ├── ai/                   ← ✅ ACTIVE: Gemini AI queries
         ├── analysis/             ← 📋 Planned: Code metrics & pattern detection
-        └── websocket/            ← 📋 Planned (Phase 6): Real-time events
+        └── websocket/            ← ✅ ACTIVE: Real-time events, Celery Tasks
 ```
 
 ---
@@ -77,10 +77,10 @@ Each app in `backend/apps/` represents a bounded context with strict ownership o
 | **`repositories`** | ✅ Active | ZIP upload (50MB limit, Zip Slip protected), extraction, repo metadata, graph API | `RepoService` | `parser`, `graph`, `common` |
 | **`parser`** | ✅ Active | Tree-sitter AST traversal, entity & relationship extraction | `ParserService` | `common` |
 | **`graph`** | ✅ Active | NetworkX graph construction, `knowledge_graph.json` persistence | `GraphService` | `common` |
-| **`accounts`** | 📋 Phase 7 | Auth, user profiles, API key management | `AuthService`, `UserService` | `common` |
-| **`ai`** | ✅ Active | Gemini API orchestration (lazy cached model), NL code queries (rate-limited 15/hr) | `AIService` | `graph`, `analysis`, `common` |
-| **`analysis`** | 📋 Planned | Graph algorithms, complexity, metrics | `MetricsService` | `graph`, `parser`, `common` |
-| **`websocket`** | 📋 Phase 6 | WebSocket channel broadcasts | `NotificationService` | `common` |
+| **accounts** | ✅ Active | Auth, user profiles, registration, JWT Tokens | `AuthService`, `UserService` | `common` |
+| **ai** | ✅ Active | Gemini API orchestration (lazy cached model), NL code queries (rate-limited 15/hr) | `AIService` | `graph`, `analysis`, `common` |
+| **analysis** | 📋 Planned | Graph algorithms, complexity, metrics | `MetricsService` | `graph`, `parser`, `common` |
+| **websocket** | ✅ Active | WebSocket channel broadcasts, TokenAuthMiddleware | `NotificationService` | `common` |
 
 ---
 
@@ -145,11 +145,11 @@ sequenceDiagram
 graph TD
     UI[Frontend / API Layer]
     UI --> Repos[repositories ✅]
-    UI --> Accounts[accounts 📋]
+    UI --> Accounts[accounts ✅]
 
     Repos --> Parser[parser ✅]
     Repos --> Graph[graph ✅]
-    Repos --> WS[websocket 📋]
+    Repos --> WS[websocket ✅]
 
     AI[ai 📋] --> Graph
     AI --> Analysis[analysis 📋]
@@ -262,6 +262,8 @@ App.tsx
     └── MainLayout  (components/layout/MainLayout.tsx)
         ├── Navbar / Sidebar
         └── <Outlet />
+            ├── LandingPage.tsx (route: / if unauthenticated)
+            ├── AuthScreen.tsx (route: /auth)
             ├── Home.tsx  (route: /)
             │   ├── Repository list (GET /repositories/)
             │   └── Upload form (POST /repositories/upload/)
@@ -346,6 +348,8 @@ Views should only:
 | **Phase 5 (Hardened)** | Security fixes (Zip Slip, 50MB upload limit), DRF rate limiting (`AIQueryAnonThrottle`, `AIQueryUserThrottle`), lazy Gemini model caching, PostgreSQL database env mapping, chat history panel UX, dynamic repo list on Home page |
 | **Phase 5.5** | AST parser enrichment (line numbers), `node_snippet` endpoint, Blast Radius graph highlighting (Rose/Emerald), interactive source code viewer sliding panel. |
 | **Phase 6** | Frontend Intelligence: Real-time graph filtering, Cmd+K search panel (framer-motion), AI source code explanation (Auto-Doc), and updated DRF serializers. |
+| **Phase 7** | Real-time WebSocket progress via Celery + Django Channels |
+| **Phase 8** | JWT Authentication, User Registration, TokenAuthMiddleware, Zustand Global Store Migration, Landing Page |
 
 ---
 

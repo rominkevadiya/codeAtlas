@@ -9,6 +9,10 @@ class RepositoryProgressConsumer(AsyncWebsocketConsumer):
         self.repo_id = self.scope['url_route']['kwargs']['repo_id']
         self.group_name = f"repo_progress_{self.repo_id}"
 
+        if self.scope['user'].is_anonymous:
+            await self.close(code=4003)
+            return
+
         # Join repo progress channel group
         await self.channel_layer.group_add(
             self.group_name,

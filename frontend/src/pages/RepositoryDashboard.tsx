@@ -3,7 +3,8 @@ import { useParams } from 'react-router-dom';
 import { RepositoryService, AIService } from '@/services/api';
 import { CodeGraph } from '@/features/graph/CodeGraph';
 import { AnalysisPanel } from '@/features/analysis/AnalysisPanel';
-import { Loader2, MessageSquare, X, Send, User, Bot, Sparkles, Activity } from 'lucide-react';
+import { Loader2, MessageSquare, X, Send, User, Bot, Sparkles, Activity, FileText } from 'lucide-react';
+import { AutoDocPanel } from '@/features/ai/AutoDocPanel';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface ChatMessage {
@@ -21,6 +22,7 @@ export const RepositoryDashboard = () => {
   // AI Panel State
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
   const [isAnalysisPanelOpen, setIsAnalysisPanelOpen] = useState(false);
+  const [isAutoDocPanelOpen, setIsAutoDocPanelOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [aiLoading, setAiLoading] = useState(false);
@@ -121,8 +123,20 @@ export const RepositoryDashboard = () => {
         <div className="flex gap-2">
           <button
             onClick={() => {
+              setIsAutoDocPanelOpen(!isAutoDocPanelOpen);
+              if (isAiPanelOpen) setIsAiPanelOpen(false);
+              if (isAnalysisPanelOpen) setIsAnalysisPanelOpen(false);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm cursor-pointer"
+          >
+            <FileText className="w-4 h-4" />
+            Auto-Doc
+          </button>
+          <button
+            onClick={() => {
               setIsAnalysisPanelOpen(!isAnalysisPanelOpen);
               if (isAiPanelOpen) setIsAiPanelOpen(false);
+              if (isAutoDocPanelOpen) setIsAutoDocPanelOpen(false);
             }}
             className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 rounded-lg text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors shadow-sm cursor-pointer"
           >
@@ -133,6 +147,7 @@ export const RepositoryDashboard = () => {
             onClick={() => {
               setIsAiPanelOpen(!isAiPanelOpen);
               if (isAnalysisPanelOpen) setIsAnalysisPanelOpen(false);
+              if (isAutoDocPanelOpen) setIsAutoDocPanelOpen(false);
             }}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
           >
@@ -323,6 +338,11 @@ export const RepositoryDashboard = () => {
       {/* Analysis Panel */}
       {isAnalysisPanelOpen && id && (
         <AnalysisPanel repositoryId={id} onClose={() => setIsAnalysisPanelOpen(false)} />
+      )}
+
+      {/* AutoDoc Panel */}
+      {isAutoDocPanelOpen && id && (
+        <AutoDocPanel repositoryId={id} onClose={() => setIsAutoDocPanelOpen(false)} />
       )}
     </div>
   );

@@ -25,11 +25,25 @@ export const api = axios.create({
   },
 });
 
-// Interceptor for attaching auth tokens, handling errors globally, etc.
+// Interceptor for attaching auth tokens
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Interceptor for handling errors globally
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     console.error('API Error:', error.response?.data || error.message);
+    if (error.response?.status === 401) {
+      // Optional: Handle token refresh or logout here
+      // localStorage.removeItem('access_token');
+      // window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );

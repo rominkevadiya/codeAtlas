@@ -65,7 +65,7 @@ CodeAtlas automates this by:
 | **Phase 5.5** | ✅ **Complete** | Interactive blast radius analysis, node dependency highlighting, and integrated source code viewer panel (`node_snippet` API) |
 | **Phase 6** | ✅ **Complete** | Frontend Intelligence (Graph filtering, search panel, AI source code explanation) |
 | **Phase 7** | ✅ **Complete** | Real-time WebSocket progress updates (Celery → Channels → React) |
-| **Phase 8** | 📋 **Planned** | Authentication, user accounts, saved repository sessions |
+| **Phase 8** | ✅ **Complete** | JWT Authentication, User Registration, TokenAuthMiddleware, and Landing Page |
 | **Phase 9** | 📋 Planned | Production deployment, Docker, CI/CD |
 
 ---
@@ -132,7 +132,7 @@ The monolith is divided into two top-level directories that are independently de
 | **React Flow (`@xyflow/react`)** | 12.x | Interactive graph and node visualization |
 | **Dagre** | 0.8.x | Automatic graph layout algorithm (Left-to-Right) |
 | **Framer Motion** | 12.x | Fluid animations for Command Palette and UI overlays |
-| **Zustand** | 5.x | Lightweight global state management |
+| **Zustand** | 5.x | Global state management (Auth, Graph data, UI Overlays) |
 | **Axios** | 1.x | HTTP client for REST API calls |
 | **lucide-react** | Latest | Icon library |
 | **React Router DOM** | 7.x | Client-side routing |
@@ -144,6 +144,7 @@ The monolith is divided into two top-level directories that are independently de
 | **Python** | 3.13+ | Runtime |
 | **Django** | 5.x | Web framework |
 | **Django REST Framework** | 3.x | REST API layer (ViewSets, Routers, Serializers) |
+| **djangorestframework-simplejwt** | 5.x | JWT Authentication |
 | **Django Channels** | 4.x | WebSocket support (Phase 6) |
 | **Daphne** | 4.x | ASGI server for HTTP + WebSocket |
 | **psycopg** | 3.x | PostgreSQL driver (binary) |
@@ -180,6 +181,8 @@ codeAtlas/                            ← Monolith root / Git repository
 │   │   │   ├── layout/               ← MainLayout (navbar, sidebar, outlet)
 │   │   │   └── ui/                   ← shadcn/ui generated components
 │   │   ├── features/
+│   │   │   ├── auth/                 ← JWT Auth (Login/Register)
+│   │   │   ├── landing/              ← Landing Page
 │   │   │   ├── graph/                ← React Flow graph canvas
 │   │   │   │   ├── CodeGraph.tsx     ← Main canvas: data → dagre layout → ReactFlow
 │   │   │   │   └── nodes/
@@ -190,9 +193,9 @@ codeAtlas/                            ← Monolith root / Git repository
 │   │   │   └── RepositoryDashboard.tsx ← Fetches graph, renders CodeGraph
 │   │   ├── services/
 │   │   │   └── api.ts                ← Axios instance + RepositoryService
-│   │   ├── store/                    ← Zustand stores (Phase 5+)
+│   │   ├── store/                    ← Global Zustand store (useAppStore.ts)
 │   │   ├── types/                    ← Shared TypeScript interfaces
-│   │   ├── App.tsx                   ← Router: / → Home, /repository/:id → Dashboard
+│   │   ├── App.tsx                   ← Router: / → Home, /repository/:id → Dashboard, /auth
 │   │   ├── main.tsx
 │   │   └── index.css                 ← Global styles + Tailwind v4 directives
 │   ├── index.html
@@ -206,7 +209,7 @@ codeAtlas/                            ← Monolith root / Git repository
     ├── manage.py
     │
     └── apps/                         ← Domain modules (bounded contexts)
-        ├── accounts/                 ← (Placeholder) User & Auth Domain
+        ├── accounts/                 ← ✅ Active: JWT Auth, User Registration
         ├── repositories/             ← ✅ Active: Upload, extract, list repos
         │   ├── models.py             ←   Repository(id, name, url, local_path, ...)
         │   ├── services.py           ←   RepoService: upload_and_extract_repository()
@@ -506,7 +509,7 @@ import { Button } from '@/components/ui/button'
 | **Phase 5.5** | ✅ Complete | Interactive blast radius analysis, dependency highlighting, and integrated source code viewer |
 | **Phase 6** | ✅ Complete | Frontend Intelligence (Graph filtering, Cmd+K search panel with framer-motion, AI Auto-Doc) |
 | **Phase 7** | ✅ Complete | Real-time WebSocket progress via Celery + Django Channels |
-| **Phase 8** | 📋 Planned | Authentication, user accounts, saved sessions |
+| **Phase 8** | ✅ Complete | JWT Authentication, User Registration, TokenAuthMiddleware, Landing Page, Zustand Global Store |
 | **Phase 9** | 📋 Planned | Production deployment, Docker, CI/CD |
 
 ---

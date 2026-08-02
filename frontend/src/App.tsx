@@ -1,96 +1,81 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { CodeGraph } from './features/graph/CodeGraph';
 import { AnalysisPanel } from './features/analysis/AnalysisPanel';
 import { ChatPanel } from './features/ai/ChatPanel';
 import { UploadModal } from './features/upload/UploadModal';
-import { RepositoryService, AIService } from './services/api';
-import { Box, Layers, Activity, Search, Command, Settings, FolderGit2, X, Loader2, Sparkles, FileCode2, MessageSquare } from 'lucide-react';
+import { RepositoryService } from './services/api';
+import { useAppStore } from './store/useAppStore';
+import { Box, Layers, Activity, Search, Command, Settings, FolderGit2, X, Loader2, Sparkles, FileCode2, MessageSquare, FileText } from 'lucide-react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import './index.css';
+import { AutoDocPanel } from './features/ai/AutoDocPanel';
+import { AuthScreen } from './features/auth/AuthScreen';
+import { LandingPage } from './features/landing/LandingPage';
 
 export default function App() {
-  const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>();
-  const [selectedNodeData, setSelectedNodeData] = useState<any>(null);
-  
-  const [showAnalysis, setShowAnalysis] = useState(false);
-  const [showChat, setShowChat] = useState(false);
-  const [showUpload, setShowUpload] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [repoId, setRepoId] = useState<string | undefined>();
-  const [graphData, setGraphData] = useState<any>(null);
-
-  // Inspector States
-  const [nodeSnippet, setNodeSnippet] = useState<string | null>(null);
-  const [isLoadingSnippet, setIsLoadingSnippet] = useState(false);
-  const [aiExplanation, setAiExplanation] = useState<string | null>(null);
-  const [isExplaining, setIsExplaining] = useState(false);
-  const [impactData, setImpactData] = useState<any>(null);
-  const [isLoadingImpact, setIsLoadingImpact] = useState(false);
+  const {
+    repoId,
+    graphData,
+    searchQuery,
+    setSearchQuery,
+    showAnalysis,
+    setShowAnalysis,
+    showChat,
+    setShowChat,
+    showUpload,
+    setShowUpload,
+    showAutoDoc,
+    setShowAutoDoc,
+    selectedNodeId,
+    selectedNodeData,
+    setSelectedNode,
+    nodeSnippet,
+    isLoadingSnippet,
+    aiExplanation,
+    isExplaining,
+    impactData,
+    isLoadingImpact,
+    fetchNodeData,
+    explainSelectedNode,
+    setRepoId,
+    setGraphData,
+    isAuthenticated,
+    showAuthScreen,
+    logout
+  } = useAppStore();
 
   const handleNodeClick = (nodeId: string, nodeData?: any) => {
-    if (nodeId === selectedNodeId) {
-      setSelectedNodeId(undefined);
-      setSelectedNodeData(null);
-    } else {
-      setSelectedNodeId(nodeId);
-      setSelectedNodeData(nodeData || null);
-    }
+    setSelectedNode(nodeId, nodeData);
   };
 
   useEffect(() => {
-    if (selectedNodeId && repoId && selectedNodeData?.file_path) {
-      setNodeSnippet(null);
-      setAiExplanation(null);
-      setIsLoadingSnippet(true);
-      
-      RepositoryService.getNodeSnippet(
-        repoId, 
-        selectedNodeData.file_path, 
-        selectedNodeData.start_line, 
-        selectedNodeData.end_line
-      )
-        .then(res => {
-          setNodeSnippet(res.data.snippet);
-          setIsLoadingSnippet(false);
-        })
-        .catch(err => {
-          console.error("Failed to fetch snippet:", err);
-          setNodeSnippet("Error loading source code.");
-          setIsLoadingSnippet(false);
-        });
-
-      // Fetch Impact Analysis
-      setImpactData(null);
-      setIsLoadingImpact(true);
-      RepositoryService.getImpactAnalysis(repoId, selectedNodeId)
-        .then(res => {
-          setImpactData(res.data);
-          setIsLoadingImpact(false);
-        })
-        .catch(err => {
-          console.error("Failed to fetch impact analysis:", err);
-          setIsLoadingImpact(false);
-        });
-    } else {
-      setNodeSnippet(null);
-      setAiExplanation(null);
-      setImpactData(null);
+    if (isAuthenticated) {
+      fetchNodeData();
     }
-  }, [selectedNodeId, repoId, selectedNodeData]);
+  }, [selectedNodeId, repoId, selectedNodeData, fetchNodeData, isAuthenticated]);
 
   const handleExplainCode = async () => {
-    if (!repoId || !selectedNodeData || !nodeSnippet) return;
-    
-    setIsExplaining(true);
-    try {
-      const res = await AIService.explainNode(repoId, selectedNodeData.name, selectedNodeData.type, nodeSnippet);
-      setAiExplanation(res.data.explanation || "No explanation provided.");
-    } catch (err) {
-      console.error("AI Error:", err);
-      setAiExplanation("Failed to generate AI explanation.");
-    } finally {
-      setIsExplaining(false);
-    }
+    await explainSelectedNode();
   };
+
+  const getLanguage = (filePath: string) => {
+    if (!filePath) return 'javascript';
+    if (filePath.endsWith('.py')) return 'python';
+    if (filePath.endsWith('.js')) return 'javascript';
+    if (filePath.endsWith('.ts') || filePath.endsWith('.tsx')) return 'typescript';
+    if (filePath.endsWith('.css')) return 'css';
+    if (filePath.endsWith('.html')) return 'html';
+    if (filePath.endsWith('.json')) return 'json';
+    return 'javascript';
+  };
+
+  if (!isAuthenticated) {
+    if (showAuthScreen) {
+      return <AuthScreen />;
+    }
+    return <LandingPage />;
+  }
 
   return (
     <div className="h-screen w-screen bg-[#050505] text-slate-200 overflow-hidden flex flex-col font-sans selection:bg-indigo-500/30">
@@ -123,6 +108,10 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-3">
+          <button onClick={() => setShowAutoDoc(!showAutoDoc)} className={`p-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${showAutoDoc ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'hover:bg-white/5 text-slate-400 border border-transparent'}`}>
+            <FileText className="w-5 h-5" />
+            <span className="text-sm font-medium pr-1">Auto-Doc</span>
+          </button>
           <button onClick={() => setShowAnalysis(!showAnalysis)} className={`p-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${showAnalysis ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'hover:bg-white/5 text-slate-400 border border-transparent'}`}>
             <Activity className="w-5 h-5" />
             <span className="text-sm font-medium pr-1">Metrics</span>
@@ -134,8 +123,10 @@ export default function App() {
           >
             <FolderGit2 className="w-5 h-5" />
           </button>
-          <button className="w-8 h-8 rounded-full bg-gradient-to-tr from-rose-400 to-orange-400 p-0.5">
-            <div className="w-full h-full bg-[#111] rounded-full border-2 border-transparent"></div>
+          <button onClick={logout} className="w-8 h-8 rounded-full bg-gradient-to-tr from-rose-400 to-orange-400 p-0.5 flex items-center justify-center hover:opacity-80 transition-opacity" title="Log out">
+            <div className="w-full h-full bg-[#111] rounded-full border-2 border-transparent flex items-center justify-center">
+              <span className="text-[10px] font-bold text-slate-300">LO</span>
+            </div>
           </button>
         </div>
       </nav>
@@ -197,6 +188,13 @@ export default function App() {
             </div>
           )}
 
+          {/* AutoDoc Overlay */}
+          {showAutoDoc && repoId && (
+            <div className="absolute top-6 right-[420px] bottom-6 z-50 animate-in slide-in-from-right-8 duration-300 fade-in shadow-2xl">
+              <AutoDocPanel onClose={() => setShowAutoDoc(false)} repositoryId={repoId} />
+            </div>
+          )}
+
           {/* Node Inspector Overlay */}
           {selectedNodeId && (
             <div className="absolute bottom-8 left-8 w-[600px] glass-card rounded-2xl p-0 z-40 animate-in slide-in-from-bottom-8 duration-300 fade-in border border-indigo-500/20 shadow-[0_0_40px_rgba(99,102,241,0.1)] flex flex-col max-h-[80vh]">
@@ -216,10 +214,7 @@ export default function App() {
                   </div>
                 </div>
                 <button 
-                  onClick={() => {
-                    setSelectedNodeId(undefined);
-                    setSelectedNodeData(null);
-                  }}
+                  onClick={() => setSelectedNode(undefined)}
                   className="p-1.5 shrink-0 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
                 >
                   <X className="w-4 h-4" />
@@ -244,9 +239,14 @@ export default function App() {
                         <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
                       </div>
                     ) : nodeSnippet ? (
-                      <pre className="text-xs text-slate-300 font-mono leading-relaxed">
-                        <code>{nodeSnippet}</code>
-                      </pre>
+                      <SyntaxHighlighter
+                        language={getLanguage(selectedNodeData?.file_path)}
+                        style={vscDarkPlus}
+                        customStyle={{ margin: 0, padding: 0, background: 'transparent', fontSize: '12px', lineHeight: '1.6' }}
+                        wrapLines={true}
+                      >
+                        {nodeSnippet}
+                      </SyntaxHighlighter>
                     ) : (
                       <p className="text-sm text-slate-500 text-center italic mt-6">Source code not available.</p>
                     )}

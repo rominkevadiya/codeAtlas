@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Send, Bot, User, Sparkles, Loader2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { AIService } from '../../services/api';
 
 interface ChatPanelProps {
@@ -45,7 +46,7 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
 
     try {
       const res = await AIService.query(repositoryId, userMessage);
-      const answer = res.data.response || res.data.answer || "I'm not sure how to answer that.";
+      const answer = res.data.answer || "I'm not sure how to answer that.";
       setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: answer }]);
     } catch (err) {
       console.error("Chat error:", err);
@@ -93,12 +94,33 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
             }`}>
               {msg.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
             </div>
-            <div className={`max-w-[80%] rounded-2xl p-4 text-sm leading-relaxed ${
+            <div className={`max-w-[85%] rounded-2xl p-4 text-sm leading-relaxed ${
               msg.role === 'user' 
                 ? 'bg-slate-800/80 text-white rounded-tr-sm border border-white/5' 
-                : 'bg-[#111115] text-slate-300 rounded-tl-sm border border-indigo-500/10'
+                : 'bg-[#111115] text-slate-300 rounded-tl-sm border border-indigo-500/10 shadow-lg'
             }`}>
-              {msg.content}
+              {msg.role === 'user' ? (
+                msg.content
+              ) : (
+                <div className="markdown-body">
+                  <ReactMarkdown
+                    components={{
+                      p: ({node, ...props}) => <p className="mb-3 last:mb-0" {...props} />,
+                      pre: ({node, ...props}) => <pre className="bg-[#0a0a0c] p-3 rounded-lg border border-white/10 my-3 overflow-x-auto text-xs" {...props} />,
+                      code: ({node, inline, ...props}: any) => inline ? <code className="bg-white/10 px-1.5 py-0.5 rounded-md text-indigo-300 font-mono text-[11px]" {...props} /> : <code className="font-mono text-slate-300" {...props} />,
+                      ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-3 space-y-1.5" {...props} />,
+                      ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-3 space-y-1.5" {...props} />,
+                      li: ({node, ...props}) => <li className="text-slate-300" {...props} />,
+                      strong: ({node, ...props}) => <strong className="font-semibold text-white" {...props} />,
+                      h1: ({node, ...props}) => <h1 className="text-lg font-bold text-white mb-2" {...props} />,
+                      h2: ({node, ...props}) => <h2 className="text-base font-bold text-white mb-2 mt-4" {...props} />,
+                      h3: ({node, ...props}) => <h3 className="text-sm font-bold text-white mb-2 mt-3" {...props} />,
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
+                </div>
+              )}
             </div>
           </div>
         ))}

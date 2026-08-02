@@ -62,7 +62,8 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
 
       const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsHost = window.location.hostname || 'localhost';
-      const wsUrl = `${wsProtocol}//${wsHost}:8000/ws/repositories/${repoId}/progress/`;
+      const token = localStorage.getItem('access_token') || '';
+      const wsUrl = `${wsProtocol}//${wsHost}:8000/ws/repositories/${repoId}/progress/?token=${token}`;
 
       const ws = new WebSocket(wsUrl);
 
@@ -92,8 +93,19 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
 
       ws.onerror = (err) => {
         console.error('WebSocket error:', err);
-        // Fallback: Just complete it after a delay
-        setTimeout(() => onUploadComplete(repoId), 2000);
+        setUploadError('Connection to progress stream failed.');
+        setIsUploading(false);
+      };
+
+      ws.onclose = () => {
+        setProgressState(prev => {
+          if (prev.status !== 'READY' && prev.status !== 'FAILED') {
+            setUploadError('WebSocket connection closed unexpectedly.');
+            setIsUploading(false);
+            return { ...prev, status: 'FAILED' };
+          }
+          return prev;
+        });
       };
 
     } catch (err: any) {

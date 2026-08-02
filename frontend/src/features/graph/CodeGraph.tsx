@@ -22,20 +22,13 @@ const nodeTypes = {
   entity: EntityNode,
 };
 
-interface GraphData {
-  nodes: any[];
-  edges: any[];
-}
+import type { GraphData, GraphNode, ImpactData } from '../../types/graph';
 
 interface CodeGraphProps {
   data: GraphData | null;
   selectedNodeId?: string | null;
-  onNodeClick?: (nodeId: string, nodeData: any) => void;
-  impactData?: {
-    impacted_nodes: { id: string, name: string, type: string }[];
-    dependency_nodes: { id: string, name: string, type: string }[];
-    impact_score: number;
-  } | null;
+  onNodeClick?: (nodeId: string, nodeData: GraphNode) => void;
+  impactData?: ImpactData | null;
 }
 
 const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => {
@@ -45,9 +38,9 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => 
   const isHorizontal = direction === 'LR';
   dagreGraph.setGraph({ 
     rankdir: direction,
-    ranksep: 200,
-    nodesep: 60,
-    edgesep: 20
+    ranksep: 250,
+    nodesep: 100,
+    edgesep: 40
   });
 
   nodes.forEach((node) => {
@@ -122,6 +115,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
     setVisibleTypes(newTypes);
   };
 
+  // 1. Structure and Layout Effect
   useEffect(() => {
     if (data && data.nodes && (data.edges || (data as any).links)) {
       const edgesData = data.edges || (data as any).links;
@@ -151,34 +145,87 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
         filteredNodeIds.has(e.source) && filteredNodeIds.has(e.target)
       );
 
+      // Calculate node degrees for dynamic sizing based on connections
+      const nodeDegrees = new Map<string, number>();
+      filteredEdgesData.forEach((e: any) => {
+        nodeDegrees.set(e.source, (nodeDegrees.get(e.source) || 0) + 1);
+        nodeDegrees.set(e.target, (nodeDegrees.get(e.target) || 0) + 1);
+      });
+
       const initialNodes: Node[] = filteredNodesData.map((n) => {
-        const isImpacted = impactData?.impacted_nodes.some(node => node.id === n.id);
-        const isDependency = impactData?.dependency_nodes.some(node => node.id === n.id);
-        const isImpactRoot = impactData && selectedNodeId === n.id;
-        const isFaded = selectedNodeId && !isImpacted && !isDependency && !isImpactRoot;
-        
+        // Base scale: Leaves are 0.95x, hubs scale up to 1.3x based on connection count
+        const degree = nodeDegrees.get(n.id) || 0;
+        const scale = Math.min(0.95 + (degree * 0.05), 1.3);
+
         return {
           id: n.id,
           type: 'entity',
-          data: { ...n, isSelected: selectedNodeId === n.id, isFaded, isImpacted, isDependency, isImpactRoot },
+          data: { ...n, scale }, // Basic data, selection applied later
           position: { x: 0, y: 0 },
         };
       });
       
       const initialEdges: Edge[] = filteredEdgesData.map((e: any, idx: number) => {
         const isContains = e.type === 'contains';
+        return {
+          id: `e${idx}-${e.source}-${e.target}`,
+          source: e.source,
+          target: e.target,
+          type: 'smoothstep', // Technical/Architectural routing
+          data: { originalType: e.type, isContains }
+        };
+      });
+
+      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+        initialNodes,
+        initialEdges,
+        'LR'
+      );
+      
+      setNodes(layoutedNodes);
+      setEdges(layoutedEdges);
+    }
+  }, [data, searchQuery, visibleTypes, setNodes, setEdges]);
+
+  // 2. Styling Effect (Selection & Impact)
+  useEffect(() => {
+    setNodes((currentNodes) => 
+      currentNodes.map((n) => {
+        const isImpacted = impactData?.impacted_nodes.some((node: any) => node.id === n.id);
+        const isDependency = impactData?.dependency_nodes.some((node: any) => node.id === n.id);
+        const isImpactRoot = impactData && selectedNodeId === n.id;
+        const isFaded = selectedNodeId && !isImpacted && !isDependency && !isImpactRoot;
+
+        return {
+          ...n,
+          data: {
+            ...n.data,
+            isSelected: selectedNodeId === n.id,
+            isFaded,
+            isImpacted,
+            isDependency,
+            isImpactRoot,
+          }
+        };
+      })
+    );
+
+    setEdges((currentEdges) => 
+      currentEdges.map((e) => {
+        const isContains = e.data?.isContains;
+        const originalType = e.data?.originalType;
         
         let isAnimated = false;
-        let strokeColor = isContains ? '#64748b' : '#a855f7'; // Lighter purple for better dark mode visibility
-        let strokeWidth = isContains ? 2 : 3;
-        let opacity = isContains ? 0.5 : 0.95;
+        let strokeColor = isContains ? '#475569' : '#818cf8'; // Slate-600 for contains, Indigo-400 for imports/calls
+        let strokeWidth = isContains ? 1.5 : 2;
+        let opacity = isContains ? 0.4 : 0.7; // Base visibility increased
 
         if (impactData) {
-          const isImpactPath = impactData.impacted_nodes.some(n => n.id === e.target) && 
-                              (impactData.impacted_nodes.some(n => n.id === e.source) || e.source === selectedNodeId);
+          const isImpactPath = impactData.impacted_nodes.some((n: any) => n.id === e.target) && 
+                              (impactData.impacted_nodes.some((n: any) => n.id === e.source) || e.source === selectedNodeId);
                               
-          const isDepPath = impactData.dependency_nodes.some(n => n.id === e.source) && 
-                            (impactData.dependency_nodes.some(n => n.id === e.target) || e.target === selectedNodeId);
+          const isDepPath = impactData.dependency_nodes.some((n: any) => n.id === e.source) && 
+                            (impactData.dependency_nodes.some((n: any) => n.id === e.target) || e.target === selectedNodeId);
 
           if (isImpactPath) {
             strokeColor = '#f43f5e';
@@ -191,24 +238,22 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
             isAnimated = true;
             opacity = 1;
           } else {
-            opacity = 0.05;
+            opacity = 0.08;
           }
         } else if (selectedNodeId) {
           if (e.source === selectedNodeId || e.target === selectedNodeId) {
+             strokeColor = isContains ? '#94a3b8' : '#c084fc';
              strokeWidth = 3;
              opacity = 1;
           } else {
-             opacity = 0.05;
+             opacity = 0.08;
           }
         }
 
         return {
-          id: `e${idx}-${e.source}-${e.target}`,
-          source: e.source,
-          target: e.target,
-          type: 'default', // standard bezier curve which looks best in Dagre
+          ...e,
           animated: isAnimated,
-          label: (!isContains && opacity > 0.5) ? e.type : '',
+          label: (!isContains && opacity > 0.5) ? (originalType as string) : '',
           labelStyle: { fill: '#94a3b8', fontWeight: 500, fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase' },
           labelBgStyle: { fill: 'transparent' },
           style: { 
@@ -224,18 +269,9 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
             height: 20,
           },
         };
-      });
-
-      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-        initialNodes,
-        initialEdges,
-        'LR'
-      );
-      
-      setNodes(layoutedNodes);
-      setEdges(layoutedEdges);
-    }
-  }, [data, selectedNodeId, searchQuery, visibleTypes, setNodes, setEdges]);
+      })
+    );
+  }, [selectedNodeId, impactData, setNodes, setEdges]);
 
   const onConnect = useCallback(
     (params: Connection | Edge) => setEdges((eds) => addEdge(params, eds)),
@@ -244,7 +280,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
   
   const handleNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     if (onNodeClick) {
-      onNodeClick(node.id, node.data);
+      onNodeClick(node.id, node.data as unknown as GraphNode);
     }
   }, [onNodeClick]);
 

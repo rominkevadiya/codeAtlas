@@ -15,14 +15,14 @@ This is the React frontend for the CodeAtlas platform — an AI-powered reposito
 | **Framer Motion** | Fluid animations (Cmd+K Command Palette) |
 | **Axios** | HTTP client for the Django REST API |
 | **React Router DOM** | Client-side routing |
-| **Zustand** | Global state management |
+| **Zustand** | Global state management (Auth, UI, Graph) |
 | **lucide-react** | Icon library |
 
 ## Project Structure
 
 ```
 src/
-├── App.tsx                        ← Router: / and /repository/:id
+├── App.tsx                        ← Router: /, /repository/:id, /auth
 ├── main.tsx                       ← Entry point
 ├── index.css                      ← Global styles + Tailwind v4
 │
@@ -31,10 +31,14 @@ src/
 │   └── ui/                        ← shadcn/ui components
 │
 ├── features/
-│   └── graph/
-│       ├── CodeGraph.tsx          ← Main canvas component
-│       └── nodes/
-│           └── EntityNode.tsx     ← Custom node: icon + name + path
+│   ├── graph/
+│   │   ├── CodeGraph.tsx          ← Main canvas component
+│   │   └── nodes/
+│   │       └── EntityNode.tsx     ← Custom node: icon + name + path
+│   ├── landing/
+│   │   └── LandingPage.tsx        ← Unauthenticated landing page
+│   └── auth/
+│       └── AuthScreen.tsx         ← JWT Login and Registration
 │
 ├── pages/
 │   ├── Home.tsx                   ← Repo list + ZIP upload form

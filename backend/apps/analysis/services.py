@@ -115,7 +115,7 @@ class MetricsService:
         try:
             with open(graph_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            G = json_graph.node_link_graph(data, directed=True)
+            G = nx.DiGraph(json_graph.node_link_graph(data))
         except Exception as e:
             raise CodeAtlasException(f"Failed to load graph: {str(e)}", code="GRAPH_LOAD_ERROR", status_code=500)
 
