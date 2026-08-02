@@ -383,6 +383,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
     pannable
     zoomable
     nodeBorderRadius={4}
+    nodeStrokeWidth={0}
     nodeColor={(node) => {
      switch (node.data?.type) {
       case 'file': return '#34d399';
