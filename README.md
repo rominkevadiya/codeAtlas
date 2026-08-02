@@ -513,4 +513,4 @@ chore:    Build process or tooling changes
 
 ---
 
-*Built with ❤️ using Django, React, Tree-sitter, NetworkX, and React Flow.*
+*Built using Django, React, Tree-sitter, NetworkX, and React Flow.*
