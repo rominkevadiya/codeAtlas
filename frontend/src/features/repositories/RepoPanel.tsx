@@ -44,7 +44,7 @@ const getRepoColor = (id: string) => {
 };
 
 export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
-  const { userRepos, setUserRepos, repoId, switchRepo } = useAppStore();
+  const { userRepos, setUserRepos, repoId, switchRepo, clearActiveRepo } = useAppStore();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -67,6 +67,9 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
     try {
       await RepositoryService.deleteRepository(id);
       setUserRepos(userRepos.filter(r => r.id !== id));
+      if (id === repoId) {
+        clearActiveRepo();
+      }
     } catch (err) {
       console.error('Failed to delete repo:', err);
     } finally {

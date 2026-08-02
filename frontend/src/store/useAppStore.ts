@@ -71,6 +71,7 @@ interface AppState {
   explainSelectedNode: () => Promise<void>;
   loadUserData: () => Promise<void>;
   switchRepo: (repoId: string) => Promise<void>;
+  clearActiveRepo: () => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -209,6 +210,19 @@ export const useAppStore = create<AppState>((set, get) => ({
     } catch (err) {
       console.error('Failed to load graph for repo:', newRepoId, err);
     }
+  },
+
+  clearActiveRepo: () => {
+    localStorage.removeItem('last_repo_id');
+    set({
+      repoId: undefined,
+      graphData: null,
+      selectedNodeId: undefined,
+      selectedNodeData: null,
+      nodeSnippet: null,
+      aiExplanation: null,
+      impactData: null,
+    });
   },
 
   fetchNodeData: async () => {

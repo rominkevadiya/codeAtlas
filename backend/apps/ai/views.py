@@ -6,6 +6,7 @@ from apps.ai.serializers import AIQuerySerializer, ChatSessionSerializer, ChatSe
 from apps.ai.services import AIService
 from apps.ai.models import ChatSession, ChatMessage, ArchitectureDocument
 from apps.ai.throttles import AIQueryAnonThrottle, AIQueryUserThrottle
+from apps.repositories.models import Repository
 
 
 class AIQueryView(APIView):
@@ -14,12 +15,16 @@ class AIQueryView(APIView):
     Rate-limited to prevent Gemini API quota abuse.
     """
     throttle_classes = [AIQueryAnonThrottle, AIQueryUserThrottle]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = AIQuerySerializer(data=request.data)
         if serializer.is_valid():
             repository_id = serializer.validated_data['repository_id']
             query = serializer.validated_data['query']
+
+            if not Repository.objects.filter(id=repository_id, owner=request.user).exists():
+                return Response({"error": "Repository not found or access denied."}, status=status.HTTP_403_FORBIDDEN)
 
             try:
                 answer = AIService.query_repository(repository_id=str(repository_id), query=query)
@@ -38,6 +43,7 @@ class AIExplainNodeView(APIView):
     Request body: { "repository_id": "...", "node_name": "...", "node_type": "...", "snippet": "..." }
     """
     throttle_scope = 'ai_query'
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         repository_id = request.data.get('repository_id')
@@ -50,6 +56,9 @@ class AIExplainNodeView(APIView):
                 {"error": "repository_id, node_name, node_type, and snippet are required."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        if not Repository.objects.filter(id=repository_id, owner=request.user).exists():
+            return Response({"error": "Repository not found or access denied."}, status=status.HTTP_403_FORBIDDEN)
 
         try:
             explanation = AIService.explain_node(repository_id, node_name, node_type, snippet)

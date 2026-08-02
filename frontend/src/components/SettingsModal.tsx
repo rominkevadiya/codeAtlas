@@ -13,11 +13,11 @@ export const SettingsModal: React.FC = () => {
   if (!showSettingsModal) return null;
 
   const handleClearCache = () => {
-    const activeRepo = localStorage.getItem('active_repo_id');
+    const activeRepo = localStorage.getItem('last_repo_id');
     const token = localStorage.getItem('access_token');
     const refresh = localStorage.getItem('refresh_token');
     localStorage.clear();
-    if (activeRepo) localStorage.setItem('active_repo_id', activeRepo);
+    if (activeRepo) localStorage.setItem('last_repo_id', activeRepo);
     if (token) localStorage.setItem('access_token', token);
     if (refresh) localStorage.setItem('refresh_token', refresh);
     addToast('Application cache cleared successfully', 'success');
