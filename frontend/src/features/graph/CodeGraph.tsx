@@ -374,15 +374,17 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
     showInteractive={false}
    />
    <MiniMap 
-    className="bg-zinc-900 border-zinc-800 rounded-xl overflow-hidden shadow-sm" 
-    maskColor="rgba(0, 0, 0, 0.7)"
+    className="rounded-xl overflow-hidden shadow-sm"
+    pannable
+    zoomable
+    nodeBorderRadius={4}
     nodeColor={(node) => {
      switch (node.data?.type) {
-      case 'file': return '#34d399'; // emerald-400
-      case 'class': return '#fbbf24'; // amber-400
-      case 'function': return '#a78bfa'; // violet-400
-      case 'module': return '#38bdf8'; // sky-400
-      default: return '#94a3b8'; // slate-400
+      case 'file': return '#34d399';
+      case 'class': return '#fbbf24';
+      case 'function': return '#a78bfa';
+      case 'module': return '#38bdf8';
+      default: return '#94a3b8';
      }
     }}
    />
