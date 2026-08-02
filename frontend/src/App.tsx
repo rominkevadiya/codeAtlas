@@ -5,9 +5,9 @@ import { ChatPanel } from './features/ai/ChatPanel';
 import { UploadModal } from './features/upload/UploadModal';
 import { RepositoryService } from './services/api';
 import { useAppStore } from './store/useAppStore';
-import { Box, Layers, Activity, Search, Command, Settings, FolderGit2, X, Loader2, Sparkles, FileCode2, MessageSquare, FileText } from 'lucide-react';
+import { Layers, Activity, Search, Command, Settings, FolderGit2, X, Loader2, Sparkles, FileCode2, MessageSquare, FileText } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import './index.css';
 import { AutoDocPanel } from './features/ai/AutoDocPanel';
 import { AuthScreen } from './features/auth/AuthScreen';
@@ -56,7 +56,6 @@ export default function App() {
     setSelectedNode(nodeId, nodeData);
   };
 
-  // Load user profile and repo list when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       loadUserData();
@@ -69,7 +68,6 @@ export default function App() {
     }
   }, [selectedNodeId, repoId, selectedNodeData, fetchNodeData, isAuthenticated]);
 
-  // Generate avatar initials from username
   const avatarInitials = currentUser?.username
     ? currentUser.username.slice(0, 2).toUpperCase()
     : 'ME';
@@ -90,102 +88,113 @@ export default function App() {
   };
 
   if (!isAuthenticated) {
-    if (showAuthScreen) {
-      return <AuthScreen />;
-    }
+    if (showAuthScreen) return <AuthScreen />;
     return <LandingPage />;
   }
 
+  // Determine what is shown in the right panel
+  const activeRightPanel = showAnalysis ? 'analysis' : showAutoDoc ? 'autodoc' : showChat ? 'chat' : selectedNodeId ? 'inspector' : null;
+
   return (
-    <div className="h-screen w-screen bg-[#000000] text-zinc-300 overflow-hidden flex flex-col font-sans selection:bg-zinc-800">
+    <div className="h-screen w-screen bg-slate-50 text-slate-900 overflow-hidden flex flex-col font-sans selection:bg-blue-100">
       
-      {/* Top Navbar */}
-      <nav className="h-16 shrink-0 glass-panel border-b border-white/5 flex items-center justify-between px-6 z-40 relative">
+      {/* GLOBAL NAVIGATION (Top Navbar) */}
+      <nav className="h-14 shrink-0 bg-white border-b border-slate-200 flex items-center justify-between px-4 z-40 relative shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-            <Layers className="w-5 h-5 text-black" />
+          <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white shadow-sm">
+            <Layers className="w-5 h-5" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-white">
-            CodeAtlas <span className="text-zinc-500 font-normal">Pro</span>
+          <h1 className="text-lg font-bold tracking-tight text-slate-900 hidden sm:block">
+            CodeAtlas <span className="text-slate-400 font-normal">Workspace</span>
           </h1>
         </div>
 
-        <div className="flex-1 max-w-xl px-12 relative group">
-          <div className="absolute inset-y-0 left-16 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-zinc-500 group-focus-within:text-white transition-colors" />
+        <div className="flex-1 max-w-2xl px-8 relative group">
+          <div className="absolute inset-y-0 left-12 flex items-center pointer-events-none">
+            <Search className="h-4 w-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
           </div>
           <input 
             type="text" 
             placeholder="Search nodes, functions, files... (Cmd + K)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#0A0A0A] border border-white/10 rounded-md py-2 pl-10 pr-4 text-sm text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-white/20 transition-all shadow-sm"
+            className="w-full bg-slate-50 border border-slate-200 rounded-md py-1.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm"
           />
-          <div className="absolute inset-y-0 right-16 flex items-center pointer-events-none gap-1">
-            <kbd className="hidden sm:inline-block bg-[#222226] border border-white/10 rounded px-1.5 py-0.5 text-[10px] font-mono text-zinc-400 font-semibold shadow-sm"><Command className="w-3 h-3 inline-block -mt-0.5"/> K</kbd>
+          <div className="absolute inset-y-0 right-10 flex items-center pointer-events-none gap-1">
+            <kbd className="hidden sm:inline-block bg-white border border-slate-200 rounded px-1.5 py-0.5 text-[10px] font-mono text-slate-500 font-semibold shadow-sm"><Command className="w-3 h-3 inline-block -mt-0.5"/> K</kbd>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button onClick={() => setShowAutoDoc(!showAutoDoc)} className={`p-2 rounded-md transition-all duration-200 flex items-center gap-2 ${showAutoDoc ? 'bg-zinc-800 text-white border border-white/10' : 'hover:bg-zinc-900 text-zinc-400 border border-transparent'}`}>
-            <FileText className="w-4 h-4" />
-            <span className="text-sm font-medium pr-1">Auto-Doc</span>
-          </button>
-          <button onClick={() => setShowAnalysis(!showAnalysis)} className={`p-2 rounded-md transition-all duration-200 flex items-center gap-2 ${showAnalysis ? 'bg-zinc-800 text-white border border-white/10' : 'hover:bg-zinc-900 text-zinc-400 border border-transparent'}`}>
-            <Activity className="w-4 h-4" />
-            <span className="text-sm font-medium pr-1">Metrics</span>
-          </button>
-          <div className="w-px h-6 bg-white/10 mx-2" />
-          {/* Repo Switcher */}
+        <div className="flex items-center gap-2">
+          {/* Repo Switcher Trigger */}
           <button 
             onClick={() => setShowRepoPanel(!showRepoPanel)}
-            className={`p-2 rounded-md transition-all duration-200 ${showRepoPanel ? 'bg-zinc-800 text-white border border-white/10' : 'hover:bg-zinc-900 text-zinc-400 border border-transparent'}`}
-            title="My Repositories"
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${showRepoPanel ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
           >
             <FolderGit2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Repositories</span>
           </button>
-          {/* Dynamic User Avatar */}
+          
+          <div className="w-px h-6 bg-slate-200 mx-1" />
+          
           <button
             onClick={() => setShowSettingsModal(true)}
-            className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:opacity-80 transition-opacity ml-1"
-            title={`Logged in as ${currentUser?.username || '...'} — Settings & Account`}
+            className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center hover:bg-slate-200 transition-colors ml-1"
+            title={`Logged in as ${currentUser?.username || '...'}`}
           >
-            <span className="text-[10px] font-bold text-black">{avatarInitials}</span>
+            <span className="text-xs font-bold text-slate-700">{avatarInitials}</span>
           </button>
         </div>
       </nav>
 
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Sidebar */}
-        <aside className="w-16 shrink-0 glass-panel border-r border-white/5 flex flex-col items-center py-6 gap-6 z-30 relative">
-          <button className="p-3 rounded-md bg-zinc-900 text-white border border-white/10 hover:bg-zinc-800 transition-all group">
-            <Box className="w-5 h-5" />
-          </button>
-          <button 
-            onClick={() => setShowChat(!showChat)}
-            className={`p-3 rounded-md transition-all group ${showChat ? 'bg-zinc-900 text-white border border-white/10 shadow-sm' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900 border border-transparent'}`}
-          >
-            <MessageSquare className="w-5 h-5" />
-          </button>
+        
+        {/* LEFT SIDEBAR (Context & Tools) */}
+        <aside className="w-16 md:w-64 shrink-0 bg-white border-r border-slate-200 flex flex-col z-30 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+          <div className="p-4 flex flex-col gap-2">
+            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2 hidden md:block">Analysis Tools</div>
+            
+            <button 
+              onClick={() => { setShowAutoDoc(true); setShowAnalysis(false); setShowChat(false); }}
+              className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${showAutoDoc ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'}`}
+            >
+              <FileText className="w-5 h-5 shrink-0" />
+              <span className="text-sm font-medium hidden md:block">Auto-Doc</span>
+            </button>
+            
+            <button 
+              onClick={() => { setShowAnalysis(true); setShowAutoDoc(false); setShowChat(false); }}
+              className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${showAnalysis ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'}`}
+            >
+              <Activity className="w-5 h-5 shrink-0" />
+              <span className="text-sm font-medium hidden md:block">Metrics</span>
+            </button>
+            
+            <button 
+              onClick={() => { setShowChat(true); setShowAutoDoc(false); setShowAnalysis(false); }}
+              className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${showChat ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'}`}
+            >
+              <MessageSquare className="w-5 h-5 shrink-0" />
+              <span className="text-sm font-medium hidden md:block">AI Assistant</span>
+            </button>
+          </div>
           
-          <div className="mt-auto">
+          <div className="mt-auto p-4 border-t border-slate-100">
             <button 
               onClick={() => setShowSettingsModal(true)}
-              className="p-3 rounded-xl text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all group"
-              title="Settings & Profile"
+              className="flex items-center gap-3 p-2 rounded-lg text-slate-600 hover:bg-slate-50 w-full transition-colors"
             >
-              <Settings className="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" />
+              <Settings className="w-5 h-5 shrink-0" />
+              <span className="text-sm font-medium hidden md:block">Settings</span>
             </button>
           </div>
         </aside>
 
-        {/* Main Canvas Container */}
-        <main className="flex-1 relative overflow-hidden bg-[#000000]">
+        {/* MAIN WORKSPACE (Graph / Content) */}
+        <main className="flex-1 relative overflow-hidden bg-slate-900 flex">
+          <div className="absolute inset-0 z-0 opacity-20 bg-[linear-gradient(to_right,#4f46e5_1px,transparent_1px),linear-gradient(to_bottom,#4f46e5_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
           
-          {/* Decorative Grid */}
-          <div className="absolute inset-0 z-0 opacity-[0.03] bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
-
-          <div className="absolute inset-0 z-10">
+          <div className="flex-1 relative z-10">
             {graphData ? (
               <CodeGraph 
                 data={graphData} 
@@ -194,214 +203,226 @@ export default function App() {
                 impactData={impactData}
               />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center opacity-40">
-                <Layers className="w-16 h-16 text-white mb-6" />
-                <p className="text-xl font-medium tracking-tight text-white mb-2">Workspace Empty</p>
-                <p className="text-sm text-zinc-400">Click the folder icon in the top navbar to upload a repository.</p>
+              <div className="w-full h-full flex flex-col items-center justify-center bg-white z-20 absolute inset-0">
+                <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 border border-blue-100">
+                  <Layers className="w-10 h-10 text-blue-600" />
+                </div>
+                <p className="text-2xl font-bold tracking-tight text-slate-900 mb-2">Workspace Empty</p>
+                <p className="text-slate-500 mb-8 max-w-md text-center">Select a repository from the top navigation to analyze its architecture and begin exploring.</p>
+                <button 
+                  onClick={() => setShowUpload(true)}
+                  className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
+                >
+                  Connect Repository
+                </button>
               </div>
             )}
           </div>
+        </main>
 
-          {/* Metrics Overlay */}
-          {showAnalysis && (
-            <div className="absolute top-6 right-6 bottom-6 w-96 z-50 animate-in slide-in-from-right-8 duration-300 fade-in shadow-2xl">
-              <AnalysisPanel onClose={() => setShowAnalysis(false)} repositoryId={repoId} />
-            </div>
-          )}
-
-          {/* Global Chat AI Overlay */}
-          {showChat && (
-            <div className="absolute top-6 left-24 bottom-6 w-[400px] z-50 animate-in slide-in-from-left-8 duration-300 fade-in shadow-2xl">
-              <ChatPanel onClose={() => setShowChat(false)} repositoryId={repoId} />
-            </div>
-          )}
-
-          {/* AutoDoc Overlay */}
-          {showAutoDoc && repoId && (
-            <div className="absolute top-6 right-[420px] bottom-6 z-50 animate-in slide-in-from-right-8 duration-300 fade-in shadow-2xl">
-              <AutoDocPanel onClose={() => setShowAutoDoc(false)} repositoryId={repoId} />
-            </div>
-          )}
-
-          {/* Node Inspector Overlay */}
-          {selectedNodeId && (
-            <div className="absolute bottom-8 left-8 w-[600px] glass-card rounded-2xl p-0 z-40 animate-in slide-in-from-bottom-8 duration-300 fade-in border border-white/10 shadow-sm flex flex-col max-h-[80vh]">
-              {/* Header */}
-              <div className="p-5 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.02]">
-                <div className="flex items-center gap-3 overflow-hidden pr-4">
-                  <div className="w-8 h-8 rounded-md bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
-                    <FileCode2 className="w-4 h-4 text-zinc-300" />
-                  </div>
-                  <div className="truncate">
-                    <h3 className="text-base font-semibold text-white tracking-tight truncate">
-                      {selectedNodeData?.name || selectedNodeId}
-                    </h3>
-                    <p className="text-[11px] text-zinc-400 font-mono truncate">
-                      {selectedNodeData?.file_path || 'Unknown file'}
-                    </p>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setSelectedNode(undefined)}
-                  className="p-1.5 shrink-0 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+        {/* RIGHT CONTEXT PANEL (Detail Inspector, AutoDoc, Chat, Metrics) */}
+        {activeRightPanel && (
+          <aside className="w-96 shrink-0 bg-white border-l border-slate-200 shadow-[-4px_0_24px_rgba(0,0,0,0.02)] flex flex-col z-30 animate-in slide-in-from-right-2 duration-200 relative">
+            {activeRightPanel === 'analysis' && (
+              <div className="h-full relative [&>div]:h-full [&>div]:shadow-none [&>div]:border-0 [&>div]:rounded-none">
+                 <AnalysisPanel onClose={() => setShowAnalysis(false)} repositoryId={repoId} />
               </div>
-
-              {/* Content */}
-              <div className="p-5 overflow-y-auto flex-1 custom-scrollbar space-y-6">
-                
-                {/* Source Code */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">Source Code</h4>
-                    {selectedNodeData?.start_line && (
-                      <span className="text-[10px] text-zinc-500 font-mono">Lines {selectedNodeData.start_line} - {selectedNodeData.end_line}</span>
-                    )}
-                  </div>
-                  
-                  <div className="bg-[#0a0a0c] border border-white/5 rounded-xl p-4 overflow-x-auto relative min-h-[100px]">
-                    {isLoadingSnippet ? (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Loader2 className="w-5 h-5 text-white animate-spin" />
-                      </div>
-                    ) : nodeSnippet ? (
-                      <SyntaxHighlighter
-                        language={getLanguage(selectedNodeData?.file_path)}
-                        style={vscDarkPlus}
-                        customStyle={{ margin: 0, padding: 0, background: 'transparent', fontSize: '12px', lineHeight: '1.6' }}
-                        wrapLines={true}
-                      >
-                        {nodeSnippet}
-                      </SyntaxHighlighter>
-                    ) : (
-                      <p className="text-sm text-zinc-500 text-center italic mt-6">Source code not available.</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* AI Explanation */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
-                      <Sparkles className="w-3.5 h-3.5 text-zinc-300" /> AI Insights
-                    </h4>
-                  </div>
-                  
-                  {aiExplanation ? (
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-md p-4">
-                      <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
-                        {aiExplanation}
+            )}
+            
+            {activeRightPanel === 'autodoc' && repoId && (
+              <div className="h-full relative [&>div]:h-full [&>div]:shadow-none [&>div]:border-0 [&>div]:rounded-none">
+                 <AutoDocPanel onClose={() => setShowAutoDoc(false)} repositoryId={repoId} />
+              </div>
+            )}
+            
+            {activeRightPanel === 'chat' && (
+              <div className="h-full relative [&>div]:h-full [&>div]:shadow-none [&>div]:border-0 [&>div]:rounded-none">
+                 <ChatPanel onClose={() => setShowChat(false)} repositoryId={repoId} />
+              </div>
+            )}
+            
+            {activeRightPanel === 'inspector' && (
+              <div className="h-full flex flex-col bg-white">
+                {/* Header */}
+                <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="w-8 h-8 rounded border border-slate-200 bg-white flex items-center justify-center shrink-0 shadow-sm">
+                      <FileCode2 className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div className="truncate">
+                      <h3 className="text-sm font-bold text-slate-900 tracking-tight truncate">
+                        {selectedNodeData?.name || selectedNodeId}
+                      </h3>
+                      <p className="text-xs text-slate-500 font-mono truncate">
+                        {selectedNodeData?.file_path || 'Unknown file'}
                       </p>
                     </div>
-                  ) : (
-                    <button 
-                      onClick={handleExplainCode}
-                      disabled={isExplaining || !nodeSnippet}
-                      className="w-full relative overflow-hidden group bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-md p-3 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <div className="flex items-center justify-center gap-2">
-                        {isExplaining ? (
-                          <>
-                            <Loader2 className="w-4 h-4 text-zinc-400 animate-spin" />
-                            <span className="text-sm font-medium text-zinc-300">Analyzing syntax tree...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-4 h-4 text-zinc-400" />
-                            <span className="text-sm font-medium text-zinc-300">Generate AI Documentation</span>
-                          </>
-                        )}
-                      </div>
-                    </button>
-                  )}
+                  </div>
+                  <button 
+                    onClick={() => setSelectedNode(undefined)}
+                    className="p-1.5 shrink-0 rounded text-slate-400 hover:text-slate-900 hover:bg-slate-200 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
 
-                {/* Blast Radius (Impact Analysis) */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
-                      <Activity className="w-3.5 h-3.5 text-rose-400" /> Blast Radius
-                    </h4>
-                  </div>
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-5 space-y-8 custom-scrollbar">
                   
-                  <div className="bg-[#0a0a0c] border border-white/5 rounded-xl p-4 min-h-[100px] relative">
-                    {isLoadingImpact ? (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Loader2 className="w-5 h-5 text-rose-500 animate-spin" />
-                      </div>
-                    ) : impactData ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-zinc-400">Impact Score</span>
-                          <span className="font-bold text-rose-400 text-lg">{impactData.impact_score}</span>
+                  {/* Source Code */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Source Code</h4>
+                      {selectedNodeData?.start_line && (
+                        <span className="text-[10px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded border border-slate-200">L{selectedNodeData.start_line}-{selectedNodeData.end_line}</span>
+                      )}
+                    </div>
+                    
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 overflow-x-auto relative min-h-[120px] shadow-inner">
+                      {isLoadingSnippet ? (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
                         </div>
-                        
-                        {impactData.impacted_nodes?.length > 0 && (
-                          <div>
-                            <h5 className="text-xs font-semibold text-zinc-500 mb-2 uppercase tracking-wider">Impacted Nodes ({impactData.impacted_nodes.length})</h5>
-                            <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
-                              {impactData.impacted_nodes.slice(0, 10).map((node: any, idx: number) => (
-                                <div key={idx} className="flex items-center gap-2 bg-rose-500/10 border border-rose-500/20 rounded-lg px-3 py-2">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
-                                  <span className="text-xs text-rose-200 truncate flex-1">{node.name}</span>
-                                  <span className="text-[10px] text-rose-400/70 uppercase">{node.type}</span>
-                                </div>
-                              ))}
-                              {impactData.impacted_nodes.length > 10 && (
-                                <div className="text-center text-xs text-zinc-500 pt-1">
-                                  + {impactData.impacted_nodes.length - 10} more
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {impactData.dependency_nodes?.length > 0 && (
-                          <div className="pt-2 border-t border-white/5">
-                            <h5 className="text-xs font-semibold text-zinc-500 mb-2 uppercase tracking-wider">Dependencies ({impactData.dependency_nodes.length})</h5>
-                            <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
-                              {impactData.dependency_nodes.slice(0, 5).map((node: any, idx: number) => (
-                                <div key={idx} className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                  <span className="text-xs text-emerald-200 truncate flex-1">{node.name}</span>
-                                  <span className="text-[10px] text-emerald-400/70 uppercase">{node.type}</span>
-                                </div>
-                              ))}
-                              {impactData.dependency_nodes.length > 5 && (
-                                <div className="text-center text-xs text-zinc-500 pt-1">
-                                  + {impactData.dependency_nodes.length - 5} more
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {impactData.impacted_nodes?.length === 0 && impactData.dependency_nodes?.length === 0 && (
-                          <p className="text-sm text-zinc-500 text-center italic">No dependencies found.</p>
-                        )}
+                      ) : nodeSnippet ? (
+                        <SyntaxHighlighter
+                          language={getLanguage(selectedNodeData?.file_path)}
+                          style={prism}
+                          customStyle={{ margin: 0, padding: 0, background: 'transparent', fontSize: '12px', lineHeight: '1.6' }}
+                          wrapLines={true}
+                        >
+                          {nodeSnippet}
+                        </SyntaxHighlighter>
+                      ) : (
+                        <p className="text-sm text-slate-500 text-center italic mt-6">Source code not available.</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* AI Explanation */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                        <Sparkles className="w-3.5 h-3.5 text-blue-600" /> AI Insights
+                      </h4>
+                    </div>
+                    
+                    {aiExplanation ? (
+                      <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4 shadow-sm">
+                        <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+                          {aiExplanation}
+                        </p>
                       </div>
                     ) : (
-                      <p className="text-sm text-zinc-500 text-center italic mt-6">Impact analysis not available.</p>
+                      <button 
+                        onClick={handleExplainCode}
+                        disabled={isExplaining || !nodeSnippet}
+                        className="w-full bg-white hover:bg-slate-50 border border-slate-200 rounded-lg p-3 transition-colors disabled:opacity-50 shadow-sm group"
+                      >
+                        <div className="flex items-center justify-center gap-2">
+                          {isExplaining ? (
+                            <>
+                              <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
+                              <span className="text-sm font-medium text-slate-700">Analyzing syntax tree...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
+                              <span className="text-sm font-medium text-slate-700">Generate AI Documentation</span>
+                            </>
+                          )}
+                        </div>
+                      </button>
                     )}
                   </div>
-                </div>
 
+                  {/* Blast Radius (Impact Analysis) */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                        <Activity className="w-3.5 h-3.5 text-rose-500" /> Blast Radius
+                      </h4>
+                    </div>
+                    
+                    <div className="bg-white border border-slate-200 rounded-lg p-4 min-h-[100px] relative shadow-sm">
+                      {isLoadingImpact ? (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Loader2 className="w-5 h-5 text-rose-500 animate-spin" />
+                        </div>
+                      ) : impactData ? (
+                        <div className="space-y-5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-slate-600">Impact Score</span>
+                            <span className="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-100">{impactData.impact_score}</span>
+                          </div>
+                          
+                          {impactData.impacted_nodes?.length > 0 && (
+                            <div>
+                              <h5 className="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wider">Impacted Nodes ({impactData.impacted_nodes.length})</h5>
+                              <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
+                                {impactData.impacted_nodes.slice(0, 10).map((node: any, idx: number) => (
+                                  <div key={idx} className="flex items-center gap-2 bg-rose-50 border border-rose-100 rounded md p-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></div>
+                                    <span className="text-xs text-slate-700 font-medium truncate flex-1">{node.name}</span>
+                                    <span className="text-[9px] text-slate-400 uppercase font-bold shrink-0">{node.type}</span>
+                                  </div>
+                                ))}
+                                {impactData.impacted_nodes.length > 10 && (
+                                  <div className="text-center text-xs text-slate-500 pt-1 font-medium">
+                                    + {impactData.impacted_nodes.length - 10} more
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {impactData.dependency_nodes?.length > 0 && (
+                            <div className="pt-4 border-t border-slate-100">
+                              <h5 className="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wider">Dependencies ({impactData.dependency_nodes.length})</h5>
+                              <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
+                                {impactData.dependency_nodes.slice(0, 5).map((node: any, idx: number) => (
+                                  <div key={idx} className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded md p-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></div>
+                                    <span className="text-xs text-slate-700 font-medium truncate flex-1">{node.name}</span>
+                                    <span className="text-[9px] text-slate-400 uppercase font-bold shrink-0">{node.type}</span>
+                                  </div>
+                                ))}
+                                {impactData.dependency_nodes.length > 5 && (
+                                  <div className="text-center text-xs text-slate-500 pt-1 font-medium">
+                                    + {impactData.dependency_nodes.length - 5} more
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {impactData.impacted_nodes?.length === 0 && impactData.dependency_nodes?.length === 0 && (
+                            <p className="text-sm text-slate-500 text-center italic py-2">No dependencies found.</p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-slate-500 text-center italic py-4">Select to run impact analysis.</p>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
               </div>
-            </div>
-          )}
-        </main>
+            )}
+          </aside>
+        )}
       </div>
 
-      {/* Repo Panel Overlay */}
+      {/* Repo Panel Overlay (still absolute, but cleaner) */}
       {showRepoPanel && (
-        <div className="absolute top-0 right-0 bottom-0 w-80 z-50 animate-in slide-in-from-right-8 duration-300 fade-in shadow-2xl p-4">
-          <RepoPanel
-            onClose={() => setShowRepoPanel(false)}
-            onAddNew={() => { setShowRepoPanel(false); setShowUpload(true); }}
-          />
-        </div>
+        <>
+          <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm z-40 transition-opacity" onClick={() => setShowRepoPanel(false)} />
+          <div className="absolute top-14 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-64 mt-2 w-80 z-50 animate-in fade-in zoom-in-95 duration-200">
+            <RepoPanel
+              onClose={() => setShowRepoPanel(false)}
+              onAddNew={() => { setShowRepoPanel(false); setShowUpload(true); }}
+            />
+          </div>
+        </>
       )}
 
       {showUpload && (
@@ -410,13 +431,11 @@ export default function App() {
           onUploadComplete={(newRepoId) => {
             setShowUpload(false);
             switchRepo(newRepoId);
-            // Refresh repo list to include the new one
             RepositoryService.getRepositories().then(res => setUserRepos(res.data));
           }} 
         />
       )}
 
-      {/* Global Notifications & Settings */}
       <ToastContainer />
       <SettingsModal />
     </div>

@@ -288,11 +288,11 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
 
   if (data.nodes && data.nodes.length === 0) {
     return (
-      <div className="flex-1 w-full h-full min-h-[500px] flex flex-col items-center justify-center bg-zinc-50 dark:bg-[#030712] text-zinc-500">
-        <div className="p-8 rounded-3xl border border-zinc-200 dark:border-zinc-800/60 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl shadow-xl flex flex-col items-center max-w-md text-center">
-          <Layers className="w-16 h-16 mb-4 text-zinc-400" />
-          <p className="text-xl font-bold text-zinc-800 dark:text-zinc-200">No supported files found</p>
-          <p className="text-sm mt-3 text-zinc-500 dark:text-zinc-400 leading-relaxed">
+      <div className="flex-1 w-full h-full min-h-[500px] flex flex-col items-center justify-center bg-slate-50 text-slate-500">
+        <div className="p-8 rounded-3xl border border-slate-200 bg-white shadow-xl flex flex-col items-center max-w-md text-center">
+          <Layers className="w-16 h-16 mb-4 text-slate-400" />
+          <p className="text-xl font-bold text-slate-800">No supported files found</p>
+          <p className="text-sm mt-3 text-slate-500 leading-relaxed">
             The parser currently supports Python, JavaScript/TypeScript, JSON, and EJS files. The repository has no supported source code.
           </p>
         </div>
@@ -314,21 +314,21 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
         fitView
       fitViewOptions={{ padding: 0.3 }}
       className="!bg-transparent"
-      colorMode="dark"
+      colorMode="light"
       minZoom={0.05}
       maxZoom={2}
     >
-      <Panel position="top-left" className="glass-card p-3 rounded-xl flex flex-col gap-3 min-w-[280px] m-6 border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+      <Panel position="top-left" className="bg-white p-4 rounded-xl flex flex-col gap-3 min-w-[280px] m-6 border border-slate-200 shadow-sm">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-white font-semibold text-sm">
-            <Filter className="w-4 h-4 text-white" />
+          <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+            <Filter className="w-4 h-4 text-slate-700" />
             Filter & Search
           </div>
           <button
             onClick={() => {
               const flowViewport = document.querySelector('.react-flow__viewport') as HTMLElement;
               if (flowViewport) {
-                toPng(flowViewport, { backgroundColor: '#050505' })
+                toPng(flowViewport, { backgroundColor: '#f8fafc' })
                   .then((dataUrl) => {
                     const a = document.createElement('a');
                     a.setAttribute('download', 'code-atlas-graph.png');
@@ -337,31 +337,31 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
                   });
               }
             }}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200"
             title="Download PNG"
           >
             <Download className="w-4 h-4" />
           </button>
         </div>
         <div className="relative">
-          <Search className="w-4 h-4 absolute left-2.5 top-2 text-zinc-400" />
+          <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
           <input
             type="text"
             placeholder="Search nodes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#111115] border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-sm text-zinc-200 focus:outline-none focus:border-white/10 transition-colors placeholder:text-zinc-500"
+            className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder:text-slate-400"
           />
         </div>
-        <div className="flex flex-wrap gap-2 mt-1">
+        <div className="flex flex-wrap gap-2 mt-2">
           {['file', 'class', 'function', 'module'].map(type => (
             <button
               key={type}
               onClick={() => toggleType(type)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 border ${
                 visibleTypes.has(type)
-                  ? 'bg-white/10 text-zinc-300 border border-white/10'
-                  : 'bg-white/5 text-zinc-400 border border-white/5 hover:bg-white/10'
+                  ? 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm'
+                  : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:text-slate-700'
               }`}
             >
               {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -370,12 +370,12 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
         </div>
       </Panel>
       <Controls 
-        className="glass-panel border-white/10 rounded-xl overflow-hidden shadow-2xl !bg-[#111115]" 
+        className="bg-white border-slate-200 rounded-xl overflow-hidden shadow-sm" 
         showInteractive={false}
       />
       <MiniMap 
-        className="glass-card border-white/10 rounded-xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.5)] !bg-[#050505]" 
-        maskColor="rgba(5, 5, 5, 0.7)"
+        className="bg-white border-slate-200 rounded-xl overflow-hidden shadow-sm" 
+        maskColor="rgba(248, 250, 252, 0.7)"
         nodeColor={(node) => {
           switch (node.data?.type) {
             case 'file': return '#34d399'; // emerald-400
