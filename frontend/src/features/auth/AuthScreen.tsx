@@ -56,10 +56,8 @@ export const AuthScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#050505] flex items-center justify-center relative overflow-hidden font-sans selection:bg-indigo-500/30">
+    <div className="min-h-screen w-full bg-[#000000] flex items-center justify-center relative overflow-hidden font-sans selection:bg-zinc-800">
       {/* Background Elements */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-1/4 right-1/4 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
       
       {/* Grid Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none" />
@@ -67,26 +65,26 @@ export const AuthScreen: React.FC = () => {
       {/* Back Button */}
       <button 
         onClick={() => setShowAuthScreen(false)}
-        className="absolute top-8 left-8 text-slate-400 hover:text-white transition-colors flex items-center gap-2 text-sm font-medium z-50 bg-[#111115]/50 px-4 py-2 rounded-full border border-white/5 backdrop-blur-md"
+        className="absolute top-8 left-8 text-zinc-400 hover:text-white transition-colors flex items-center gap-2 text-sm font-medium z-50 bg-[#0A0A0A] px-4 py-2 rounded-full border border-white/5 shadow-sm"
       >
         <ArrowRight className="w-4 h-4 rotate-180" />
         Back to Home
       </button>
 
       <div className="w-full max-w-md p-8 relative z-10">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-zinc-800 flex items-center justify-center shadow-xl shadow-indigo-500/20 mb-6">
-            <Layers className="w-8 h-8 text-white" />
+        <div className="flex flex-col items-center mb-10">
+          <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-sm mb-6">
+            <Layers className="w-6 h-6 text-black" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-            CodeAtlas <span className="text-indigo-400 font-normal">Pro</span>
+          <h1 className="text-3xl font-bold tracking-tight text-white">
+            CodeAtlas <span className="text-zinc-500 font-normal">Pro</span>
           </h1>
-          <p className="text-slate-400 mt-2 text-sm text-center">
+          <p className="text-zinc-400 mt-2 text-sm text-center">
             Intelligent architecture exploration & code analysis
           </p>
         </div>
 
-        <div className="bg-[#111115]/80 backdrop-blur-xl border border-white/5 rounded-3xl p-8 shadow-2xl">
+        <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-8 shadow-2xl">
           <h2 className="text-xl font-semibold text-white mb-6">
             {isLogin ? 'Sign in to your account' : 'Create a new account'}
           </h2>
@@ -99,25 +97,25 @@ export const AuthScreen: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1.5">Username</label>
+              <label className="block text-sm font-medium text-zinc-400 mb-1.5">Username</label>
               <input 
                 type="text" 
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                className="w-full bg-[#000000] border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all"
                 placeholder="developer"
               />
             </div>
             
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1.5">Email</label>
+                <label className="block text-sm font-medium text-zinc-400 mb-1.5">Email</label>
                 <input 
                   type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                  className="w-full bg-[#000000] border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all"
                   placeholder="dev@company.com"
                 />
               </div>
@@ -125,15 +123,15 @@ export const AuthScreen: React.FC = () => {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-sm font-medium text-slate-400">Password</label>
-                {isLogin && <a href="#" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Forgot password?</a>}
+                <label className="block text-sm font-medium text-zinc-400">Password</label>
+                {isLogin && <a href="#" className="text-xs text-zinc-500 hover:text-white transition-colors">Forgot password?</a>}
               </div>
               <input 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                className="w-full bg-[#000000] border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -141,7 +139,7 @@ export const AuthScreen: React.FC = () => {
             <button 
               type="submit" 
               disabled={isLoading}
-              className="w-full bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl py-3 px-4 font-medium transition-all duration-200 flex items-center justify-center gap-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className="w-full bg-white hover:bg-zinc-200 text-black rounded-lg py-3 px-4 font-bold transition-all duration-200 flex items-center justify-center gap-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -154,14 +152,14 @@ export const AuthScreen: React.FC = () => {
             </button>
           </form>
 
-          <div className="mt-8 text-center text-sm text-slate-400">
+          <div className="mt-8 text-center text-sm text-zinc-500">
             {isLogin ? "Don't have an account? " : "Already have an account? "}
             <button 
               onClick={() => {
                 setIsLogin(!isLogin);
                 setError('');
               }}
-              className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+              className="text-white hover:text-zinc-300 font-medium transition-colors"
             >
               {isLogin ? 'Sign up' : 'Sign in'}
             </button>
