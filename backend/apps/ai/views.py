@@ -92,6 +92,8 @@ class ChatSessionDetailView(generics.RetrieveDestroyAPIView):
     """
     permission_classes = [IsAuthenticated]
     serializer_class = ChatSessionSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'session_id'
 
     def get_queryset(self):
         return ChatSession.objects.filter(user=self.request.user)
