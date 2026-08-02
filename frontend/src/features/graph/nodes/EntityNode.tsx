@@ -36,10 +36,10 @@ export const EntityNode = ({ data }: EntityNodeProps) => {
   const displayName = getDisplayName();
 
   const getBlastRadiusStyle = () => {
-    if (data.isImpactRoot) return 'ring-2 ring-violet-500 shadow-[0_0_20px_rgba(139,92,246,0.3)] border-transparent scale-105';
-    if (data.isImpacted) return 'ring-2 ring-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.2)] border-transparent scale-105';
-    if (data.isDependency) return 'ring-2 ring-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)] border-transparent scale-105';
-    if (data.isSelected) return 'ring-2 ring-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.3)] border-transparent scale-105';
+    if (data.isImpactRoot) return 'ring-2 ring-violet-500 shadow-sm border-transparent scale-105';
+    if (data.isImpacted) return 'ring-2 ring-rose-500 shadow-sm border-transparent scale-105';
+    if (data.isDependency) return 'ring-2 ring-emerald-500 shadow-sm border-transparent scale-105';
+    if (data.isSelected) return 'ring-2 ring-indigo-500 shadow-sm border-transparent scale-105';
     return data.isFaded ? 'opacity-20 grayscale-[80%]' : 'hover:-translate-y-0.5 hover:shadow-lg';
   };
 

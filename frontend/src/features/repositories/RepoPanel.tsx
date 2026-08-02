@@ -128,7 +128,7 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
             </div>
             <button
               onClick={onAddNew}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-sm font-medium hover:bg-indigo-500/30 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-white/10 text-sm font-medium hover:bg-indigo-500/30 transition-colors"
             >
               <Plus className="w-4 h-4" /> Add Repository
             </button>
@@ -145,7 +145,7 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
                 onClick={() => handleSelect(repo)}
                 className={`group relative flex items-center gap-3 p-3.5 rounded-xl border transition-all duration-200 ${
                   isActive
-                    ? 'bg-indigo-500/10 border-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.1)]'
+                    ? 'bg-indigo-500/10 border-white/10 shadow-sm'
                     : canOpen
                     ? 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10 cursor-pointer'
                     : 'bg-white/[0.01] border-white/5 cursor-default opacity-70'
@@ -161,7 +161,7 @@ export const RepoPanel: React.FC<RepoPanelProps> = ({ onClose, onAddNew }) => {
                   <div className="flex items-center gap-2 mb-1">
                     <p className="text-sm font-semibold text-white truncate">{repo.name}</p>
                     {isActive && (
-                      <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider bg-indigo-500/10 px-1.5 py-0.5 rounded-md border border-indigo-500/20">
+                      <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider bg-indigo-500/10 px-1.5 py-0.5 rounded-md border border-white/10">
                         Active
                       </span>
                     )}

@@ -117,7 +117,7 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-      <div className="w-full max-w-md bg-[#0a0a0f] border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
+      <div className="w-full max-w-md bg-[#0a0a0f] border border-white/10 rounded-2xl shadow-sm overflow-hidden">
         
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-white/5 bg-white/5">
@@ -193,7 +193,7 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
                     placeholder="https://github.com/user/repo"
                     value={githubUrl}
                     onChange={(e) => setGithubUrl(e.target.value)}
-                    className="w-full bg-[#111115] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-slate-600"
+                    className="w-full bg-[#111115] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-slate-600"
                   />
                   <p className="text-[10px] text-slate-500 px-1 mt-1">
                     Public repositories only. Example: https://github.com/facebook/react
@@ -208,7 +208,7 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
                       placeholder="e.g., CodeAtlas Core"
                       value={repoName}
                       onChange={(e) => setRepoName(e.target.value)}
-                      className="w-full bg-[#111115] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-slate-600"
+                      className="w-full bg-[#111115] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-slate-600"
                     />
                   </div>
 
@@ -221,7 +221,7 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
                         onChange={handleFileChange}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
-                      <div className={`w-full border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-3 transition-colors ${file ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-white/10 bg-[#111115] group-hover:border-white/20 group-hover:bg-white/5'}`}>
+                      <div className={`w-full border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-3 transition-colors ${file ? 'border-white/10 bg-indigo-500/5' : 'border-white/10 bg-[#111115] group-hover:border-white/20 group-hover:bg-white/5'}`}>
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${file ? 'bg-indigo-500/20' : 'bg-white/5'}`}>
                           <FileArchive className={`w-5 h-5 ${file ? 'text-indigo-400' : 'text-slate-400'}`} />
                         </div>
@@ -249,7 +249,7 @@ export const UploadModal = ({ onClose, onUploadComplete }: UploadModalProps) => 
               <button
                 type="submit"
                 disabled={(uploadMode === 'zip' && (!file || !repoName)) || (uploadMode === 'github' && !githubUrl)}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(99,102,241,0.2)]"
+                className="w-full py-3 rounded-xl bg-zinc-800 text-white font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
                 {uploadMode === 'zip' ? 'Upload & Process' : 'Import & Process'}
               </button>

@@ -15,7 +15,7 @@ export const LandingPage: React.FC = () => {
       {/* Navigation */}
       <nav className="h-20 max-w-7xl mx-auto px-6 flex items-center justify-between relative z-20">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center shadow-lg shadow-indigo-500/20">
             <Layers className="w-6 h-6 text-white" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
@@ -31,7 +31,7 @@ export const LandingPage: React.FC = () => {
           </button>
           <button 
             onClick={() => setShowAuthScreen(true)}
-            className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium px-5 py-2.5 rounded-full transition-all duration-300 shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:shadow-[0_0_25px_rgba(99,102,241,0.5)]"
+            className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium px-5 py-2.5 rounded-full transition-all duration-300 shadow-sm hover:shadow-sm"
           >
             Get Started
           </button>
@@ -97,8 +97,8 @@ export const LandingPage: React.FC = () => {
             {/* Mock Graph Area */}
             <div className="flex-1 relative overflow-hidden bg-[#030712] p-8">
               {/* Nodes visualization mockup */}
-              <div className="absolute top-1/4 left-1/4 w-32 h-12 bg-white/5 border border-indigo-500/30 rounded-lg flex items-center justify-center text-sm font-mono text-indigo-300 shadow-[0_0_20px_rgba(99,102,241,0.1)]">Authentication</div>
-              <div className="absolute top-1/2 left-1/2 w-32 h-12 bg-white/10 border border-purple-500/50 rounded-lg flex items-center justify-center text-sm font-mono text-purple-300 shadow-[0_0_20px_rgba(168,85,247,0.2)]">UserRepository</div>
+              <div className="absolute top-1/4 left-1/4 w-32 h-12 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center text-sm font-mono text-indigo-300 shadow-sm">Authentication</div>
+              <div className="absolute top-1/2 left-1/2 w-32 h-12 bg-white/10 border border-white/10 rounded-lg flex items-center justify-center text-sm font-mono text-purple-300 shadow-sm">UserRepository</div>
               <div className="absolute bottom-1/4 right-1/4 w-32 h-12 bg-white/5 border border-emerald-500/30 rounded-lg flex items-center justify-center text-sm font-mono text-emerald-300">DatabaseConn</div>
               
               {/* Lines */}
@@ -116,7 +116,7 @@ export const LandingPage: React.FC = () => {
                 <div className="h-3 w-5/6 bg-white/5 rounded" />
                 <div className="h-3 w-4/6 bg-white/5 rounded" />
               </div>
-              <div className="mt-8 h-32 bg-indigo-500/5 border border-indigo-500/20 rounded-lg p-4">
+              <div className="mt-8 h-32 bg-indigo-500/5 border border-white/10 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <SparklesIcon className="w-4 h-4 text-indigo-400" />
                   <div className="h-3 w-20 bg-indigo-400/20 rounded" />
@@ -196,7 +196,7 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 rounded-3xl blur-2xl" />
+              <div className="absolute inset-0 bg-zinc-800/50 rounded-3xl blur-2xl" />
               <div className="bg-[#111115] border border-white/10 rounded-3xl p-8 relative">
                 <blockquote className="text-xl text-slate-300 italic mb-6 leading-relaxed">
                   "CodeAtlas fundamentally changed how we handle legacy migrations. We used to spend days grepping through spaghetti code; now we just look at the blast radius graph."
@@ -243,7 +243,7 @@ function SparklesIcon(props: any) {
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
   return (
-    <div className="p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-indigo-500/30 hover:bg-white/[0.07] transition-all duration-300 group">
+    <div className="p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 hover:bg-white/[0.07] transition-all duration-300 group">
       <div className="w-12 h-12 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
         {icon}
       </div>
@@ -257,7 +257,7 @@ function AudienceRow({ title, description }: { title: string, description: strin
   return (
     <div className="flex gap-4">
       <div className="shrink-0 mt-1">
-        <div className="w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-500/50 flex items-center justify-center">
+        <div className="w-6 h-6 rounded-full bg-indigo-500/20 border border-white/10 flex items-center justify-center">
           <div className="w-2 h-2 rounded-full bg-indigo-400" />
         </div>
       </div>

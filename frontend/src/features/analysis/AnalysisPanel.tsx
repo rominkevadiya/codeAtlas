@@ -31,7 +31,7 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
 
   if (loading) {
     return (
-      <div className="h-full flex flex-col glass-card border border-indigo-500/20 rounded-2xl shadow-[0_0_40px_rgba(99,102,241,0.1)] overflow-hidden items-center justify-center">
+      <div className="h-full flex flex-col glass-card border border-white/10 rounded-2xl shadow-sm overflow-hidden items-center justify-center">
         <Loader2 className="w-8 h-8 text-indigo-500 animate-spin mb-4" />
         <p className="text-slate-400">Analyzing architecture...</p>
       </div>
@@ -40,7 +40,7 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
 
   if (!data) {
      return (
-      <div className="h-full flex flex-col glass-card border border-indigo-500/20 rounded-2xl shadow-[0_0_40px_rgba(99,102,241,0.1)] overflow-hidden items-center justify-center p-8 text-center">
+      <div className="h-full flex flex-col glass-card border border-white/10 rounded-2xl shadow-sm overflow-hidden items-center justify-center p-8 text-center">
         <ShieldAlert className="w-8 h-8 text-slate-500 mb-4" />
         <p className="text-slate-400">No analysis data available. Please upload a repository first.</p>
       </div>
@@ -63,7 +63,7 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
 
   const panelContent = isExpanded ? (
-    <div className="w-full h-full max-w-6xl max-h-[85vh] flex flex-col bg-[#0B0B0F] border border-indigo-500/30 rounded-2xl shadow-[0_0_60px_rgba(99,102,241,0.15)] overflow-hidden mx-auto animate-in fade-in duration-200">
+    <div className="w-full h-full max-w-6xl max-h-[85vh] flex flex-col bg-[#0B0B0F] border border-white/10 rounded-2xl shadow-sm overflow-hidden mx-auto animate-in fade-in duration-200">
       {/* Expanded Header */}
       <div className="flex items-center justify-between p-6 border-b border-white/10 bg-indigo-500/5 shrink-0">
         <div className="flex items-center gap-4">
@@ -96,7 +96,7 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
                 onClick={() => setActiveTabId(tab.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-all duration-200 ${
                   activeTabId === tab.id 
-                  ? 'bg-indigo-500/20 text-white shadow-lg border border-indigo-500/20' 
+                  ? 'bg-indigo-500/20 text-white shadow-lg border border-white/10' 
                   : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 border border-transparent'
                 }`}
               >
@@ -170,7 +170,7 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
           {activeTabId === 'coupling' && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {data.top_coupled_files?.map((file: any, idx: number) => (
-                  <div key={idx} className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col justify-between hover:border-indigo-500/40 transition-colors shadow-sm">
+                  <div key={idx} className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col justify-between hover:border-white/10 transition-colors shadow-sm">
                     <p className="text-sm font-mono text-slate-300 break-all mb-5" title={file.name}>{file.name}</p>
                     <div className="flex items-center gap-6 mt-auto">
                       <div>
@@ -233,7 +233,7 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
       </div>
     </div>
   ) : (
-    <div className="h-full flex flex-col glass-card border border-indigo-500/20 rounded-2xl shadow-[0_0_40px_rgba(99,102,241,0.1)] overflow-hidden">
+    <div className="h-full flex flex-col glass-card border border-white/10 rounded-2xl shadow-sm overflow-hidden">
       {/* Mini Header */}
       <div className="flex items-center justify-between p-5 border-b border-white/5 bg-indigo-500/5 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-3">
@@ -331,7 +331,7 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
             {data.top_coupled_files && data.top_coupled_files.map((file: any, idx: number) => {
               const fileName = file.name.split('/').pop() || file.name;
               return (
-                <div key={idx} className="bg-[#111115] border border-white/5 p-3 rounded-xl flex flex-col justify-between hover:border-indigo-500/30 transition-colors group">
+                <div key={idx} className="bg-[#111115] border border-white/5 p-3 rounded-xl flex flex-col justify-between hover:border-white/10 transition-colors group">
                   <span className="text-[11px] font-mono text-slate-300 truncate mb-3" title={file.name}>{fileName}</span>
                   <div className="flex justify-between items-end mt-auto">
                     <div className="flex flex-col">
@@ -400,7 +400,7 @@ export const AnalysisPanel = ({ onClose, repositoryId }: AnalysisPanelProps) => 
   if (isExpanded) {
     return (
       <>
-        <div className="h-full flex flex-col items-center justify-center p-6 text-center border border-indigo-500/20 rounded-2xl bg-indigo-500/5 shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+        <div className="h-full flex flex-col items-center justify-center p-6 text-center border border-white/10 rounded-2xl bg-indigo-500/5 shadow-sm">
           <Cpu className="w-8 h-8 text-indigo-400/50 mb-3" />
           <p className="text-sm text-slate-400">Analysis is opened in full screen</p>
           <button onClick={() => setIsExpanded(false)} className="mt-4 px-4 py-2 bg-white/5 hover:bg-white/10 text-xs text-white rounded-lg transition-colors">

@@ -350,7 +350,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
             placeholder="Search nodes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#111115] border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500/50 transition-colors placeholder:text-slate-500"
+            className="w-full bg-[#111115] border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-white/10 transition-colors placeholder:text-slate-500"
           />
         </div>
         <div className="flex flex-wrap gap-2 mt-1">
@@ -360,7 +360,7 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
               onClick={() => toggleType(type)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
                 visibleTypes.has(type)
-                  ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                  ? 'bg-indigo-500/20 text-indigo-300 border border-white/10'
                   : 'bg-white/5 text-slate-400 border border-white/5 hover:bg-white/10'
               }`}
             >

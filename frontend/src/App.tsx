@@ -102,7 +102,7 @@ export default function App() {
       {/* Top Navbar */}
       <nav className="h-16 shrink-0 glass-panel border-b border-white/5 flex items-center justify-between px-6 z-40 relative">
         <div className="flex items-center gap-4">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <div className="w-8 h-8 rounded-xl bg-zinc-800 flex items-center justify-center shadow-lg shadow-indigo-500/20">
             <Layers className="w-5 h-5 text-white" />
           </div>
           <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
@@ -119,7 +119,7 @@ export default function App() {
             placeholder="Search nodes, functions, files... (Cmd + K)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#111115] border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all shadow-inner"
+            className="w-full bg-[#111115] border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-indigo-500/50 transition-all shadow-inner"
           />
           <div className="absolute inset-y-0 right-16 flex items-center pointer-events-none gap-1">
             <kbd className="hidden sm:inline-block bg-[#222226] border border-white/10 rounded px-1.5 py-0.5 text-[10px] font-mono text-slate-400 font-semibold shadow-sm"><Command className="w-3 h-3 inline-block -mt-0.5"/> K</kbd>
@@ -127,11 +127,11 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button onClick={() => setShowAutoDoc(!showAutoDoc)} className={`p-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${showAutoDoc ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'hover:bg-white/5 text-slate-400 border border-transparent'}`}>
+          <button onClick={() => setShowAutoDoc(!showAutoDoc)} className={`p-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${showAutoDoc ? 'bg-indigo-500/20 text-indigo-400 border border-white/10 shadow-sm' : 'hover:bg-white/5 text-slate-400 border border-transparent'}`}>
             <FileText className="w-5 h-5" />
             <span className="text-sm font-medium pr-1">Auto-Doc</span>
           </button>
-          <button onClick={() => setShowAnalysis(!showAnalysis)} className={`p-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${showAnalysis ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'hover:bg-white/5 text-slate-400 border border-transparent'}`}>
+          <button onClick={() => setShowAnalysis(!showAnalysis)} className={`p-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${showAnalysis ? 'bg-indigo-500/20 text-indigo-400 border border-white/10 shadow-sm' : 'hover:bg-white/5 text-slate-400 border border-transparent'}`}>
             <Activity className="w-5 h-5" />
             <span className="text-sm font-medium pr-1">Metrics</span>
           </button>
@@ -139,7 +139,7 @@ export default function App() {
           {/* Repo Switcher */}
           <button 
             onClick={() => setShowRepoPanel(!showRepoPanel)}
-            className={`p-2 rounded-lg transition-all duration-300 ${showRepoPanel ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'hover:bg-white/5 text-slate-400 border border-transparent'}`}
+            className={`p-2 rounded-lg transition-all duration-300 ${showRepoPanel ? 'bg-indigo-500/20 text-indigo-400 border border-white/10' : 'hover:bg-white/5 text-slate-400 border border-transparent'}`}
             title="My Repositories"
           >
             <FolderGit2 className="w-5 h-5" />
@@ -147,7 +147,7 @@ export default function App() {
           {/* Dynamic User Avatar */}
           <button
             onClick={() => setShowSettingsModal(true)}
-            className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center hover:opacity-80 transition-opacity shadow-lg shadow-indigo-500/20"
+            className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center hover:opacity-80 transition-opacity shadow-lg shadow-indigo-500/20"
             title={`Logged in as ${currentUser?.username || '...'} — Settings & Account`}
           >
             <span className="text-[10px] font-bold text-white">{avatarInitials}</span>
@@ -158,12 +158,12 @@ export default function App() {
       <div className="flex-1 flex overflow-hidden relative">
         {/* Sidebar */}
         <aside className="w-16 shrink-0 glass-panel border-r border-white/5 flex flex-col items-center py-6 gap-6 z-30 relative">
-          <button className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition-all group">
+          <button className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-white/10 hover:bg-indigo-500/20 transition-all group">
             <Box className="w-5 h-5 group-hover:scale-110 transition-transform" />
           </button>
           <button 
             onClick={() => setShowChat(!showChat)}
-            className={`p-3 rounded-xl transition-all group ${showChat ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.2)]' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5 border border-transparent'}`}
+            className={`p-3 rounded-xl transition-all group ${showChat ? 'bg-purple-500/20 text-purple-400 border border-white/10 shadow-sm' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5 border border-transparent'}`}
           >
             <MessageSquare className="w-5 h-5 group-hover:scale-110 transition-transform" />
           </button>
@@ -225,7 +225,7 @@ export default function App() {
 
           {/* Node Inspector Overlay */}
           {selectedNodeId && (
-            <div className="absolute bottom-8 left-8 w-[600px] glass-card rounded-2xl p-0 z-40 animate-in slide-in-from-bottom-8 duration-300 fade-in border border-indigo-500/20 shadow-[0_0_40px_rgba(99,102,241,0.1)] flex flex-col max-h-[80vh]">
+            <div className="absolute bottom-8 left-8 w-[600px] glass-card rounded-2xl p-0 z-40 animate-in slide-in-from-bottom-8 duration-300 fade-in border border-white/10 shadow-sm flex flex-col max-h-[80vh]">
               {/* Header */}
               <div className="p-5 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.02]">
                 <div className="flex items-center gap-3 overflow-hidden pr-4">
@@ -299,7 +299,7 @@ export default function App() {
                     <button 
                       onClick={handleExplainCode}
                       disabled={isExplaining || !nodeSnippet}
-                      className="w-full relative overflow-hidden group bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/20 hover:border-indigo-500/40 rounded-xl p-4 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full relative overflow-hidden group bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-white/10 hover:border-white/10 rounded-xl p-4 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <div className="flex items-center justify-center gap-2">
                         {isExplaining ? (

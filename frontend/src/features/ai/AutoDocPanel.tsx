@@ -168,7 +168,7 @@ export const AutoDocPanel = ({ onClose, repositoryId }: AutoDocPanelProps) => {
                 pre: ({...props}) => <pre className="bg-[#0a0a0c] p-4 rounded-xl border border-white/10 my-4 overflow-x-auto text-xs" {...props} />,
                 code: ({...props}: any) => props.inline ? <code className="bg-white/10 px-1.5 py-0.5 rounded-md text-indigo-300 font-mono text-[11px]" {...props} /> : <code className="font-mono text-slate-300" {...props} />,
                 strong: ({...props}) => <strong className="font-semibold text-white" {...props} />,
-                blockquote: ({...props}) => <blockquote className="border-l-4 border-indigo-500/50 pl-4 py-1 my-4 text-slate-400 bg-indigo-500/5 rounded-r-lg" {...props} />,
+                blockquote: ({...props}) => <blockquote className="border-l-4 border-white/10 pl-4 py-1 my-4 text-slate-400 bg-indigo-500/5 rounded-r-lg" {...props} />,
               }}
             >
               {doc}

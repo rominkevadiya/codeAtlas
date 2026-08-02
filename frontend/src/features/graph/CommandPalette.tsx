@@ -122,7 +122,7 @@ export const CommandPalette = ({ isOpen, onClose, nodes, onSelectNode }: Command
                           onClose();
                         }}
                         className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-colors ${
-                          isSelected ? 'bg-indigo-500/10 border-indigo-500/20' : 'hover:bg-white/5'
+                          isSelected ? 'bg-indigo-500/10 border-white/10' : 'hover:bg-white/5'
                         } border border-transparent`}
                       >
                         <div className="flex items-center gap-3 min-w-0">

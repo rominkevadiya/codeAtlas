@@ -14,10 +14,10 @@ export const ToastContainer: React.FC = () => {
         let icon = <Info className="w-4 h-4 text-sky-400 shrink-0" />;
 
         if (toast.type === 'success') {
-          bg = 'bg-slate-900/95 border-emerald-500/30 text-slate-100 shadow-[0_0_25px_rgba(16,185,129,0.15)]';
+          bg = 'bg-slate-900/95 border-emerald-500/30 text-slate-100 shadow-sm';
           icon = <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />;
         } else if (toast.type === 'error') {
-          bg = 'bg-slate-900/95 border-rose-500/30 text-slate-100 shadow-[0_0_25px_rgba(244,63,94,0.15)]';
+          bg = 'bg-slate-900/95 border-rose-500/30 text-slate-100 shadow-sm';
           icon = <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />;
         }
 

@@ -145,11 +145,11 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
   };
 
   const panelContent = (
-    <div className={`flex flex-col glass-card border border-indigo-500/20 shadow-[0_0_40px_rgba(99,102,241,0.1)] overflow-hidden ${isExpanded ? 'w-full h-full max-w-5xl max-h-[85vh] rounded-2xl mx-auto bg-[#0B0B0F]' : 'h-full rounded-2xl'}`}>
+    <div className={`flex flex-col glass-card border border-white/10 shadow-sm overflow-hidden ${isExpanded ? 'w-full h-full max-w-5xl max-h-[85vh] rounded-2xl mx-auto bg-[#0B0B0F]' : 'h-full rounded-2xl'}`}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-white/5 bg-indigo-500/5 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center shadow-lg shadow-indigo-500/20">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
           <div>
@@ -216,7 +216,7 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
                       <button
                         key={prompt}
                         onClick={() => handleSend(prompt)}
-                        className="w-full text-left text-xs text-slate-300 bg-white/5 hover:bg-indigo-500/10 hover:text-indigo-300 border border-white/5 hover:border-indigo-500/30 rounded-xl p-3 transition-all"
+                        className="w-full text-left text-xs text-slate-300 bg-white/5 hover:bg-indigo-500/10 hover:text-indigo-300 border border-white/5 hover:border-white/10 rounded-xl p-3 transition-all"
                       >
                         {prompt}
                       </button>
@@ -257,7 +257,7 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
                     <button
                       key={prompt}
                       onClick={() => handleSend(prompt)}
-                      className="w-full text-left text-xs text-slate-400 hover:text-indigo-300 bg-white/[0.02] hover:bg-indigo-500/10 border border-white/5 hover:border-indigo-500/30 rounded-xl p-3 transition-all"
+                      className="w-full text-left text-xs text-slate-400 hover:text-indigo-300 bg-white/[0.02] hover:bg-indigo-500/10 border border-white/5 hover:border-white/10 rounded-xl p-3 transition-all"
                     >
                       {prompt}
                     </button>
@@ -291,7 +291,7 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
                     <div className={`w-7 h-7 rounded-xl shrink-0 flex items-center justify-center ${msg.role === 'user' ? 'bg-slate-700/50 text-slate-300' : 'bg-indigo-500/20 text-indigo-400'}`}>
                       {msg.role === 'user' ? <User className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
                     </div>
-                    <div className={`max-w-[85%] rounded-2xl p-3.5 text-sm leading-relaxed ${msg.role === 'user' ? 'bg-slate-800/80 text-white rounded-tr-sm border border-white/5' : 'bg-[#111115] text-slate-300 rounded-tl-sm border border-indigo-500/10 shadow-lg'}`}>
+                    <div className={`max-w-[85%] rounded-2xl p-3.5 text-sm leading-relaxed ${msg.role === 'user' ? 'bg-slate-800/80 text-white rounded-tr-sm border border-white/5' : 'bg-[#111115] text-slate-300 rounded-tl-sm border border-white/10 shadow-lg'}`}>
                       {msg.role === 'user' ? msg.content : (
                         <div className="markdown-body">
                           <ReactMarkdown
@@ -317,7 +317,7 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
                     <div className="w-7 h-7 rounded-xl shrink-0 flex items-center justify-center bg-indigo-500/20 text-indigo-400">
                       <Bot className="w-3.5 h-3.5" />
                     </div>
-                    <div className="rounded-2xl rounded-tl-sm p-3.5 bg-[#111115] border border-indigo-500/10 flex items-center gap-2">
+                    <div className="rounded-2xl rounded-tl-sm p-3.5 bg-[#111115] border border-white/10 flex items-center gap-2">
                       <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
                       <span className="text-sm text-slate-400">Thinking...</span>
                     </div>
@@ -337,7 +337,7 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
                 onChange={(e) => setInput(e.target.value)}
                 disabled={isTyping}
                 placeholder={activeSession ? "Ask about architecture, functions, logic..." : "Ask anything to start a new chat..."}
-                className="w-full bg-[#111115] border border-white/10 rounded-xl py-3 pl-4 pr-12 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all shadow-inner disabled:opacity-50"
+                className="w-full bg-[#111115] border border-white/10 rounded-xl py-3 pl-4 pr-12 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-indigo-500/50 transition-all shadow-inner disabled:opacity-50"
               />
               <button
                 type="submit"
@@ -356,7 +356,7 @@ export const ChatPanel = ({ onClose, repositoryId }: ChatPanelProps) => {
   if (isExpanded) {
     return (
       <>
-        <div className="h-full flex flex-col items-center justify-center p-6 text-center border border-indigo-500/20 rounded-2xl bg-indigo-500/5 shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+        <div className="h-full flex flex-col items-center justify-center p-6 text-center border border-white/10 rounded-2xl bg-indigo-500/5 shadow-sm">
           <MessageSquare className="w-8 h-8 text-indigo-400/50 mb-3" />
           <p className="text-sm text-slate-400">Chat is opened in full screen</p>
           <button onClick={() => setIsExpanded(false)} className="mt-4 px-4 py-2 bg-white/5 hover:bg-white/10 text-xs text-white rounded-lg transition-colors">

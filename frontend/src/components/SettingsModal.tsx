@@ -57,7 +57,7 @@ export const SettingsModal: React.FC = () => {
               onClick={() => setActiveTab('profile')}
               className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                 activeTab === 'profile'
-                  ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30'
+                  ? 'bg-indigo-600/20 text-indigo-400 border border-white/10'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
               }`}
             >
@@ -68,7 +68,7 @@ export const SettingsModal: React.FC = () => {
               onClick={() => setActiveTab('preferences')}
               className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                 activeTab === 'preferences'
-                  ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30'
+                  ? 'bg-indigo-600/20 text-indigo-400 border border-white/10'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
               }`}
             >

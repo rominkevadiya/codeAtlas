@@ -75,7 +75,7 @@ export const AuthScreen: React.FC = () => {
 
       <div className="w-full max-w-md p-8 relative z-10">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-500/20 mb-6">
+          <div className="w-14 h-14 rounded-2xl bg-zinc-800 flex items-center justify-center shadow-xl shadow-indigo-500/20 mb-6">
             <Layers className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
@@ -105,7 +105,7 @@ export const AuthScreen: React.FC = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-indigo-500/50 transition-all"
                 placeholder="developer"
               />
             </div>
@@ -117,7 +117,7 @@ export const AuthScreen: React.FC = () => {
                   type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-indigo-500/50 transition-all"
                   placeholder="dev@company.com"
                 />
               </div>
@@ -133,7 +133,7 @@ export const AuthScreen: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-white/10 focus:ring-1 focus:ring-indigo-500/50 transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -141,7 +141,7 @@ export const AuthScreen: React.FC = () => {
             <button 
               type="submit" 
               disabled={isLoading}
-              className="w-full bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl py-3 px-4 font-medium transition-all duration-200 flex items-center justify-center gap-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(99,102,241,0.3)]"
+              className="w-full bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl py-3 px-4 font-medium transition-all duration-200 flex items-center justify-center gap-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
