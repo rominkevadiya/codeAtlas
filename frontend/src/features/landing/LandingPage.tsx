@@ -7,7 +7,8 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full bg-[#000000] text-zinc-300 overflow-y-auto overflow-x-hidden font-sans selection:bg-zinc-800 relative">
-      {/* Subtle Grid Background */}
+      {/* Subtle Grid Background & Noise */}
+      <div className="fixed inset-0 bg-noise pointer-events-none z-[1]" />
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_60%,transparent_100%)] pointer-events-none" />
 
       {/* Navigation */}
