@@ -315,12 +315,14 @@ export const CodeGraph = ({ data, selectedNodeId, onNodeClick, impactData }: Cod
     onInit={setRfInstance}
     nodeTypes={nodeTypes}
     fitView
-   fitViewOptions={{ padding: 0.3 }}
-   className="!bg-transparent"
-   colorMode="dark"
-   minZoom={0.05}
-   maxZoom={2}
-  >
+    fitViewOptions={{ padding: 0.3 }}
+    className="!bg-transparent"
+    colorMode="dark"
+    minZoom={0.05}
+    maxZoom={2}
+    panOnScroll={true}
+    panOnDrag={true}
+   >
    <Panel position="top-left" className="bg-zinc-950 p-4 rounded-xl flex flex-col gap-3 min-w-[280px] m-6 border border-zinc-800 shadow-sm">
     <div className="flex items-center justify-between">
      <div className="flex items-center gap-2 text-white font-bold text-sm">
